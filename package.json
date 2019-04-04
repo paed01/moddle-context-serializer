@@ -1,0 +1,34 @@
+{
+  "name": "moddle-context-serializer",
+  "version": "0.0.1",
+  "description": "Map bpmn-moddle BPMN 2 types to behaviour and make it serializable",
+  "module": "index.js",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "mocha -R dot",
+    "posttest": "eslint . --cache",
+    "prepare": "npm run dist",
+    "dist": "babel index.js -d dist",
+    "cov:html": "nyc mocha -R dot && nyc report --reporter html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/paed01/moddle-context-serializer"
+  },
+  "author": {
+    "name": "Pål Edman",
+    "url": "https://github.com/paed01"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/cli": "^7.4.3",
+    "@babel/core": "^7.4.3",
+    "@babel/preset-env": "^7.4.3",
+    "@babel/register": "^7.4.0",
+    "bpmn-moddle": "^5.1.6",
+    "chai": "^4.2.0",
+    "eslint": "^5.16.0",
+    "mocha": "^6.0.2",
+    "nyc": "^13.3.0"
+  }
+}
