@@ -1,7 +1,7 @@
 {
   "name": "moddle-context-serializer",
   "version": "0.0.1",
-  "description": "Map bpmn-moddle BPMN 2 types to behaviour and make it serializable",
+  "description": "Make bpmn-moddle context serializable and mapped to behaviour functions",
   "module": "index.js",
   "main": "dist/index.js",
   "scripts": {

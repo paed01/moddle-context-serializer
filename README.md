@@ -1,7 +1,9 @@
-bpmn-moddle moddle context serializer
-=====================================
+bpmn-moddle context serializer
+==============================
 
-Map bpmn-moddle BPMN 2 types to behaviour and make it serializable
+[![Build Status](https://travis-ci.org/paed01/moddle-context-serializer.svg?branch=master)](https://travis-ci.org/paed01/moddle-context-serializer)
+
+Make bpmn-moddle context serializable and mapped to behaviour functions
 
 - [API](/API.md)
 
