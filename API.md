@@ -18,7 +18,7 @@ Result:
 - `id`: Definition id
 - `type`: Definition type
 - `name`: Definition name
-- `getActivities`: get all definition activities
+- `getActivities(scopeId)`: get all definition activities
 - `getActivityById(activityId)`: get activity by id
 - `getDataObjects`: get all dataObjects
 - `getDataObjectById(dataObjectId)`: get dataObject by id
@@ -29,6 +29,7 @@ Result:
 - `getOutboundSequenceFlows`: get activity outbound sequence flows
 - `getProcessById(processId)`: get process by id
 - `getProcesses`: get all processes
+- `getExecutableProcesses`: get all executable processes
 - `getSequenceFlowById`: get sequence flow by id
 - `getSequenceFlows`: get all sequence flows
 - `serialize`: get stringified serialized object with [deserializable](#deserialize) content

@@ -4,6 +4,7 @@ import {default as ContextMapper, TypeResolver, deserialize} from '../index';
 
 const lanesSource = factory.resource('lanes.bpmn');
 const subProcessSource = factory.resource('sub-process.bpmn');
+const twoProcessesSource = factory.resource('two-executable-processes.bpmn');
 const eventDefinitionSource = factory.resource('bound-error-and-timer.bpmn');
 const types = {
   Definition: () => {},
@@ -37,11 +38,12 @@ const types = {
 const typeResolver = TypeResolver(types);
 
 describe('moddle context serializer', () => {
-  let lanesModdleContext, subProcessModdleContext, eventDefinitionModdleContext;
+  let lanesModdleContext, subProcessModdleContext, eventDefinitionModdleContext, twoProcessesModdleContext;
   before(async () => {
     lanesModdleContext = await testHelpers.moddleContext(lanesSource);
     subProcessModdleContext = await testHelpers.moddleContext(subProcessSource);
     eventDefinitionModdleContext = await testHelpers.moddleContext(eventDefinitionSource);
+    twoProcessesModdleContext = await testHelpers.moddleContext(twoProcessesSource);
   });
 
   describe('deafult', () => {
@@ -67,6 +69,7 @@ describe('moddle context serializer', () => {
       expect(context).to.have.property('getOutboundSequenceFlows').that.is.a('function');
       expect(context).to.have.property('getProcessById').that.is.a('function');
       expect(context).to.have.property('getProcesses').that.is.a('function');
+      expect(context).to.have.property('getExecutableProcesses').that.is.a('function');
       expect(context).to.have.property('getSequenceFlowById').that.is.a('function');
       expect(context).to.have.property('getSequenceFlows').that.is.a('function');
       expect(context).to.have.property('serialize').that.is.a('function');
@@ -107,6 +110,26 @@ describe('moddle context serializer', () => {
       expect(processes).to.have.length(1);
 
       expect(processes[0]).to.have.property('type', 'bpmn:Process');
+    });
+  });
+
+  describe('getExecutableProcesses()', () => {
+    it('returns executable processes', async () => {
+      const context = ContextMapper(lanesModdleContext, typeResolver);
+      const processes = context.getExecutableProcesses();
+
+      expect(processes).to.have.length(1);
+      expect(processes[0]).to.have.property('id', 'mainProcess');
+      expect(processes[0]).to.have.property('behaviour').with.property('isExecutable', true);
+    });
+
+    it('returns all executable processes', async () => {
+      const context = ContextMapper(twoProcessesModdleContext, typeResolver);
+      const processes = context.getExecutableProcesses();
+
+      expect(processes).to.have.length(2);
+      expect(processes[0]).to.have.property('behaviour').with.property('isExecutable', true);
+      expect(processes[1]).to.have.property('behaviour').with.property('isExecutable', true);
     });
   });
 
@@ -272,14 +295,15 @@ describe('moddle context serializer', () => {
     it('with scope returns all outbound message flows from scope (process)', () => {
       const flows = contextMapper.getMessageFlows('mainProcess');
       expect(flows).to.have.length(1);
-      expect(flows[0]).to.have.property('$type', 'bpmn:MessageFlow');
+      expect(flows[0]).to.have.property('type', 'bpmn:MessageFlow');
+      expect(flows[0]).to.have.property('Behaviour', types.MessageFlow);
     });
 
     it('without scope returns all message flows', () => {
       const flows = contextMapper.getMessageFlows();
       expect(flows).to.have.length(2);
 
-      expect(flows[0]).to.have.property('$type', 'bpmn:MessageFlow');
+      expect(flows[0]).to.have.property('type', 'bpmn:MessageFlow');
       expect(flows[0]).to.have.property('id', 'fromMainTaskMessageFlow');
       expect(flows[0]).to.have.property('source').that.eql({
         processId: 'mainProcess',
@@ -289,8 +313,9 @@ describe('moddle context serializer', () => {
         processId: 'participantProcess',
         id: 'messageStartEvent',
       });
+      expect(flows[0]).to.have.property('Behaviour', types.MessageFlow);
 
-      expect(flows[1]).to.have.property('$type', 'bpmn:MessageFlow');
+      expect(flows[1]).to.have.property('type', 'bpmn:MessageFlow');
       expect(flows[1]).to.have.property('id', 'fromCompleteTaskMessageFlow');
       expect(flows[1]).to.have.property('source').that.eql({
         processId: 'participantProcess',
@@ -300,6 +325,7 @@ describe('moddle context serializer', () => {
         processId: 'mainProcess',
         id: 'intermediate',
       });
+      expect(flows[1]).to.have.property('Behaviour', types.MessageFlow);
     });
   });
 
@@ -310,6 +336,7 @@ describe('moddle context serializer', () => {
       <process id="theProcess" isExecutable="true">
         <sendTask id="send" implementation="\${environment.services.request}" />
         <serviceTask id="service" implementation="\${environment.services.request}" />
+        <serviceTask id="dummyService" />
       </process>
     </definitions>`;
 
@@ -327,6 +354,11 @@ describe('moddle context serializer', () => {
     it('SendTask receives service implementation', () => {
       const activity = contextMapper.getActivityById('send');
       expect(activity.behaviour).to.have.property('Service', types.ServiceImplementation);
+    });
+
+    it('ServiceTask without implementation receives no implementation', () => {
+      const activity = contextMapper.getActivityById('dummyService');
+      expect(activity.behaviour).to.not.have.property('Service');
     });
   });
 
@@ -615,6 +647,7 @@ describe('moddle context serializer', () => {
       expect(deserialized).to.have.property('getOutboundSequenceFlows').that.is.a('function');
       expect(deserialized).to.have.property('getProcessById').that.is.a('function');
       expect(deserialized).to.have.property('getProcesses').that.is.a('function');
+      expect(deserialized).to.have.property('getExecutableProcesses').that.is.a('function');
       expect(deserialized).to.have.property('getSequenceFlowById').that.is.a('function');
       expect(deserialized).to.have.property('getSequenceFlows').that.is.a('function');
       expect(deserialized).to.have.property('serialize').that.is.a('function');
