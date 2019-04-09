@@ -40,6 +40,7 @@ function contextApi(mapped) {
     getDataObjectById,
     getErrorById,
     getErrors,
+    getExecutableProcesses,
     getInboundSequenceFlows,
     getMessageFlows,
     getOutboundSequenceFlows,
@@ -75,6 +76,10 @@ function contextApi(mapped) {
     return processes;
   }
 
+  function getExecutableProcesses() {
+    return processes.filter(p => p.behaviour.isExecutable);
+  }
+
   function getInboundSequenceFlows(activityId) {
     return sequenceFlows.filter(flow => flow.targetId === activityId);
   }
@@ -99,9 +104,9 @@ function contextApi(mapped) {
     }) => id === flowId);
   }
 
-  function getActivities(scopeActivityId) {
-    if (!scopeActivityId) return activities;
-    return activities.filter(activity => activity.parent.id === scopeActivityId);
+  function getActivities(scopeId) {
+    if (!scopeId) return activities;
+    return activities.filter(activity => activity.parent.id === scopeId);
   }
 
   function getDataObjects() {
@@ -291,10 +296,13 @@ function mapModdleContext(moddleContext) {
 
         case 'bpmn:Collaboration':
           {
-            const {
-              messageFlows: flows
-            } = prepareElements(parent, element.messageFlows);
-            result.messageFlows = result.messageFlows.concat(flows);
+            if (element.messageFlows) {
+              const {
+                messageFlows: flows
+              } = prepareElements(parent, element.messageFlows);
+              result.messageFlows = result.messageFlows.concat(flows);
+            }
+
             break;
           }
 
