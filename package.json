@@ -1,6 +1,6 @@
 {
   "name": "moddle-context-serializer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Make bpmn-moddle context serializable and mapped to behaviour functions",
   "module": "index.js",
   "main": "dist/index.js",
@@ -19,6 +19,10 @@
     "name": "Pål Edman",
     "url": "https://github.com/paed01"
   },
+  "files": [
+    "dist/index.js",
+    "index.js"
+  ],
   "license": "MIT",
   "devDependencies": {
     "@babel/cli": "^7.4.3",
