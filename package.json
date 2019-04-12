@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha -R dot",
-    "posttest": "eslint . --cache",
+    "posttest": "npm run dist && eslint . --cache",
     "prepare": "npm run dist",
     "dist": "babel index.js -d dist",
     "cov:html": "nyc mocha -R dot && nyc report --reporter html"

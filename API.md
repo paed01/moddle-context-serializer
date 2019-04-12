@@ -4,7 +4,7 @@ API
 - [`default`](#default-export)
 - [`deserialize`](#deserialize)
 - [`map`](#map)
-- [`Builtin TypeResolver`](#typeresolvertypemapping)
+- [`Builtin TypeResolver`](#typeresolvertypemapping-extender)
 
 ## Default export
 
@@ -12,7 +12,7 @@ Function to make serializable context.
 
 Arguments:
 - `moddleContext`: context from `bpmn-moddle`
-- `typeResolver`: type resolver function that will receive the mapped element and returns a behaviour function, or use the builtin [TypeResolver](#typeresolvertypemapping_extender)
+- `typeResolver`: type resolver function that will receive the mapped element and returns a behaviour function, or use the builtin [TypeResolver](#typeresolvertypemapping-extender)
 
 Result:
 - `id`: Definition id
@@ -34,10 +34,6 @@ Result:
 - `getSequenceFlows`: get all sequence flows
 - `serialize`: get stringified serialized object with [deserializable](#deserialize) content
 
-```js
-
-```
-
 ### `getActivities([scopeId])`
 
 Get all definition activities or pass `scopeId` to get scoped activities. Where `scopeId` can be a process or a sub-process.
@@ -48,7 +44,7 @@ Deserialize serialized content.
 
 Arguments:
 - `deserializedContext`: serialized object
-- `typeResolver`: instance of a type resolver, e.g. [TypeResolver](#typeresolvertypemapping)
+- `typeResolver`: instance of a type resolver, e.g. [TypeResolver](#typeresolvertypemapping-extender)
 
 ## `map`
 
