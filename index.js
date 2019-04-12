@@ -514,7 +514,7 @@ function mapModdleContext(moddleContext) {
   }
 }
 
-function TypeResolver(types) {
+function TypeResolver(types, extender) {
   const {
     BoundaryEvent,
     BpmnError,
@@ -574,6 +574,8 @@ function TypeResolver(types) {
   activityTypes['bpmn:UserTask'] = SignalTask;
   activityTypes['bpmn:MultiInstanceLoopCharacteristics'] = MultiInstanceLoopCharacteristics;
   activityTypes['bpmn:InputOutputSpecification'] = IoSpecification;
+
+  if (extender) extender(activityTypes);
 
   return function resolve(entity) {
     const {type, behaviour = {}} = entity;

@@ -8,11 +8,11 @@ API
 
 ## Default export
 
-Function to make serializable content.
+Function to make serializable context.
 
 Arguments:
 - `moddleContext`: context from `bpmn-moddle`
-- `typeResolver`: type resolver function that will receive the mapped element and returns a behaviour function, or use the builtin [TypeResolver](#typeresolvertypemapping)
+- `typeResolver`: type resolver function that will receive the mapped element and returns a behaviour function, or use the builtin [TypeResolver](#typeresolvertypemapping_extender)
 
 Result:
 - `id`: Definition id
@@ -34,6 +34,10 @@ Result:
 - `getSequenceFlows`: get all sequence flows
 - `serialize`: get stringified serialized object with [deserializable](#deserialize) content
 
+```js
+
+```
+
 ### `getActivities([scopeId])`
 
 Get all definition activities or pass `scopeId` to get scoped activities. Where `scopeId` can be a process or a sub-process.
@@ -53,18 +57,19 @@ Do the moddle-context map.
 Arguments:
 - `moddleContext`: context from `bpmn-moddle`
 
-## `TypeResolver(typeMapping)`
+## `TypeResolver(typeMapping[, extender])`
 
 Builtin key value mapping to behaviour function.
 
 Arguments:
 - `typeMapping`: object with type as key and value with behaviour function
+- [`extender`](#extender): optional function that will receive default type mapping by reference
 
 Returns function that will receive mapped element and expects the function to return a behaviour function.
 
 > NB! the resolver mutates entities and adds property `Behaviour` mapped to the passed `typeMapping`.
 
-The following type mapping is currently supported:
+Default type mapping:
 
 - `BoundaryEvent`: `bpmn:BoundaryEvent`
 - `DataObject`: `bpmn:DataObject`
@@ -93,3 +98,21 @@ The following type mapping is currently supported:
 - `SignalTask`: `bpmn:UserTask`
 - `MultiInstanceLoopCharacteristics`: `bpmn:MultiInstanceLoopCharacteristics`
 - `IoSpecification`: `bpmn:InputOutputSpecification`
+
+### Extender
+
+Pass a function to extend mapping:
+
+```js
+import Escalation from './Escalation';
+import IntermediateThrowEvent from './IntermediateThrowEvent';
+import EscalationEventDefinition from './EscalationEventDefinition';
+
+const typeResolver = TypeResolver(types, (activityTypes) => {
+  activityTypes['bpmn:Escalation'] = Escalation;
+  activityTypes['bpmn:IntermediateThrowEvent'] = IntermediateThrowEvent;
+  activityTypes['bpmn:EscalationEventDefinition'] = EscalationEventDefinition;
+});
+```
+
+

@@ -1,6 +1,6 @@
 import factory from './helpers/factory';
 import testHelpers from './helpers/testHelpers';
-import {default as ContextMapper, TypeResolver, deserialize} from '../index';
+import {default as Serializer, TypeResolver, deserialize} from '../index';
 
 const lanesSource = factory.resource('lanes.bpmn');
 const subProcessSource = factory.resource('sub-process.bpmn');
@@ -46,40 +46,40 @@ describe('moddle context serializer', () => {
     twoProcessesModdleContext = await testHelpers.moddleContext(twoProcessesSource);
   });
 
-  describe('deafult', () => {
-    let context;
+  describe('default', () => {
+    let serializer;
     before(() => {
-      context = ContextMapper(lanesModdleContext, typeResolver);
+      serializer = Serializer(lanesModdleContext, typeResolver);
     });
 
     it('holds definition id, type, and name', async () => {
-      expect(context).to.have.property('id', 'Definitions_1');
-      expect(context).to.have.property('type', 'bpmn:Definitions');
-      expect(context).to.have.property('name', 'Lanes');
+      expect(serializer).to.have.property('id', 'Definitions_1');
+      expect(serializer).to.have.property('type', 'bpmn:Definitions');
+      expect(serializer).to.have.property('name', 'Lanes');
     });
 
     it('has the expected api', async () => {
-      expect(context).to.have.property('getActivities').that.is.a('function');
-      expect(context).to.have.property('getActivities').that.is.a('function');
-      expect(context).to.have.property('getActivityById').that.is.a('function');
-      expect(context).to.have.property('getDataObjects').that.is.a('function');
-      expect(context).to.have.property('getErrorById').that.is.a('function');
-      expect(context).to.have.property('getInboundSequenceFlows').that.is.a('function');
-      expect(context).to.have.property('getMessageFlows').that.is.a('function');
-      expect(context).to.have.property('getOutboundSequenceFlows').that.is.a('function');
-      expect(context).to.have.property('getProcessById').that.is.a('function');
-      expect(context).to.have.property('getProcesses').that.is.a('function');
-      expect(context).to.have.property('getExecutableProcesses').that.is.a('function');
-      expect(context).to.have.property('getSequenceFlowById').that.is.a('function');
-      expect(context).to.have.property('getSequenceFlows').that.is.a('function');
-      expect(context).to.have.property('serialize').that.is.a('function');
+      expect(serializer).to.have.property('getActivities').that.is.a('function');
+      expect(serializer).to.have.property('getActivities').that.is.a('function');
+      expect(serializer).to.have.property('getActivityById').that.is.a('function');
+      expect(serializer).to.have.property('getDataObjects').that.is.a('function');
+      expect(serializer).to.have.property('getErrorById').that.is.a('function');
+      expect(serializer).to.have.property('getInboundSequenceFlows').that.is.a('function');
+      expect(serializer).to.have.property('getMessageFlows').that.is.a('function');
+      expect(serializer).to.have.property('getOutboundSequenceFlows').that.is.a('function');
+      expect(serializer).to.have.property('getProcessById').that.is.a('function');
+      expect(serializer).to.have.property('getProcesses').that.is.a('function');
+      expect(serializer).to.have.property('getExecutableProcesses').that.is.a('function');
+      expect(serializer).to.have.property('getSequenceFlowById').that.is.a('function');
+      expect(serializer).to.have.property('getSequenceFlows').that.is.a('function');
+      expect(serializer).to.have.property('serialize').that.is.a('function');
     });
   });
 
   describe('getProcesses()', () => {
     it('returns processes', async () => {
-      const context = ContextMapper(lanesModdleContext, typeResolver);
-      const processes = context.getProcesses();
+      const serializer = Serializer(lanesModdleContext, typeResolver);
+      const processes = serializer.getProcesses();
 
       expect(processes).to.have.length(2);
 
@@ -87,15 +87,15 @@ describe('moddle context serializer', () => {
     });
 
     it('returns processes only', async () => {
-      const context = ContextMapper(subProcessModdleContext, typeResolver);
-      const processes = context.getProcesses();
+      const serializer = Serializer(subProcessModdleContext, typeResolver);
+      const processes = serializer.getProcesses();
 
       expect(processes).to.have.length(1);
     });
 
     it('isExecutable is available in behaviour', async () => {
-      const context = ContextMapper(lanesModdleContext, typeResolver);
-      const processes = context.getProcesses();
+      const serializer = Serializer(lanesModdleContext, typeResolver);
+      const processes = serializer.getProcesses();
 
       expect(processes).to.have.length(2);
 
@@ -104,8 +104,8 @@ describe('moddle context serializer', () => {
     });
 
     it('returns only processes', async () => {
-      const context = ContextMapper(subProcessModdleContext, typeResolver);
-      const processes = context.getProcesses();
+      const serializer = Serializer(subProcessModdleContext, typeResolver);
+      const processes = serializer.getProcesses();
 
       expect(processes).to.have.length(1);
 
@@ -115,17 +115,19 @@ describe('moddle context serializer', () => {
 
   describe('getExecutableProcesses()', () => {
     it('returns executable processes', async () => {
-      const context = ContextMapper(lanesModdleContext, typeResolver);
-      const processes = context.getExecutableProcesses();
+      const serializer = Serializer(lanesModdleContext, typeResolver);
+      const executableProcesses = serializer.getExecutableProcesses();
+      const processes = serializer.getProcesses();
 
-      expect(processes).to.have.length(1);
-      expect(processes[0]).to.have.property('id', 'mainProcess');
-      expect(processes[0]).to.have.property('behaviour').with.property('isExecutable', true);
+      expect(executableProcesses).to.have.length(1);
+      expect(processes).to.have.length(2);
+      expect(executableProcesses[0]).to.have.property('id', 'mainProcess');
+      expect(executableProcesses[0]).to.have.property('behaviour').with.property('isExecutable', true);
     });
 
     it('returns all executable processes', async () => {
-      const context = ContextMapper(twoProcessesModdleContext, typeResolver);
-      const processes = context.getExecutableProcesses();
+      const serializer = Serializer(twoProcessesModdleContext, typeResolver);
+      const processes = serializer.getExecutableProcesses();
 
       expect(processes).to.have.length(2);
       expect(processes[0]).to.have.property('behaviour').with.property('isExecutable', true);
@@ -135,22 +137,22 @@ describe('moddle context serializer', () => {
 
   describe('getProcessesById(id)', () => {
     it('returns process with id', async () => {
-      const context = ContextMapper(lanesModdleContext, typeResolver);
-      expect(context.getProcessById('mainProcess')).to.be.ok;
-      expect(context.getProcessById('participantProcess')).to.be.ok;
+      const serializer = Serializer(lanesModdleContext, typeResolver);
+      expect(serializer.getProcessById('mainProcess')).to.be.ok;
+      expect(serializer.getProcessById('participantProcess')).to.be.ok;
     });
 
     it('returns nothing if not found', async () => {
-      const context = ContextMapper(subProcessModdleContext, typeResolver);
-      expect(context.getProcessById('subProcess')).to.not.be.ok;
+      const serializer = Serializer(subProcessModdleContext, typeResolver);
+      expect(serializer.getProcessById('subProcess')).to.not.be.ok;
     });
   });
 
   describe('getActivities([scopeId])', () => {
     it('returns all activities', async () => {
-      const context = ContextMapper(subProcessModdleContext, typeResolver);
+      const serializer = Serializer(subProcessModdleContext, typeResolver);
 
-      const activities = context.getActivities();
+      const activities = serializer.getActivities();
 
       expect(activities).to.have.length(5);
 
@@ -158,16 +160,16 @@ describe('moddle context serializer', () => {
     });
 
     it('with scope returns activities for given process or sub process', async () => {
-      const context = ContextMapper(subProcessModdleContext, typeResolver);
+      const serializer = Serializer(subProcessModdleContext, typeResolver);
 
-      const processActivities = context.getActivities('mainProcess');
+      const processActivities = serializer.getActivities('mainProcess');
       expect(processActivities).to.have.length(3);
       processActivities.forEach((activity) => {
         assertEntity(activity);
         expect(activity.parent).to.have.property('id', 'mainProcess');
       });
 
-      const subProcessActivities = context.getActivities('subProcess');
+      const subProcessActivities = serializer.getActivities('subProcess');
 
       expect(subProcessActivities).to.have.length(2);
       subProcessActivities.forEach((activity) => {
@@ -178,75 +180,75 @@ describe('moddle context serializer', () => {
   });
 
   describe('getSequenceFlows([scopeId])', () => {
-    let context;
+    let serializer;
     before(() => {
-      context = ContextMapper(lanesModdleContext, typeResolver);
+      serializer = Serializer(lanesModdleContext, typeResolver);
     });
 
     it('returns all sequence flows', () => {
-      expect(context.getSequenceFlows()).to.have.length(6);
+      expect(serializer.getSequenceFlows()).to.have.length(6);
     });
 
     it('flows have the expected properties', () => {
-      const flows = context.getSequenceFlows();
+      const flows = serializer.getSequenceFlows();
       flows.forEach(assertSequenceFlow);
     });
 
     it('with scope id returns sequence flows belonging to scope', () => {
-      expect(context.getSequenceFlows('mainProcess')).to.have.length(3);
-      expect(context.getSequenceFlows('participantProcess')).to.have.length(3);
+      expect(serializer.getSequenceFlows('mainProcess')).to.have.length(3);
+      expect(serializer.getSequenceFlows('participantProcess')).to.have.length(3);
     });
   });
 
   describe('getSequenceFlowById(id)', () => {
     it('returns sequence flow with id', async () => {
-      const context = ContextMapper(lanesModdleContext, typeResolver);
-      expect(context.getSequenceFlowById('flow1')).to.be.ok;
-      expect(context.getSequenceFlowById('flow-p-1')).to.be.ok;
+      const serializer = Serializer(lanesModdleContext, typeResolver);
+      expect(serializer.getSequenceFlowById('flow1')).to.be.ok;
+      expect(serializer.getSequenceFlowById('flow-p-1')).to.be.ok;
     });
 
     it('returns nothing if not found', async () => {
-      const context = ContextMapper(subProcessModdleContext, typeResolver);
-      expect(context.getSequenceFlowById('subProcess')).to.not.be.ok;
+      const serializer = Serializer(subProcessModdleContext, typeResolver);
+      expect(serializer.getSequenceFlowById('subProcess')).to.not.be.ok;
     });
   });
 
   describe('getOutboundSequenceFlows(activityId)', () => {
-    let context;
+    let serializer;
     before(async () => {
-      context = ContextMapper(await testHelpers.moddleContext(factory.valid()), typeResolver);
+      serializer = Serializer(await testHelpers.moddleContext(factory.valid()), typeResolver);
     });
 
     it('returns activity outbound sequence flows', () => {
-      const flows = context.getOutboundSequenceFlows('theStart');
+      const flows = serializer.getOutboundSequenceFlows('theStart');
       expect(flows).to.have.length(1);
       flows.forEach(assertSequenceFlow);
     });
 
     it('returns all outbound', () => {
-      const flows = context.getOutboundSequenceFlows('decision');
+      const flows = serializer.getOutboundSequenceFlows('decision');
       expect(flows).to.have.length(2);
     });
 
     it('empty array if non found', () => {
-      const flows = context.getOutboundSequenceFlows('end1');
+      const flows = serializer.getOutboundSequenceFlows('end1');
       expect(flows).to.have.length(0);
     });
 
     it('marks default sequence flows', () => {
-      const flows = context.getOutboundSequenceFlows('decision');
+      const flows = serializer.getOutboundSequenceFlows('decision');
       expect(flows).to.have.length(2);
       expect(flows[0]).to.have.property('isDefault', true);
     });
 
     it('conditional flow returns condition in behaviour', () => {
-      const flows = context.getOutboundSequenceFlows('decision');
+      const flows = serializer.getOutboundSequenceFlows('decision');
       expect(flows).to.have.length(2);
       expect(flows[1]).to.have.property('behaviour').with.property('conditionExpression');
     });
 
     it('contains only sequence flows', () => {
-      const flows = ContextMapper(lanesModdleContext, typeResolver).getOutboundSequenceFlows('task1');
+      const flows = Serializer(lanesModdleContext, typeResolver).getOutboundSequenceFlows('task1');
       expect(flows).to.have.length(1);
       expect(flows[0]).to.have.property('type', 'bpmn:SequenceFlow');
     });
@@ -255,7 +257,7 @@ describe('moddle context serializer', () => {
   describe('getInboundSequenceFlows()', () => {
     let contextMapper;
     before(async () => {
-      contextMapper = ContextMapper(await testHelpers.moddleContext(factory.valid()), typeResolver);
+      contextMapper = Serializer(await testHelpers.moddleContext(factory.valid()), typeResolver);
     });
 
     it('returns activity inbound sequence flows', () => {
@@ -270,17 +272,17 @@ describe('moddle context serializer', () => {
     });
 
     it('returns inbound for sub process', () => {
-      const flows = ContextMapper(subProcessModdleContext, typeResolver).getInboundSequenceFlows('subProcess');
+      const flows = Serializer(subProcessModdleContext, typeResolver).getInboundSequenceFlows('subProcess');
       expect(flows).to.have.length(1);
     });
 
     it('main process doesn´t return inbound for sub process', () => {
-      const flows = ContextMapper(subProcessModdleContext, typeResolver).getInboundSequenceFlows('mainProcess');
+      const flows = Serializer(subProcessModdleContext, typeResolver).getInboundSequenceFlows('mainProcess');
       expect(flows).to.have.length(0);
     });
 
     it('returns sequence flows only', () => {
-      const flows = ContextMapper(lanesModdleContext, typeResolver).getInboundSequenceFlows('intermediate');
+      const flows = Serializer(lanesModdleContext, typeResolver).getInboundSequenceFlows('intermediate');
       expect(flows).to.have.length(1);
       expect(flows[0]).to.have.property('type', 'bpmn:SequenceFlow');
     });
@@ -289,7 +291,7 @@ describe('moddle context serializer', () => {
   describe('getMessageFlows()', () => {
     let contextMapper;
     before(() => {
-      contextMapper = ContextMapper(lanesModdleContext, typeResolver);
+      contextMapper = Serializer(lanesModdleContext, typeResolver);
     });
 
     it('with scope returns all outbound message flows from scope (process)', () => {
@@ -343,7 +345,7 @@ describe('moddle context serializer', () => {
     let contextMapper;
     before(async () => {
       const moddleContext = await testHelpers.moddleContext(source);
-      contextMapper = ContextMapper(moddleContext, typeResolver);
+      contextMapper = Serializer(moddleContext, typeResolver);
     });
 
     it('ServiceTask receives service implementation', () => {
@@ -379,7 +381,7 @@ describe('moddle context serializer', () => {
     let contextMapper;
     before(async () => {
       const moddleContext = await testHelpers.moddleContext(source);
-      contextMapper = ContextMapper(moddleContext, typeResolver);
+      contextMapper = Serializer(moddleContext, typeResolver);
     });
 
     it('task receives multi instance loopcharacteristics', () => {
@@ -420,7 +422,7 @@ describe('moddle context serializer', () => {
     let contextMapper;
     before(async () => {
       const moddleContext = await testHelpers.moddleContext(source);
-      contextMapper = ContextMapper(moddleContext, typeResolver);
+      contextMapper = Serializer(moddleContext, typeResolver);
     });
 
     it('process with empty subProcess delivers the right amount of children', () => {
@@ -434,7 +436,7 @@ describe('moddle context serializer', () => {
     let contextMapper;
     before(async () => {
       const moddleContext = await testHelpers.moddleContext(factory.resource('bound-error.bpmn'));
-      contextMapper = ContextMapper(moddleContext, typeResolver);
+      contextMapper = Serializer(moddleContext, typeResolver);
     });
 
     it('getErrorById(id) returns error', () => {
@@ -463,7 +465,7 @@ describe('moddle context serializer', () => {
   describe('bpmn:TimerEventDefinition', () => {
     let contextMapper;
     before(async () => {
-      contextMapper = ContextMapper(eventDefinitionModdleContext, typeResolver);
+      contextMapper = Serializer(eventDefinitionModdleContext, typeResolver);
     });
 
     it('time duration is stored with activity', () => {
@@ -522,7 +524,7 @@ describe('moddle context serializer', () => {
     let contextMapper;
     before(async () => {
       const moddleContext = await testHelpers.moddleContext(source);
-      contextMapper = ContextMapper(moddleContext, typeResolver);
+      contextMapper = Serializer(moddleContext, typeResolver);
     });
 
     it('getDataObjects() returns dataObjects', () => {
@@ -609,8 +611,8 @@ describe('moddle context serializer', () => {
 
   describe('serialize()', () => {
     it('returns stringified copy of mapped context', () => {
-      const context = ContextMapper(subProcessModdleContext, typeResolver);
-      const serialized = JSON.parse(context.serialize());
+      const serializer = Serializer(subProcessModdleContext, typeResolver);
+      const serialized = JSON.parse(serializer.serialize());
 
       expect(serialized).to.have.property('id').that.is.ok;
       expect(serialized).to.have.property('type').that.is.ok;
@@ -626,16 +628,16 @@ describe('moddle context serializer', () => {
 
   describe('deserialize(deserializedContext, typeResolver)', () => {
     it('holds definition id, type, and name', async () => {
-      const context = ContextMapper(lanesModdleContext, typeResolver);
-      const deserialized = deserialize(JSON.parse(context.serialize()), typeResolver);
+      const serializer = Serializer(lanesModdleContext, typeResolver);
+      const deserialized = deserialize(JSON.parse(serializer.serialize()), typeResolver);
       expect(deserialized).to.have.property('id', 'Definitions_1');
       expect(deserialized).to.have.property('type', 'bpmn:Definitions');
       expect(deserialized).to.have.property('name', 'Lanes');
     });
 
     it('has the expected api', async () => {
-      const context = ContextMapper(subProcessModdleContext, typeResolver);
-      const deserialized = deserialize(JSON.parse(context.serialize()), typeResolver);
+      const serializer = Serializer(subProcessModdleContext, typeResolver);
+      const deserialized = deserialize(JSON.parse(serializer.serialize()), typeResolver);
 
       expect(deserialized).to.have.property('getActivities').that.is.a('function');
       expect(deserialized).to.have.property('getActivities').that.is.a('function');
@@ -654,8 +656,8 @@ describe('moddle context serializer', () => {
     });
 
     it('has entities with Behaviour', async () => {
-      let context = ContextMapper(eventDefinitionModdleContext, typeResolver);
-      let deserialized = deserialize(JSON.parse(context.serialize()), typeResolver);
+      let serializer = Serializer(eventDefinitionModdleContext, typeResolver);
+      let deserialized = deserialize(JSON.parse(serializer.serialize()), typeResolver);
 
       deserialized.getProcesses().forEach(assertEntity);
       deserialized.getActivities().forEach(assertEntity);
@@ -663,8 +665,8 @@ describe('moddle context serializer', () => {
       deserialized.getDataObjects().forEach(assertEntity);
       deserialized.getMessageFlows().forEach(assertEntity);
 
-      context = ContextMapper(lanesModdleContext, typeResolver);
-      deserialized = deserialize(JSON.parse(context.serialize()), typeResolver);
+      serializer = Serializer(lanesModdleContext, typeResolver);
+      deserialized = deserialize(JSON.parse(serializer.serialize()), typeResolver);
 
       deserialized.getProcesses().forEach(assertEntity);
       deserialized.getActivities().forEach(assertEntity);
@@ -672,8 +674,8 @@ describe('moddle context serializer', () => {
       deserialized.getDataObjects().forEach(assertEntity);
       deserialized.getMessageFlows().forEach(assertEntity);
 
-      context = ContextMapper(subProcessModdleContext, typeResolver);
-      deserialized = deserialize(JSON.parse(context.serialize()), typeResolver);
+      serializer = Serializer(subProcessModdleContext, typeResolver);
+      deserialized = deserialize(JSON.parse(serializer.serialize()), typeResolver);
 
       deserialized.getProcesses().forEach(assertEntity);
       deserialized.getActivities().forEach(assertEntity);
@@ -696,8 +698,8 @@ describe('moddle context serializer', () => {
         </process>
       </definitions>`;
 
-      const context = ContextMapper(await testHelpers.moddleContext(source), typeResolver);
-      const deserialized = deserialize(JSON.parse(context.serialize()), typeResolver);
+      const serializer = Serializer(await testHelpers.moddleContext(source), typeResolver);
+      const deserialized = deserialize(JSON.parse(serializer.serialize()), typeResolver);
       const activity = deserialized.getActivityById('loop');
 
       expect(activity.behaviour)
@@ -707,6 +709,31 @@ describe('moddle context serializer', () => {
         .to.have.property('loopCardinality', '${environment.variables.maxCardinality}');
       expect(activity.behaviour.loopCharacteristics.behaviour)
         .to.have.property('completionCondition', '${environment.services.completed}');
+    });
+  });
+
+  describe('TypeResolver(types[, extender])', () => {
+    it('executes passed extender function with default type mapping', async () => {
+      function Escalation() {}
+      function IntermediateThrowEvent() {}
+      function EscalationEventDefinition() {}
+
+      const myTypeResolver = TypeResolver(types, (activityTypes) => {
+        activityTypes['bpmn:Escalation'] = Escalation;
+        activityTypes['bpmn:IntermediateThrowEvent'] = IntermediateThrowEvent;
+        activityTypes['bpmn:EscalationEventDefinition'] = EscalationEventDefinition;
+      });
+
+      const moddleContext = await testHelpers.moddleContext(factory.resource('escalation.bpmn'));
+
+      const serializer = Serializer(moddleContext, myTypeResolver);
+
+      const event = serializer.getActivityById('intermediateThrowEvent_1');
+      expect(event).to.be.ok;
+      expect(event).to.have.property('Behaviour', IntermediateThrowEvent);
+      expect(event).to.have.property('behaviour').with.property('eventDefinitions').with.length(1);
+
+      expect(event.behaviour.eventDefinitions[0]).to.have.property('Behaviour', EscalationEventDefinition);
     });
   });
 });
