@@ -734,6 +734,11 @@ describe('moddle context serializer', () => {
       expect(event).to.have.property('behaviour').with.property('eventDefinitions').with.length(1);
 
       expect(event.behaviour.eventDefinitions[0]).to.have.property('Behaviour', EscalationEventDefinition);
+
+      const escalation = serializer.getActivityById('escalation_1');
+      expect(escalation).to.be.ok;
+      expect(escalation).to.have.property('Behaviour', Escalation);
+      expect(escalation.behaviour).to.have.property('escalationCode', '10');
     });
   });
 });
