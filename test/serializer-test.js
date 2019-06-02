@@ -741,6 +741,89 @@ describe('moddle context serializer', () => {
       expect(escalation.behaviour).to.have.property('escalationCode', '10');
     });
   });
+
+  describe('humans', () => {
+    it('human performer and potential owner is returned in behaviour', async () => {
+      const source = `
+      <?xml version="1.0" encoding="UTF-8"?>
+      <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <process id="theProcess" isExecutable="true">
+          <userTask id="task">
+            <humanPerformer>
+              <resourceAssignmentExpression>
+                <formalExpression>pal</formalExpression>
+              </resourceAssignmentExpression>
+            </humanPerformer>
+            <potentialOwner>
+              <resourceAssignmentExpression>
+                <formalExpression>user(pal), group(users)</formalExpression>
+              </resourceAssignmentExpression>
+            </potentialOwner>
+          </userTask>
+        </process>
+      </definitions>`;
+
+      const context = Serializer(await testHelpers.moddleContext(source), typeResolver);
+      const task = context.getActivityById('task');
+
+      expect(task.behaviour).to.have.property('resources').that.has.length(2);
+
+      expect(task.behaviour.resources[0]).to.have.property('type', 'bpmn:HumanPerformer');
+      expect(task.behaviour.resources[0]).to.have.property('expression', 'pal');
+      expect(task.behaviour.resources[0]).to.have.property('behaviour').with.property('$type');
+      expect(task.behaviour.resources[1]).to.have.property('type', 'bpmn:PotentialOwner');
+      expect(task.behaviour.resources[1]).to.have.property('expression', 'user(pal), group(users)');
+      expect(task.behaviour.resources[1]).to.have.property('behaviour').with.property('$type');
+    });
+
+    it('human performer and potential owner without expression is still returned in behaviour', async () => {
+      const source = `
+      <?xml version="1.0" encoding="UTF-8"?>
+      <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <process id="theProcess" isExecutable="true">
+          <userTask id="task">
+            <humanPerformer>
+              <resourceAssignmentExpression>
+              </resourceAssignmentExpression>
+            </humanPerformer>
+            <potentialOwner>
+              <resourceAssignmentExpression>
+              </resourceAssignmentExpression>
+            </potentialOwner>
+          </userTask>
+        </process>
+      </definitions>`;
+
+      const context = Serializer(await testHelpers.moddleContext(source), typeResolver);
+      const task = context.getActivityById('task');
+
+      expect(task.behaviour).to.have.property('resources').that.has.length(2);
+
+      expect(task.behaviour.resources[0]).to.have.property('type', 'bpmn:HumanPerformer');
+      expect(task.behaviour.resources[0].expression).to.be.undefined;
+      expect(task.behaviour.resources[0]).to.have.property('behaviour').with.property('$type');
+      expect(task.behaviour.resources[1]).to.have.property('type', 'bpmn:PotentialOwner');
+      expect(task.behaviour.resources[1].expression).to.be.undefined;
+      expect(task.behaviour.resources[1]).to.have.property('behaviour').with.property('$type');
+    });
+
+    it('extended assignee is returned in behaviour', async () => {
+      const source = `
+      <?xml version="1.0" encoding="UTF-8"?>
+      <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:camunda="http://camunda.org/schema/1.0/bpmn">
+        <process id="theProcess" isExecutable="true">
+          <userTask id="task" camunda:assignee="pal" />
+        </process>
+      </definitions>`;
+
+      const moddleOptions = {camunda: require('camunda-bpmn-moddle/resources/camunda')};
+      const context = Serializer(await testHelpers.moddleContext(source, moddleOptions), typeResolver);
+      const task = context.getActivityById('task');
+      expect(task.behaviour).to.have.property('assignee', 'pal');
+    });
+  });
 });
 
 function assertEntity(activity) {

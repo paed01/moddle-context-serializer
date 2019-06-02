@@ -456,11 +456,13 @@ function mapModdleContext(moddleContext) {
       }
 
       function prepareActivityBehaviour(behaviour) {
+        const resources = element.resources && element.resources.map(mapResource);
         return { ...behaviour,
           ...element,
           eventDefinitions: element.eventDefinitions && element.eventDefinitions.map(mapActivityBehaviour),
           loopCharacteristics: element.loopCharacteristics && mapActivityBehaviour(element.loopCharacteristics),
-          ioSpecification: element.ioSpecification && mapActivityBehaviour(element.ioSpecification)
+          ioSpecification: element.ioSpecification && mapActivityBehaviour(element.ioSpecification),
+          resources
         };
       }
 
@@ -490,9 +492,22 @@ function mapModdleContext(moddleContext) {
     return bp.id;
   }
 
+  function mapResource(resource) {
+    if (!resource) return;
+    const {
+      $type: type,
+      resourceAssignmentExpression
+    } = resource;
+    return {
+      type,
+      expression: resourceAssignmentExpression.expression && resourceAssignmentExpression.expression.body,
+      behaviour: { ...resource
+      }
+    };
+  }
+
   function mapActivityBehaviour(ed) {
     if (!ed) return;
-    let Behaviour;
     const {
       $type: type
     } = ed;
@@ -527,8 +542,7 @@ function mapModdleContext(moddleContext) {
     }
 
     return {
-      type: ed.$type,
-      Behaviour,
+      type,
       behaviour
     };
   }
