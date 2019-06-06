@@ -201,6 +201,7 @@ function resolveTypes(mappedContext, typeResolver) {
 
 function mapModdleContext(moddleContext) {
   const {elementsById, references, rootHandler} = moddleContext;
+  const refKeyPattern = /^(?!\$).+?Ref$/;
 
   const definition = {
     id: rootHandler.element.id,
@@ -242,11 +243,6 @@ function mapModdleContext(moddleContext) {
       const {property, element} = r;
 
       switch (property) {
-        case 'bpmn:attachedToRef':
-        case 'bpmn:errorRef':
-        case 'bpmn:escalationRef':
-          result.refs.push(r);
-          break;
         case 'bpmn:sourceRef': {
           const flow = upsertFlowRef(element.id, {
             id: element.id,
@@ -418,7 +414,7 @@ function mapModdleContext(moddleContext) {
           break;
         }
         case 'bpmn:BoundaryEvent': {
-          attachedTo = refs.find((r) => r.element.id === id);
+          attachedTo = {...element.attachedTo};
           result.activities.push(prepareActivity({attachedTo}));
           break;
         }
@@ -503,7 +499,17 @@ function mapModdleContext(moddleContext) {
 
     const {$type: type} = ed;
     let behaviour = {...ed};
+
+    const keys = Object.getOwnPropertyNames(ed);
+    for (const key of keys) {
+      if (refKeyPattern.test(key)) behaviour[key] = {...ed[key]};
+    }
+
     switch (type) {
+      case 'bpmn:ConditionalEventDefinition': {
+        behaviour.expression = behaviour.condition && behaviour.condition.body;
+        break;
+      }
       case 'bpmn:InputOutputSpecification': {
         behaviour = prepareIoSpecificationBehaviour(ed);
         break;
@@ -515,20 +521,6 @@ function mapModdleContext(moddleContext) {
       }
       case 'bpmn:TimerEventDefinition': {
         behaviour.timeDuration = ed.timeDuration && ed.timeDuration.body;
-        break;
-      }
-      case 'bpmn:ErrorEventDefinition': {
-        const errorRef = refs.find((r) => r.element === ed);
-        behaviour.errorRef = errorRef && {...errorRef};
-        break;
-      }
-      case 'bpmn:EscalationEventDefinition': {
-        const escalationRef = refs.find((r) => r.element === ed);
-        behaviour.escalationRef = escalationRef && {...escalationRef};
-        break;
-      }
-      case 'bpmn:ConditionalEventDefinition': {
-        behaviour.expression = behaviour.condition && behaviour.condition.body;
         break;
       }
     }

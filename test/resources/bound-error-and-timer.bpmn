@@ -7,7 +7,7 @@
     <bpmn:sequenceFlow id="flow1" sourceRef="start" targetRef="scriptTask" />
     <bpmn:boundaryEvent id="errorEvent" attachedToRef="scriptTask">
       <bpmn:outgoing>flow3</bpmn:outgoing>
-      <bpmn:errorEventDefinition errorRef="Error_073mxh6" camunda:errorCodeVariable="statusCode" camunda:errorMessageVariable="message" />
+      <bpmn:errorEventDefinition errorRef="Error_0" camunda:errorCodeVariable="statusCode" camunda:errorMessageVariable="message" />
     </bpmn:boundaryEvent>
     <bpmn:scriptTask id="scriptTask" name="Check input" scriptFormat="JavaScript">
       <bpmn:incoming>flow1</bpmn:incoming>
@@ -26,7 +26,7 @@
     <bpmn:sequenceFlow id="flow2" sourceRef="scriptTask" targetRef="end" />
     <bpmn:endEvent id="endInError">
       <bpmn:incoming>flow3</bpmn:incoming>
-      <bpmn:errorEventDefinition errorRef="Error_073mxh6" />
+      <bpmn:errorEventDefinition errorRef="Error_0" />
     </bpmn:endEvent>
     <bpmn:boundaryEvent id="timerEvent" attachedToRef="scriptTask">
       <bpmn:outgoing>SequenceFlow_0blswmr</bpmn:outgoing>
@@ -40,7 +40,7 @@
       <bpmn:terminateEventDefinition />
     </bpmn:endEvent>
   </bpmn:process>
-  <bpmn:error id="Error_073mxh6" name="InputError" errorCode="404" />
+  <bpmn:error id="Error_0" name="InputError" errorCode="404" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="boundErrorProcess">
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="start">

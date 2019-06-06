@@ -34,6 +34,8 @@ const types = {
   ServiceTask() {},
   UserTask() {},
   ManualTask() {},
+  Signal() {},
+  SignalEventDefinition() {},
   StartEvent() {},
   SubProcess() {},
   Task() {},
@@ -44,13 +46,14 @@ const types = {
 const typeResolver = TypeResolver(types);
 
 describe('moddle context serializer', () => {
-  let lanesModdleContext, subProcessModdleContext, eventDefinitionModdleContext, twoProcessesModdleContext, conditionAndEscalationModdleContext;
+  let lanesModdleContext, subProcessModdleContext, eventDefinitionModdleContext, twoProcessesModdleContext, conditionAndEscalationModdleContext, signalEventModdleContext;
   before(async () => {
     lanesModdleContext = await testHelpers.moddleContext(lanesSource);
     subProcessModdleContext = await testHelpers.moddleContext(subProcessSource);
     eventDefinitionModdleContext = await testHelpers.moddleContext(eventDefinitionSource);
     conditionAndEscalationModdleContext = await testHelpers.moddleContext(conditionAndEscalationSource);
     twoProcessesModdleContext = await testHelpers.moddleContext(twoProcessesSource);
+    signalEventModdleContext = await testHelpers.moddleContext(factory.resource('signal-event.bpmn'));
   });
 
   describe('TypeResolver(types[, extender])', () => {
@@ -676,6 +679,49 @@ describe('moddle context serializer', () => {
     });
   });
 
+  describe('bpmn:ErrorEventDefinition', () => {
+    let contextMapper;
+    before(async () => {
+      contextMapper = Serializer(eventDefinitionModdleContext, typeResolver);
+    });
+
+    it('boundary event has event definition with error', () => {
+      const activity = contextMapper.getActivityById('errorEvent');
+      expect(activity).to.be.ok;
+
+      expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
+      expect(activity.behaviour.eventDefinitions[0])
+        .to.have.property('Behaviour', types.ErrorEventDefinition);
+      expect(activity.behaviour.eventDefinitions[0])
+        .to.have.property('behaviour')
+        .with.property('errorRef');
+      expect(activity.behaviour.eventDefinitions[0].behaviour.errorRef)
+        .to.include({
+          $type: 'bpmn:Error',
+          id: 'Error_0',
+        });
+    });
+
+    it('can be deserialized', () => {
+      const serialized = contextMapper.serialize();
+
+      const deserialized = deserialize(JSON.parse(serialized), typeResolver);
+      const activity = deserialized.getActivityById('errorEvent');
+
+      expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
+      expect(activity.behaviour.eventDefinitions[0])
+        .to.have.property('Behaviour', types.ErrorEventDefinition);
+      expect(activity.behaviour.eventDefinitions[0])
+        .to.have.property('behaviour')
+        .with.property('errorRef');
+      expect(activity.behaviour.eventDefinitions[0].behaviour.errorRef)
+        .to.include({
+          $type: 'bpmn:Error',
+          id: 'Error_0',
+        });
+    });
+  });
+
   describe('escalation', () => {
     let contextMapper;
     before(async () => {
@@ -743,6 +789,50 @@ describe('moddle context serializer', () => {
       expect(activity.behaviour.eventDefinitions[0].behaviour)
         .to.have.property('escalationRef')
         .with.property('id', 'Escalation_0');
+    });
+  });
+
+  describe('signal event', () => {
+    let contextMapper;
+    before(async () => {
+      contextMapper = Serializer(signalEventModdleContext, typeResolver);
+    });
+
+    it('signal event definition is stored with activity', () => {
+      const activity = contextMapper.getActivityById('signal');
+      expect(activity).to.be.ok;
+
+      expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
+      expect(activity.behaviour.eventDefinitions[0])
+        .to.have.property('Behaviour', types.SignalEventDefinition);
+      expect(activity.behaviour.eventDefinitions[0].behaviour)
+        .to.have.property('signalRef')
+        .with.property('id', 'Signal_0');
+    });
+
+    it('can be deserialized', () => {
+      const serialized = contextMapper.serialize();
+
+      const deserialized = deserialize(JSON.parse(serialized), typeResolver);
+      const activity = deserialized.getActivityById('signal');
+      expect(activity).to.be.ok;
+
+      expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
+      expect(activity.behaviour.eventDefinitions[0])
+        .to.have.property('Behaviour', types.SignalEventDefinition);
+      expect(activity.behaviour.eventDefinitions[0].behaviour)
+        .to.have.property('signalRef')
+        .with.property('id', 'Signal_0');
+    });
+
+    it('signal element has escalation name and code', () => {
+      const serialized = contextMapper.serialize();
+
+      const deserialized = deserialize(JSON.parse(serialized), typeResolver);
+      const escalation = deserialized.getActivityById('Signal_0');
+      expect(escalation).to.be.ok;
+
+      expect(escalation.behaviour).to.have.property('name', 'Semaphore');
     });
   });
 
