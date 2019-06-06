@@ -414,7 +414,7 @@ function mapModdleContext(moddleContext) {
           break;
         }
         case 'bpmn:BoundaryEvent': {
-          attachedTo = {...element.attachedTo};
+          attachedTo = spreadRef(element.attachedToRef);
           result.activities.push(prepareActivity({attachedTo}));
           break;
         }
@@ -502,7 +502,7 @@ function mapModdleContext(moddleContext) {
 
     const keys = Object.getOwnPropertyNames(ed);
     for (const key of keys) {
-      if (refKeyPattern.test(key)) behaviour[key] = {...ed[key]};
+      if (refKeyPattern.test(key)) behaviour[key] = spreadRef(ed[key]);
     }
 
     switch (type) {
@@ -580,5 +580,11 @@ function mapModdleContext(moddleContext) {
         target: target && {...target, dataObject: getDataObjectRef(target.id)},
       },
     };
+  }
+
+  function spreadRef(ref) {
+    if (!ref) return;
+    const {id, $type: type, name} = ref;
+    return {id, type, name};
   }
 }

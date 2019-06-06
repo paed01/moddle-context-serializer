@@ -679,6 +679,35 @@ describe('moddle context serializer', () => {
     });
   });
 
+  describe('bpmn:BoundaryEvent', () => {
+    let contextMapper;
+    before(async () => {
+      contextMapper = Serializer(eventDefinitionModdleContext, typeResolver);
+    });
+
+    it('boundary event has attached to', () => {
+      const activity = contextMapper.getActivityById('errorEvent');
+      expect(activity).to.be.ok;
+
+      expect(activity.behaviour).to.have.property('attachedTo').that.include({
+        id: 'scriptTask',
+        type: 'bpmn:ScriptTask',
+      });
+    });
+
+    it('can be deserialized', () => {
+      const serialized = contextMapper.serialize();
+
+      const deserialized = deserialize(JSON.parse(serialized), typeResolver);
+      const activity = deserialized.getActivityById('errorEvent');
+
+      expect(activity.behaviour).to.have.property('attachedTo').that.include({
+        id: 'scriptTask',
+        type: 'bpmn:ScriptTask',
+      });
+    });
+  });
+
   describe('bpmn:ErrorEventDefinition', () => {
     let contextMapper;
     before(async () => {
@@ -697,7 +726,7 @@ describe('moddle context serializer', () => {
         .with.property('errorRef');
       expect(activity.behaviour.eventDefinitions[0].behaviour.errorRef)
         .to.include({
-          $type: 'bpmn:Error',
+          type: 'bpmn:Error',
           id: 'Error_0',
         });
     });
@@ -716,7 +745,7 @@ describe('moddle context serializer', () => {
         .with.property('errorRef');
       expect(activity.behaviour.eventDefinitions[0].behaviour.errorRef)
         .to.include({
-          $type: 'bpmn:Error',
+          type: 'bpmn:Error',
           id: 'Error_0',
         });
     });
