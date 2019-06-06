@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1ic0cv7" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.0.1">
+  <bpmn:process id="Process_0gwnqnt" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>SequenceFlow_1mu8opr</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1mu8opr" sourceRef="StartEvent_1" targetRef="Task_1lfmulg" />
+    <bpmn:serviceTask id="Task_1lfmulg" camunda:expression="${environment.services.serviceFn}" camunda:resultVariable="result">
+      <bpmn:incoming>SequenceFlow_1mu8opr</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1vopbzg</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent_0xg2xsv">
+      <bpmn:incoming>SequenceFlow_1vopbzg</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1vopbzg" sourceRef="Task_1lfmulg" targetRef="EndEvent_0xg2xsv" />
+    <bpmn:boundaryEvent id="conditionalBoundaryEvent" attachedToRef="Task_1lfmulg">
+      <bpmn:outgoing>SequenceFlow_1eziojc</bpmn:outgoing>
+      <bpmn:conditionalEventDefinition>
+        <bpmn:condition xsi:type="bpmn:tFormalExpression">${environment.variables.conditionMet}</bpmn:condition>
+      </bpmn:conditionalEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1eziojc" sourceRef="conditionalBoundaryEvent" targetRef="end" />
+    <bpmn:endEvent id="end">
+      <bpmn:incoming>SequenceFlow_1eziojc</bpmn:incoming>
+      <bpmn:escalationEventDefinition escalationRef="Escalation_0" />
+    </bpmn:endEvent>
+    <bpmn:subProcess id="escalationSubProcess" triggeredByEvent="true">
+      <bpmn:startEvent id="startEscalation" isInterrupting="false">
+        <bpmn:outgoing>SequenceFlow_1dlghyw</bpmn:outgoing>
+        <bpmn:escalationEventDefinition escalationRef="Escalation_0" />
+      </bpmn:startEvent>
+      <bpmn:task id="Task_18akgyd">
+        <bpmn:incoming>SequenceFlow_1dlghyw</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_1dnccad</bpmn:outgoing>
+      </bpmn:task>
+      <bpmn:sequenceFlow id="SequenceFlow_1dlghyw" sourceRef="startEscalation" targetRef="Task_18akgyd" />
+      <bpmn:endEvent id="EndEvent_1rrklau">
+        <bpmn:incoming>SequenceFlow_1dnccad</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow_1dnccad" sourceRef="Task_18akgyd" targetRef="EndEvent_1rrklau" />
+    </bpmn:subProcess>
+  </bpmn:process>
+  <bpmn:escalation id="Escalation_0" name="Escalate" escalationCode="404" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_0gwnqnt">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="103" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1mu8opr_di" bpmnElement="SequenceFlow_1mu8opr">
+        <di:waypoint x="215" y="121" />
+        <di:waypoint x="265" y="121" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_0nh5nnj_di" bpmnElement="Task_1lfmulg">
+        <dc:Bounds x="265" y="81" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0xg2xsv_di" bpmnElement="EndEvent_0xg2xsv">
+        <dc:Bounds x="415" y="103" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1vopbzg_di" bpmnElement="SequenceFlow_1vopbzg">
+        <di:waypoint x="365" y="121" />
+        <di:waypoint x="415" y="121" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="BoundaryEvent_1l0ykuq_di" bpmnElement="conditionalBoundaryEvent">
+        <dc:Bounds x="297" y="143" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1eziojc_di" bpmnElement="SequenceFlow_1eziojc">
+        <di:waypoint x="315" y="179" />
+        <di:waypoint x="315" y="241" />
+        <di:waypoint x="415" y="241" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_13i7xc1_di" bpmnElement="end">
+        <dc:Bounds x="415" y="223" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcess_1j2sm6y_di" bpmnElement="escalationSubProcess" isExpanded="true">
+        <dc:Bounds x="151" y="376" width="350" height="200" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_0ivpkg4_di" bpmnElement="startEscalation">
+        <dc:Bounds x="188" y="456" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_18akgyd_di" bpmnElement="Task_18akgyd">
+        <dc:Bounds x="278" y="434" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1dlghyw_di" bpmnElement="SequenceFlow_1dlghyw">
+        <di:waypoint x="224" y="474" />
+        <di:waypoint x="278" y="474" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_1rrklau_di" bpmnElement="EndEvent_1rrklau">
+        <dc:Bounds x="432" y="456" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1dnccad_di" bpmnElement="SequenceFlow_1dnccad">
+        <di:waypoint x="378" y="474" />
+        <di:waypoint x="432" y="474" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

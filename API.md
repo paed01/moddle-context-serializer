@@ -53,47 +53,52 @@ Do the moddle-context map.
 Arguments:
 - `moddleContext`: context from `bpmn-moddle`
 
-## `TypeResolver(typeMapping[, extender])`
+## `TypeResolver(types[, extender])`
 
 Builtin key value mapping to behaviour function.
 
 Arguments:
-- `typeMapping`: object with type as key and value with behaviour function
+- `types`: object with type as key and value with behaviour function
 - [`extender`](#extender): optional function that will receive default type mapping by reference
 
 Returns function that will receive mapped element and expects the function to return a behaviour function.
 
-> NB! the resolver mutates entities and adds property `Behaviour` mapped to the passed `typeMapping`.
+> NB! the resolver mutates entities and adds property `Behaviour` mapped to the passed `types`.
 
-Default type mapping:
+The default behaviour is to map moddle context `$type` property, stripped from the `bpmn:` prefix, and see if there is a corresponding property in the `typeMapping` object.
 
-- `BoundaryEvent`: `bpmn:BoundaryEvent`
-- `DataObject`: `bpmn:DataObject`
-- `Definitions`: `bpmn:Definitions`
-- `EndEvent`: `bpmn:EndEvent`
-- `BpmnError`: `bpmn:Error`
-- `ErrorEventDefinition`: `bpmn:ErrorEventDefinition`
-- `ExclusiveGateway`: `bpmn:ExclusiveGateway`
-- `InclusiveGateway`: `bpmn:InclusiveGateway`
-- `IntermediateCatchEvent`: `bpmn:IntermediateCatchEvent`
-- `SignalTask`: `bpmn:ManualTask`
-- `MessageEventDefinition`: `bpmn:MessageEventDefinition`
-- `MessageFlow`: `bpmn:MessageFlow`
-- `Process`: `bpmn:Process`
-- `ParallelGateway`: `bpmn:ParallelGateway`
-- `SignalTask`: `bpmn:ReceiveTask`
-- `ScriptTask`: `bpmn:ScriptTask`
-- `ServiceTask`: `bpmn:SendTask`
-- `SequenceFlow`: `bpmn:SequenceFlow`
-- `ServiceTask`: `bpmn:ServiceTask`
-- `StartEvent`: `bpmn:StartEvent`
-- `SubProcess`: `bpmn:SubProcess`
-- `Task`: `bpmn:Task`
-- `TerminateEventDefinition`: `bpmn:TerminateEventDefinition`
-- `TimerEventDefinition`: `bpmn:TimerEventDefinition`
-- `SignalTask`: `bpmn:UserTask`
-- `MultiInstanceLoopCharacteristics`: `bpmn:MultiInstanceLoopCharacteristics`
-- `IoSpecification`: `bpmn:InputOutputSpecification`
+For instance:
+- `bpmn:BoundaryEvent`: `types.BoundaryEvent`
+- `bpmn:DataObject`: `types.DataObject`
+- `bpmn:EndEvent`: `types.EndEvent`
+- `bpmn:ErrorEventDefinition`: `types.ErrorEventDefinition`
+- `bpmn:ExclusiveGateway`: `types.ExclusiveGateway`
+- `bpmn:InclusiveGateway`: `types.InclusiveGateway`
+- `bpmn:IntermediateCatchEvent`: `types.IntermediateCatchEvent`
+- `bpmn:ManualTask`: `types.ManualTask`
+- `bpmn:MessageEventDefinition`: `types.MessageEventDefinition`
+- `bpmn:MultiInstanceLoopCharacteristics`: `types.MultiInstanceLoopCharacteristics`
+- `bpmn:MessageFlow`: `types.MessageFlow`
+- `bpmn:ParallelGateway`: `types.ParallelGateway`
+- `bpmn:ReceiveTask`: `types.ReceiveTask`
+- `bpmn:ScriptTask`: `types.ScriptTask`
+- `bpmn:SendTask`: `types.SendTask`
+- `bpmn:SequenceFlow`: `types.SequenceFlow`
+- `bpmn:ServiceTask`: `types.ServiceTask`
+- `bpmn:StartEvent`: `types.StartEvent`
+- `bpmn:SubProcess`: `types.SubProcess`
+- `bpmn:Task`: `types.Task`
+- `bpmn:TerminateEventDefinition`: `types.TerminateEventDefinition`
+- `bpmn:TimerEventDefinition`: `types.TimerEventDefinition`
+- `bpmn:UserTask`: `types.UserTask`
+- `bpmn:InputOutputSpecification`: `types.InputOutputSpecification`
+
+Some default type mapping exist:
+
+- `Definition`: `bpmn:Definitions`, singular just sounds better
+- `BpmnError`: `bpmn:Error` since using `Error` is not recommended
+- `ServiceImplementation`: mapped to Service- or SendTask implementation property
+
 
 ### Extender
 
@@ -104,10 +109,10 @@ import Escalation from './Escalation';
 import IntermediateThrowEvent from './IntermediateThrowEvent';
 import EscalationEventDefinition from './EscalationEventDefinition';
 
-const typeResolver = TypeResolver(types, (activityTypes) => {
-  activityTypes['bpmn:Escalation'] = Escalation;
-  activityTypes['bpmn:IntermediateThrowEvent'] = IntermediateThrowEvent;
-  activityTypes['bpmn:EscalationEventDefinition'] = EscalationEventDefinition;
+const typeResolver = TypeResolver(types, (typeMapping) => {
+  typeMapping['bpmn:Escalation'] = Escalation;
+  typeMapping['bpmn:IntermediateThrowEvent'] = IntermediateThrowEvent;
+  typeMapping['bpmn:EscalationEventDefinition'] = EscalationEventDefinition;
 });
 ```
 

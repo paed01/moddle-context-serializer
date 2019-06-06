@@ -11,6 +11,68 @@ exports.default = void 0;
 var _default = context;
 exports.default = _default;
 
+function TypeResolver(types, extender) {
+  const {
+    BpmnError,
+    Definition,
+    Dummy,
+    ServiceImplementation
+  } = types;
+  const typeMapper = {};
+  typeMapper['bpmn:DataObjectReference'] = Dummy;
+  typeMapper['bpmn:Definitions'] = Definition;
+  typeMapper['bpmn:Error'] = BpmnError;
+  if (extender) extender(typeMapper);
+  return function resolve(entity) {
+    const {
+      type,
+      behaviour = {}
+    } = entity;
+
+    switch (type) {
+      case 'bpmn:SendTask':
+      case 'bpmn:ServiceTask':
+        entity.Behaviour = getBehaviourFromType(type);
+
+        if (behaviour.implementation) {
+          behaviour.Service = ServiceImplementation;
+        }
+
+        break;
+
+      default:
+        entity.Behaviour = getBehaviourFromType(type);
+    }
+
+    if (behaviour.loopCharacteristics) {
+      resolve(behaviour.loopCharacteristics);
+    }
+
+    if (behaviour.eventDefinitions) {
+      behaviour.eventDefinitions.forEach(resolve);
+    }
+
+    if (behaviour.ioSpecification) {
+      resolve(behaviour.ioSpecification);
+    }
+  };
+
+  function getBehaviourFromType(type) {
+    let activityType = typeMapper[type];
+
+    if (!activityType && type) {
+      const nonPrefixedType = type.split(':').slice(1).join(':');
+      activityType = types[nonPrefixedType];
+    }
+
+    if (!activityType) {
+      throw new Error(`Unknown activity type ${type}`);
+    }
+
+    return activityType;
+  }
+}
+
 function context(moddleContext, typeResolver) {
   const mapped = mapModdleContext(moddleContext);
   return contextApi(resolveTypes(mapped, typeResolver));
@@ -169,11 +231,9 @@ function mapModdleContext(moddleContext) {
     exporterVersion: rootHandler.element.exporterVersion
   };
   const {
-    attachedToRefs,
+    refs,
     dataInputAssociations,
-    dataObjectRefs,
     dataOutputAssociations,
-    errorRefs,
     flowRefs
   } = prepareReferences();
   const {
@@ -203,11 +263,9 @@ function mapModdleContext(moddleContext) {
 
       switch (property) {
         case 'bpmn:attachedToRef':
-          result.attachedToRefs.push(r);
-          break;
-
         case 'bpmn:errorRef':
-          result.errorRefs.push(r);
+        case 'bpmn:escalationRef':
+          result.refs.push(r);
           break;
 
         case 'bpmn:sourceRef':
@@ -240,7 +298,7 @@ function mapModdleContext(moddleContext) {
           break;
 
         case 'bpmn:dataObjectRef':
-          result.dataObjectRefs.push(r);
+          result.refs.push(r);
           break;
       }
 
@@ -268,11 +326,9 @@ function mapModdleContext(moddleContext) {
         return flow;
       }
     }, {
-      attachedToRefs: [],
+      refs: [],
       dataInputAssociations: [],
-      dataObjectRefs: [],
       dataOutputAssociations: [],
-      errorRefs: [],
       flowRefs: {},
       sourceRefs: {},
       targetRefs: {}
@@ -420,7 +476,7 @@ function mapModdleContext(moddleContext) {
 
         case 'bpmn:BoundaryEvent':
           {
-            attachedTo = attachedToRefs.find(r => r.element.id === id);
+            attachedTo = refs.find(r => r.element.id === id);
             result.activities.push(prepareActivity({
               attachedTo
             }));
@@ -467,7 +523,7 @@ function mapModdleContext(moddleContext) {
       }
 
       function prepareDataObjectReferences() {
-        const objectRefs = dataObjectRefs.filter(objectRef => objectRef.id === element.id);
+        const objectRefs = refs.filter(objectRef => objectRef.id === element.id);
         return objectRefs.map(objectRef => {
           return {
             id: objectRef.element.id,
@@ -531,13 +587,29 @@ function mapModdleContext(moddleContext) {
       case 'bpmn:TimerEventDefinition':
         {
           behaviour.timeDuration = ed.timeDuration && ed.timeDuration.body;
+          break;
         }
 
       case 'bpmn:ErrorEventDefinition':
         {
-          const errorRef = errorRefs.find(r => r.element === ed);
+          const errorRef = refs.find(r => r.element === ed);
           behaviour.errorRef = errorRef && { ...errorRef
           };
+          break;
+        }
+
+      case 'bpmn:EscalationEventDefinition':
+        {
+          const escalationRef = refs.find(r => r.element === ed);
+          behaviour.escalationRef = escalationRef && { ...escalationRef
+          };
+          break;
+        }
+
+      case 'bpmn:ConditionalEventDefinition':
+        {
+          behaviour.expression = behaviour.condition && behaviour.condition.body;
+          break;
         }
     }
 
@@ -583,7 +655,7 @@ function mapModdleContext(moddleContext) {
   }
 
   function getDataObjectRef(dataObjectReferenceId) {
-    const dataObjectRef = dataObjectRefs.find(dor => dor.element && dor.element.id === dataObjectReferenceId);
+    const dataObjectRef = refs.find(dor => dor.element && dor.element.id === dataObjectReferenceId);
     if (!dataObjectRef) return;
     return { ...dataObjectRef
     };
@@ -601,109 +673,5 @@ function mapModdleContext(moddleContext) {
         }
       }
     };
-  }
-}
-
-function TypeResolver(types, extender) {
-  const {
-    BoundaryEvent,
-    BpmnError,
-    DataObject,
-    Definition,
-    Dummy,
-    EndEvent,
-    ErrorEventDefinition,
-    ExclusiveGateway,
-    InclusiveGateway,
-    IntermediateCatchEvent,
-    IoSpecification,
-    MessageEventDefinition,
-    MessageFlow,
-    MultiInstanceLoopCharacteristics,
-    ParallelGateway,
-    Process,
-    ScriptTask,
-    SequenceFlow,
-    ServiceImplementation,
-    ServiceTask,
-    SignalTask,
-    StartEvent,
-    SubProcess,
-    Task,
-    TerminateEventDefinition,
-    TimerEventDefinition
-  } = types;
-  const activityTypes = {};
-  activityTypes['bpmn:BoundaryEvent'] = BoundaryEvent;
-  activityTypes['bpmn:DataObjectReference'] = Dummy;
-  activityTypes['bpmn:DataObject'] = DataObject;
-  activityTypes['bpmn:Definitions'] = Definition;
-  activityTypes['bpmn:EndEvent'] = EndEvent;
-  activityTypes['bpmn:Error'] = BpmnError;
-  activityTypes['bpmn:ErrorEventDefinition'] = ErrorEventDefinition;
-  activityTypes['bpmn:ExclusiveGateway'] = ExclusiveGateway;
-  activityTypes['bpmn:InclusiveGateway'] = InclusiveGateway;
-  activityTypes['bpmn:IntermediateCatchEvent'] = IntermediateCatchEvent;
-  activityTypes['bpmn:ManualTask'] = SignalTask;
-  activityTypes['bpmn:MessageEventDefinition'] = MessageEventDefinition;
-  activityTypes['bpmn:MessageFlow'] = MessageFlow;
-  activityTypes['bpmn:Process'] = Process;
-  activityTypes['bpmn:ParallelGateway'] = ParallelGateway;
-  activityTypes['bpmn:ReceiveTask'] = SignalTask;
-  activityTypes['bpmn:ScriptTask'] = ScriptTask;
-  activityTypes['bpmn:SendTask'] = ServiceTask;
-  activityTypes['bpmn:SequenceFlow'] = SequenceFlow;
-  activityTypes['bpmn:ServiceTask'] = ServiceTask;
-  activityTypes['bpmn:StartEvent'] = StartEvent;
-  activityTypes['bpmn:SubProcess'] = SubProcess;
-  activityTypes['bpmn:Task'] = Task;
-  activityTypes['bpmn:TerminateEventDefinition'] = TerminateEventDefinition;
-  activityTypes['bpmn:TimerEventDefinition'] = TimerEventDefinition;
-  activityTypes['bpmn:UserTask'] = SignalTask;
-  activityTypes['bpmn:MultiInstanceLoopCharacteristics'] = MultiInstanceLoopCharacteristics;
-  activityTypes['bpmn:InputOutputSpecification'] = IoSpecification;
-  if (extender) extender(activityTypes);
-  return function resolve(entity) {
-    const {
-      type,
-      behaviour = {}
-    } = entity;
-
-    switch (type) {
-      case 'bpmn:SendTask':
-      case 'bpmn:ServiceTask':
-        entity.Behaviour = getBehaviourFromType(type);
-
-        if (behaviour.implementation) {
-          behaviour.Service = ServiceImplementation;
-        }
-
-        break;
-
-      default:
-        entity.Behaviour = getBehaviourFromType(type);
-    }
-
-    if (behaviour.loopCharacteristics) {
-      resolve(behaviour.loopCharacteristics);
-    }
-
-    if (behaviour.eventDefinitions) {
-      behaviour.eventDefinitions.forEach(resolve);
-    }
-
-    if (behaviour.ioSpecification) {
-      resolve(behaviour.ioSpecification);
-    }
-  };
-
-  function getBehaviourFromType(type) {
-    const activityType = activityTypes[type];
-
-    if (!activityType) {
-      throw new Error(`Unknown activity type ${type}`);
-    }
-
-    return activityType;
   }
 }
