@@ -25,14 +25,14 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "@babel/cli": "^7.4.4",
-    "@babel/core": "^7.4.5",
-    "@babel/preset-env": "^7.4.5",
+    "@babel/cli": "^7.5.0",
+    "@babel/core": "^7.5.0",
+    "@babel/preset-env": "^7.5.0",
     "@babel/register": "^7.4.4",
-    "bpmn-moddle": "^5.1.6",
+    "bpmn-moddle": "^5.2.0",
     "camunda-bpmn-moddle": "^3.2.0",
     "chai": "^4.2.0",
-    "eslint": "^5.16.0",
+    "eslint": "^6.0.1",
     "mocha": "^6.1.4",
     "nyc": "^14.1.1"
   }

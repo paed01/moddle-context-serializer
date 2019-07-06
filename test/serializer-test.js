@@ -751,6 +751,36 @@ describe('moddle context serializer', () => {
     });
   });
 
+  describe('bpmn:Signal', () => {
+    let contextMapper;
+    before(async () => {
+      contextMapper = Serializer(signalEventModdleContext, typeResolver);
+    });
+
+    it('Signal is mapped with name and definition as parent', () => {
+      const signal = contextMapper.getActivityById('Signal_0');
+      expect(signal).to.be.ok;
+      expect(signal).to.have.property('name', 'Semaphore');
+      expect(signal).to.have.property('parent').that.eql({
+        id: 'Definitions_0',
+        type: 'bpmn:Definitions',
+      });
+    });
+
+    it('can be deserialized', () => {
+      const serialized = contextMapper.serialize();
+
+      const deserialized = deserialize(JSON.parse(serialized), typeResolver);
+      const signal = deserialized.getActivityById('Signal_0');
+      expect(signal).to.be.ok;
+      expect(signal).to.have.property('name', 'Semaphore');
+      expect(signal).to.have.property('parent').that.eql({
+        id: 'Definitions_0',
+        type: 'bpmn:Definitions',
+      });
+    });
+  });
+
   describe('escalation', () => {
     let contextMapper;
     before(async () => {
