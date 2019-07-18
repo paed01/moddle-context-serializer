@@ -87,7 +87,6 @@ function contextApi(mapped) {
     activities,
     dataObjects,
     definition,
-    errors,
     messageFlows,
     processes,
     sequenceFlows
@@ -121,7 +120,6 @@ function contextApi(mapped) {
       activities,
       dataObjects,
       definition,
-      errors,
       messageFlows,
       processes,
       sequenceFlows
@@ -175,16 +173,6 @@ function contextApi(mapped) {
     return dataObjects;
   }
 
-  function getErrors() {
-    return errors;
-  }
-
-  function getErrorById(errorId) {
-    return errors.find(({
-      id
-    }) => id === errorId);
-  }
-
   function getDataObjectById(dataObjectId) {
     return dataObjects.find(({
       id
@@ -194,6 +182,14 @@ function contextApi(mapped) {
   function getActivityById(actvitiyId) {
     return activities.find(activity => activity.id === actvitiyId);
   }
+
+  function getErrorById(errorId) {
+    return getActivityById(errorId);
+  }
+
+  function getErrors() {
+    return getActivities().filter(a => a.type === 'bpmn:Error');
+  }
 }
 
 function resolveTypes(mappedContext, typeResolver) {
@@ -201,7 +197,6 @@ function resolveTypes(mappedContext, typeResolver) {
     definition,
     activities,
     dataObjects,
-    errors,
     messageFlows,
     processes,
     sequenceFlows
@@ -210,7 +205,6 @@ function resolveTypes(mappedContext, typeResolver) {
   processes.forEach(typeResolver);
   activities.forEach(typeResolver);
   dataObjects.forEach(typeResolver);
-  errors.forEach(typeResolver);
   messageFlows.forEach(typeResolver);
   sequenceFlows.forEach(typeResolver);
   return mappedContext;
@@ -240,7 +234,6 @@ function mapModdleContext(moddleContext) {
   const {
     activities,
     dataObjects,
-    errors,
     messageFlows,
     processes,
     sequenceFlows
@@ -249,7 +242,6 @@ function mapModdleContext(moddleContext) {
     definition,
     activities,
     dataObjects,
-    errors,
     messageFlows,
     processes,
     sequenceFlows
@@ -375,22 +367,6 @@ function mapModdleContext(moddleContext) {
               target: {
                 processId: getElementProcessId(flowRef.targetId),
                 id: flowRef.targetId
-              },
-              behaviour: { ...element
-              }
-            });
-            break;
-          }
-
-        case 'bpmn:Error':
-          {
-            result.errors.push({
-              id,
-              type,
-              name,
-              parent: {
-                id: parent.id,
-                type: parent.type
               },
               behaviour: { ...element
               }
@@ -531,7 +507,6 @@ function mapModdleContext(moddleContext) {
     }, {
       activities: [],
       dataObjects: [],
-      errors: [],
       messageFlows: [],
       processes: [],
       sequenceFlows: []

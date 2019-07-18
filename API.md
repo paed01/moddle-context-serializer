@@ -22,8 +22,6 @@ Result:
 - `getActivityById(activityId)`: get activity by id
 - `getDataObjects`: get all dataObjects
 - `getDataObjectById(dataObjectId)`: get dataObject by id
-- `getErrorById`: get error by id
-- `getErrors`: get all errors
 - `getInboundSequenceFlows(activityId)`: get activity inbound sequence flows
 - `getMessageFlows`: get all message flows
 - `getOutboundSequenceFlows(activityId)`: get activity outbound sequence flows
@@ -33,6 +31,8 @@ Result:
 - `getSequenceFlowById`: get sequence flow by id
 - `getSequenceFlows`: get all sequence flows
 - `serialize`: get stringified serialized object with [deserializable](#deserialize) content
+- `getErrorById`: *(deprecated)* get error by id
+- `getErrors`: *(deprecated)* get all errors
 
 ### `getActivities([scopeId])`
 

@@ -124,7 +124,6 @@ describe('moddle context serializer', () => {
       expect(serialized).to.have.property('activities').that.is.an('array');
       expect(serialized).to.have.property('dataObjects').that.is.an('array');
       expect(serialized).to.have.property('definition').that.is.an('object').and.ok;
-      expect(serialized).to.have.property('errors').that.is.an('array');
       expect(serialized).to.have.property('messageFlows').that.is.an('array');
       expect(serialized).to.have.property('processes').that.is.an('array');
       expect(serialized).to.have.property('sequenceFlows').that.is.an('array');
@@ -166,7 +165,6 @@ describe('moddle context serializer', () => {
 
       deserialized.getProcesses().forEach(assertEntity);
       deserialized.getActivities().forEach(assertEntity);
-      deserialized.getErrors().forEach(assertEntity);
       deserialized.getDataObjects().forEach(assertEntity);
       deserialized.getMessageFlows().forEach(assertEntity);
 
@@ -175,7 +173,6 @@ describe('moddle context serializer', () => {
 
       deserialized.getProcesses().forEach(assertEntity);
       deserialized.getActivities().forEach(assertEntity);
-      deserialized.getErrors().forEach(assertEntity);
       deserialized.getDataObjects().forEach(assertEntity);
       deserialized.getMessageFlows().forEach(assertEntity);
 
@@ -184,7 +181,6 @@ describe('moddle context serializer', () => {
 
       deserialized.getProcesses().forEach(assertEntity);
       deserialized.getActivities().forEach(assertEntity);
-      deserialized.getErrors().forEach(assertEntity);
       deserialized.getDataObjects().forEach(assertEntity);
       deserialized.getMessageFlows().forEach(assertEntity);
     });
@@ -574,14 +570,26 @@ describe('moddle context serializer', () => {
   });
 
   describe('bpmn:Error', () => {
-    let contextMapper;
+    let serializer;
     before(async () => {
       const moddleContext = await testHelpers.moddleContext(factory.resource('bound-error.bpmn'));
-      contextMapper = Serializer(moddleContext, typeResolver);
+      serializer = Serializer(moddleContext, typeResolver);
     });
 
-    it('getErrorById(id) returns error', () => {
-      const error = contextMapper.getErrorById('Error_0');
+    it('getActivityById(errorId) returns error', () => {
+      const error = serializer.getActivityById('Error_0');
+      expect(error).to.be.ok;
+
+      expect(error).to.have.property('type', 'bpmn:Error');
+      expect(error).to.have.property('name', 'InputError');
+      expect(error).to.have.property('Behaviour', types.BpmnError);
+      expect(error).to.have.property('parent').that.eql({id: 'Definitions_1', type: 'bpmn:Definitions'});
+      expect(error).to.have.property('behaviour').that.include({errorCode: '404'});
+    });
+
+    it('deserialized getActivityById(errorId) returns error', () => {
+      const deserialized = deserialize(JSON.parse(serializer.serialize()), typeResolver);
+      const error = deserialized.getActivityById('Error_0');
       expect(error).to.be.ok;
 
       expect(error).to.have.property('type', 'bpmn:Error');
@@ -592,7 +600,7 @@ describe('moddle context serializer', () => {
     });
 
     it('error reference is stored with activity', () => {
-      const activity = contextMapper.getActivityById('errorEvent');
+      const activity = serializer.getActivityById('errorEvent');
       expect(activity).to.be.ok;
 
       expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
@@ -600,6 +608,27 @@ describe('moddle context serializer', () => {
         .to.have.property('behaviour')
         .with.property('errorRef')
         .with.property('id', 'Error_0');
+    });
+
+    it('deserialized error reference is stored with activity', () => {
+      const deserialized = deserialize(JSON.parse(serializer.serialize()), typeResolver);
+
+      const activity = deserialized.getActivityById('errorEvent');
+      expect(activity).to.be.ok;
+
+      expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
+      expect(activity.behaviour.eventDefinitions[0])
+        .to.have.property('behaviour')
+        .with.property('errorRef')
+        .with.property('id', 'Error_0');
+    });
+
+    it('getErrorById is deprecated but still ok', () => {
+      expect(serializer.getErrorById('Error_0')).to.be.ok;
+    });
+
+    it('getErrors is deprecated but still ok', () => {
+      expect(serializer.getErrors()).to.have.length(1);
     });
   });
 
