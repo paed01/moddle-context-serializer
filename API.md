@@ -31,8 +31,6 @@ Result:
 - `getSequenceFlowById`: get sequence flow by id
 - `getSequenceFlows`: get all sequence flows
 - `serialize`: get stringified serialized object with [deserializable](#deserialize) content
-- `getErrorById`: *(deprecated)* get error by id
-- `getErrors`: *(deprecated)* get all errors
 
 ### `getActivities([scopeId])`
 
