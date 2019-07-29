@@ -88,8 +88,6 @@ function contextApi(mapped) {
     getActivityById,
     getDataObjects,
     getDataObjectById,
-    getErrorById,
-    getErrors,
     getExecutableProcesses,
     getInboundSequenceFlows,
     getMessageFlows,
@@ -162,16 +160,8 @@ function contextApi(mapped) {
     return dataObjects.find(({id}) => id === dataObjectId);
   }
 
-  function getActivityById(actvitiyId) {
-    return activities.find((activity) => activity.id === actvitiyId);
-  }
-
-  function getErrorById(errorId) {
-    return getActivityById(errorId);
-  }
-
-  function getErrors() {
-    return getActivities().filter((a) => a.type === 'bpmn:Error');
+  function getActivityById(activityId) {
+    return activities.find((activity) => activity.id === activityId);
   }
 }
 
@@ -395,11 +385,6 @@ function mapModdleContext(moddleContext) {
         case 'bpmn:BoundaryEvent': {
           attachedTo = spreadRef(element.attachedToRef);
           result.activities.push(prepareActivity({attachedTo}));
-          break;
-        }
-        case 'bpmn:SendTask':
-        case 'bpmn:ServiceTask': {
-          result.activities.push(prepareActivity());
           break;
         }
         default: {

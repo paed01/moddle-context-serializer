@@ -74,7 +74,6 @@ describe('moddle context serializer', () => {
       expect(serializer).to.have.property('getActivities').that.is.a('function');
       expect(serializer).to.have.property('getActivityById').that.is.a('function');
       expect(serializer).to.have.property('getDataObjects').that.is.a('function');
-      expect(serializer).to.have.property('getErrorById').that.is.a('function');
       expect(serializer).to.have.property('getInboundSequenceFlows').that.is.a('function');
       expect(serializer).to.have.property('getMessageFlows').that.is.a('function');
       expect(serializer).to.have.property('getOutboundSequenceFlows').that.is.a('function');
@@ -148,7 +147,6 @@ describe('moddle context serializer', () => {
       expect(deserialized).to.have.property('getActivities').that.is.a('function');
       expect(deserialized).to.have.property('getActivityById').that.is.a('function');
       expect(deserialized).to.have.property('getDataObjects').that.is.a('function');
-      expect(deserialized).to.have.property('getErrorById').that.is.a('function');
       expect(deserialized).to.have.property('getInboundSequenceFlows').that.is.a('function');
       expect(deserialized).to.have.property('getMessageFlows').that.is.a('function');
       expect(deserialized).to.have.property('getOutboundSequenceFlows').that.is.a('function');
@@ -622,14 +620,6 @@ describe('moddle context serializer', () => {
         .to.have.property('behaviour')
         .with.property('errorRef')
         .with.property('id', 'Error_0');
-    });
-
-    it('getErrorById is deprecated but still ok', () => {
-      expect(serializer.getErrorById('Error_0')).to.be.ok;
-    });
-
-    it('getErrors is deprecated but still ok', () => {
-      expect(serializer.getErrors()).to.have.length(1);
     });
   });
 
