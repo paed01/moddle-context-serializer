@@ -23,6 +23,7 @@ const types = {
   InclusiveGateway() {},
   IntermediateCatchEvent() {},
   InputOutputSpecification() {},
+  Message() {},
   MessageEventDefinition() {},
   MessageFlow() {},
   MultiInstanceLoopCharacteristics() {},

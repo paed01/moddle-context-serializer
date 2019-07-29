@@ -334,9 +334,6 @@ function mapModdleContext(moddleContext) {
 
       switch (element.$type) {
         case 'bpmn:DataObjectReference':
-        case 'bpmn:Message':
-          break;
-
         case 'bpmn:Collaboration':
           {
             if (element.messageFlows) {
