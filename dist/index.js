@@ -219,7 +219,8 @@ function mapModdleContext(moddleContext) {
     refs,
     dataInputAssociations,
     dataOutputAssociations,
-    flowRefs
+    flowRefs,
+    processRefs
   } = prepareReferences();
   const {
     activities,
@@ -277,6 +278,15 @@ function mapModdleContext(moddleContext) {
         case 'bpmn:dataObjectRef':
           result.refs.push(r);
           break;
+
+        case 'bpmn:processRef':
+          {
+            result.processRefs[element.id] = {
+              id: r.id,
+              $type: element.$type
+            };
+            break;
+          }
       }
 
       switch (element.$type) {
@@ -307,6 +317,7 @@ function mapModdleContext(moddleContext) {
       dataInputAssociations: [],
       dataOutputAssociations: [],
       flowRefs: {},
+      processRefs: {},
       sourceRefs: {},
       targetRefs: {}
     });
@@ -351,10 +362,7 @@ function mapModdleContext(moddleContext) {
                 processId: getElementProcessId(flowRef.sourceId),
                 id: flowRef.sourceId
               },
-              target: {
-                processId: getElementProcessId(flowRef.targetId),
-                id: flowRef.targetId
-              },
+              target: getElementTargetById(flowRef.targetId),
               behaviour: { ...element
               }
             });
@@ -496,6 +504,29 @@ function mapModdleContext(moddleContext) {
   function getElementProcessId(elementId) {
     const bp = rootHandler.element.rootElements.find(e => e.$type === 'bpmn:Process' && e.flowElements.find(ce => ce.id === elementId));
     return bp.id;
+  }
+
+  function getElementTargetById(elementId) {
+    const targetElement = elementsById[elementId];
+    if (!targetElement) return;
+    const result = {};
+
+    switch (targetElement.$type) {
+      case 'bpmn:Participant':
+        {
+          result.processId = processRefs[elementId].id;
+          break;
+        }
+
+      default:
+        {
+          const bp = rootHandler.element.rootElements.find(e => e.$type === 'bpmn:Process' && e.flowElements.find(ce => ce.id === elementId));
+          result.processId = bp.id;
+          result.id = elementId;
+        }
+    }
+
+    return result;
   }
 
   function mapResource(resource) {

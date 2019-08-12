@@ -1,6 +1,16 @@
 Changelog
 =========
 
+# 0.7.0
+
+- MessageFlow targeting lane is now supported
+
+# 0.6.0
+
+## Breaking
+- `getErrorById(errorId)` is no more
+- `getErrors()` is no more
+
 # 0.5.0
 
 ## Deprecated

@@ -47,7 +47,7 @@ const types = {
 const typeResolver = TypeResolver(types);
 
 describe('moddle context serializer', () => {
-  let lanesModdleContext, subProcessModdleContext, eventDefinitionModdleContext, twoProcessesModdleContext, conditionAndEscalationModdleContext, signalEventModdleContext;
+  let lanesModdleContext, subProcessModdleContext, eventDefinitionModdleContext, twoProcessesModdleContext, conditionAndEscalationModdleContext, signalEventModdleContext, messageFlowModdleContext;
   before(async () => {
     lanesModdleContext = await testHelpers.moddleContext(lanesSource);
     subProcessModdleContext = await testHelpers.moddleContext(subProcessSource);
@@ -55,6 +55,7 @@ describe('moddle context serializer', () => {
     conditionAndEscalationModdleContext = await testHelpers.moddleContext(conditionAndEscalationSource);
     twoProcessesModdleContext = await testHelpers.moddleContext(twoProcessesSource);
     signalEventModdleContext = await testHelpers.moddleContext(factory.resource('signal-event.bpmn'));
+    messageFlowModdleContext = await testHelpers.moddleContext(factory.resource('message-flows.bpmn'));
   });
 
   describe('TypeResolver(types[, extender])', () => {
@@ -1123,6 +1124,27 @@ describe('moddle context serializer', () => {
       const context = Serializer(await testHelpers.moddleContext(source, moddleOptions), typeResolver);
       const task = context.getActivityById('task');
       expect(task.behaviour).to.have.property('assignee', 'pal');
+    });
+  });
+
+  describe('bpmn:MessageFlow', () => {
+    let serializer;
+    before(() => {
+      serializer = Serializer(messageFlowModdleContext, typeResolver);
+    });
+
+    it('can target lane', () => {
+      const [toLaneFlow] = serializer.getMessageFlows();
+      expect(toLaneFlow).to.be.ok;
+      expect(toLaneFlow).to.have.property('target').with.property('processId', 'participantProcess');
+      expect(toLaneFlow.target).to.not.have.property('id');
+    });
+
+    it('can target activity', () => {
+      const [, toActivityFlow] = serializer.getMessageFlows();
+      expect(toActivityFlow).to.be.ok;
+      expect(toActivityFlow).to.have.property('target').with.property('processId', 'mainProcess');
+      expect(toActivityFlow.target).to.have.property('id', 'intermediate');
     });
   });
 });
