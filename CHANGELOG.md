@@ -1,6 +1,10 @@
 Changelog
 =========
 
+# 0.8.0
+
+- ReceiveTask is messageRef aware
+
 # 0.7.0
 
 - MessageFlow targeting lane is now supported

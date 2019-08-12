@@ -299,7 +299,6 @@ function mapModdleContext(moddleContext) {
     return elements.reduce((result, element) => {
       const {id, $type: type, name} = element;
 
-      let attachedTo;
       switch (element.$type) {
         case 'bpmn:DataObjectReference':
         case 'bpmn:Collaboration': {
@@ -389,8 +388,13 @@ function mapModdleContext(moddleContext) {
           break;
         }
         case 'bpmn:BoundaryEvent': {
-          attachedTo = spreadRef(element.attachedToRef);
+          const attachedTo = spreadRef(element.attachedToRef);
           result.activities.push(prepareActivity({attachedTo}));
+          break;
+        }
+        case 'bpmn:ReceiveTask': {
+          const messageRef = spreadRef(element.messageRef);
+          result.activities.push(prepareActivity({messageRef}));
           break;
         }
         default: {

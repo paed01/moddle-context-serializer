@@ -28,6 +28,7 @@ const types = {
   MessageFlow() {},
   MultiInstanceLoopCharacteristics() {},
   ParallelGateway() {},
+  ReceiveTask() {},
   ScriptTask() {},
   SequenceFlow() {},
   ServiceImplementation() {},
@@ -799,6 +800,41 @@ describe('moddle context serializer', () => {
         id: 'Definitions_0',
         type: 'bpmn:Definitions',
       });
+    });
+  });
+
+  describe('bpmn:ReceiveTask', () => {
+    let contextMapper;
+    before(async () => {
+      const source = `
+      <?xml version="1.0" encoding="UTF-8"?>
+      <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <process id="theProcess" isExecutable="true">
+          <receiveTask id="receive" messageRef="Message1" />
+        </process>
+        <message id="Message1" />
+      </definitions>`;
+      const moddleContext = await testHelpers.moddleContext(source);
+      contextMapper = Serializer(moddleContext, typeResolver);
+    });
+
+    it('has reference to message', () => {
+      const task = contextMapper.getActivityById('receive');
+      expect(task).to.be.ok;
+      expect(task).to.have.property('behaviour');
+      expect(task.behaviour).to.have.property('messageRef');
+      expect(task.behaviour.messageRef).to.have.property('id', 'Message1');
+    });
+
+    it('can be deserialized', () => {
+      const serialized = contextMapper.serialize();
+
+      const deserialized = deserialize(JSON.parse(serialized), typeResolver);
+      const task = deserialized.getActivityById('receive');
+      expect(task).to.be.ok;
+      expect(task).to.have.property('behaviour');
+      expect(task.behaviour).to.have.property('messageRef');
+      expect(task.behaviour.messageRef).to.have.property('id', 'Message1');
     });
   });
 
