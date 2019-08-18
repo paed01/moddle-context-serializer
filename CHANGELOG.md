@@ -1,6 +1,10 @@
 Changelog
 =========
 
+# 0.9.0
+
+- Pick `loopCondition.body` in StandardLoopCharacteristics
+
 # 0.8.0
 
 - ReceiveTask is messageRef aware

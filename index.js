@@ -513,6 +513,10 @@ function mapModdleContext(moddleContext) {
         behaviour.completionCondition = ed.completionCondition && ed.completionCondition.body;
         break;
       }
+      case 'bpmn:StandardLoopCharacteristics': {
+        behaviour.loopCondition = ed.loopCondition && ed.loopCondition.body;
+        break;
+      }
       case 'bpmn:TimerEventDefinition': {
         behaviour.timeDuration = ed.timeDuration && ed.timeDuration.body;
         break;

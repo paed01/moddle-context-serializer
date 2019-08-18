@@ -27,6 +27,7 @@ const types = {
   MessageEventDefinition() {},
   MessageFlow() {},
   MultiInstanceLoopCharacteristics() {},
+  StandardLoopCharacteristics() {},
   ParallelGateway() {},
   ReceiveTask() {},
   ScriptTask() {},
@@ -184,33 +185,6 @@ describe('moddle context serializer', () => {
       deserialized.getActivities().forEach(assertEntity);
       deserialized.getDataObjects().forEach(assertEntity);
       deserialized.getMessageFlows().forEach(assertEntity);
-    });
-
-    it('multi instance is also deserializable', async () => {
-      const source = `
-      <?xml version="1.0" encoding="UTF-8"?>
-      <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-        <process id="theProcess" isExecutable="true">
-          <task id="loop">
-            <multiInstanceLoopCharacteristics>
-              <loopCardinality>\${environment.variables.maxCardinality}</loopCardinality>
-              <completionCondition xsi:type="bpmn:tFormalExpression">\${environment.services.completed}</completionCondition>
-            </multiInstanceLoopCharacteristics>
-          </task>
-        </process>
-      </definitions>`;
-
-      const serializer = Serializer(await testHelpers.moddleContext(source), typeResolver);
-      const deserialized = deserialize(JSON.parse(serializer.serialize()), typeResolver);
-      const activity = deserialized.getActivityById('loop');
-
-      expect(activity.behaviour)
-        .to.have.property('loopCharacteristics')
-        .with.property('Behaviour', types.MultiInstanceLoopCharacteristics);
-      expect(activity.behaviour.loopCharacteristics.behaviour)
-        .to.have.property('loopCardinality', '${environment.variables.maxCardinality}');
-      expect(activity.behaviour.loopCharacteristics.behaviour)
-        .to.have.property('completionCondition', '${environment.services.completed}');
     });
   });
 
@@ -502,16 +476,21 @@ describe('moddle context serializer', () => {
     });
   });
 
-  describe('Multi instance', () => {
+  describe('Task loop', () => {
     const source = `
     <?xml version="1.0" encoding="UTF-8"?>
     <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
       <process id="theProcess" isExecutable="true">
-        <task id="loop">
+        <task id="multiInstance">
           <multiInstanceLoopCharacteristics>
             <loopCardinality>\${environment.variables.maxCardinality}</loopCardinality>
             <completionCondition xsi:type="bpmn:tFormalExpression">\${environment.services.completed}</completionCondition>
           </multiInstanceLoopCharacteristics>
+        </task>
+        <task id="standardLoop">
+          <standardLoopCharacteristics testBefore="true" loopMaximum="3">
+            <loopCondition xsi:type="bpmn:tFormalExpression">\${environment.services.completed}</loopCondition>
+          </standardLoopCharacteristics>
         </task>
       </process>
     </definitions>`;
@@ -522,8 +501,8 @@ describe('moddle context serializer', () => {
       contextMapper = Serializer(moddleContext, typeResolver);
     });
 
-    it('task receives multi instance loopcharacteristics', () => {
-      const activity = contextMapper.getActivityById('loop');
+    it('MultiInstanceLoopCharacteristics is added to task behaviour', () => {
+      const activity = contextMapper.getActivityById('multiInstance');
 
       expect(activity.behaviour)
         .to.have.property('loopCharacteristics')
@@ -532,6 +511,50 @@ describe('moddle context serializer', () => {
         .to.have.property('loopCardinality', '${environment.variables.maxCardinality}');
       expect(activity.behaviour.loopCharacteristics.behaviour)
         .to.have.property('completionCondition', '${environment.services.completed}');
+    });
+
+    it('MultiInstanceLoopCharacteristics is deserializable', async () => {
+      const serializer = Serializer(await testHelpers.moddleContext(source), typeResolver);
+      const deserialized = deserialize(JSON.parse(serializer.serialize()), typeResolver);
+      const activity = deserialized.getActivityById('multiInstance');
+
+      expect(activity.behaviour)
+        .to.have.property('loopCharacteristics')
+        .with.property('Behaviour', types.MultiInstanceLoopCharacteristics);
+      expect(activity.behaviour.loopCharacteristics.behaviour)
+        .to.have.property('loopCardinality', '${environment.variables.maxCardinality}');
+      expect(activity.behaviour.loopCharacteristics.behaviour)
+        .to.have.property('completionCondition', '${environment.services.completed}');
+    });
+
+    it('StandardLoopCharacteristics is added to task behaviour', () => {
+      const activity = contextMapper.getActivityById('standardLoop');
+
+      expect(activity.behaviour)
+        .to.have.property('loopCharacteristics')
+        .with.property('Behaviour', types.StandardLoopCharacteristics);
+      expect(activity.behaviour.loopCharacteristics.behaviour)
+        .to.have.property('testBefore', true);
+      expect(activity.behaviour.loopCharacteristics.behaviour)
+        .to.have.property('loopMaximum', 3);
+      expect(activity.behaviour.loopCharacteristics.behaviour)
+        .to.have.property('loopCondition', '${environment.services.completed}');
+    });
+
+    it('StandardLoopCharacteristics is deserializable', async () => {
+      const serializer = Serializer(await testHelpers.moddleContext(source), typeResolver);
+      const deserialized = deserialize(JSON.parse(serializer.serialize()), typeResolver);
+      const activity = deserialized.getActivityById('standardLoop');
+
+      expect(activity.behaviour)
+        .to.have.property('loopCharacteristics')
+        .with.property('Behaviour', types.StandardLoopCharacteristics);
+      expect(activity.behaviour.loopCharacteristics.behaviour)
+        .to.have.property('testBefore', true);
+      expect(activity.behaviour.loopCharacteristics.behaviour)
+        .to.have.property('loopMaximum', 3);
+      expect(activity.behaviour.loopCharacteristics.behaviour)
+        .to.have.property('loopCondition', '${environment.services.completed}');
     });
   });
 
