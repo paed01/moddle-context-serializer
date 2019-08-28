@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1petavw" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.2.1">
+  <bpmn:process id="Process_0" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>SequenceFlow_0dcevi7</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="service">
+      <bpmn:incoming>SequenceFlow_0dcevi7</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0ntz2rv</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="SequenceFlow_0dcevi7" sourceRef="StartEvent_1" targetRef="service" />
+    <bpmn:endEvent id="EndEvent_0ya3rsy">
+      <bpmn:incoming>SequenceFlow_0ntz2rv</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_0ntz2rv" sourceRef="service" targetRef="EndEvent_0ya3rsy" />
+    <bpmn:boundaryEvent id="compensation" attachedToRef="service">
+      <bpmn:compensateEventDefinition />
+    </bpmn:boundaryEvent>
+    <bpmn:task id="undoService" isForCompensation="true" />
+    <bpmn:textAnnotation id="TextAnnotation_0gmcqoz">
+      <bpmn:text>Annotation</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_0l2asuh" sourceRef="service" targetRef="TextAnnotation_0gmcqoz" />
+    <bpmn:association id="association_0" associationDirection="One" sourceRef="compensation" targetRef="undoService" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_0">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="159" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_02aaaic_di" bpmnElement="service">
+        <dc:Bounds x="270" y="137" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0dcevi7_di" bpmnElement="SequenceFlow_0dcevi7">
+        <di:waypoint x="215" y="177" />
+        <di:waypoint x="270" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="TextAnnotation_0gmcqoz_di" bpmnElement="TextAnnotation_0gmcqoz">
+        <dc:Bounds x="370" y="50" width="100" height="30" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_0l2asuh_di" bpmnElement="Association_0l2asuh">
+        <di:waypoint x="356" y="137" />
+        <di:waypoint x="407" y="80" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_0ya3rsy_di" bpmnElement="EndEvent_0ya3rsy">
+        <dc:Bounds x="432" y="159" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0ntz2rv_di" bpmnElement="SequenceFlow_0ntz2rv">
+        <di:waypoint x="370" y="177" />
+        <di:waypoint x="432" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="BoundaryEvent_0uyio4e_di" bpmnElement="compensation">
+        <dc:Bounds x="322" y="199" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_1g3v8pc_di" bpmnElement="undoService">
+        <dc:Bounds x="410" y="260" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_0bzke24_di" bpmnElement="association_0">
+        <di:waypoint x="340" y="235" />
+        <di:waypoint x="340" y="300" />
+        <di:waypoint x="410" y="300" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

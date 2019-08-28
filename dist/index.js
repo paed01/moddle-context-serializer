@@ -85,6 +85,7 @@ function deserialize(deserializedContext, typeResolver) {
 function contextApi(mapped) {
   const {
     activities,
+    associations,
     dataObjects,
     definition,
     messageFlows,
@@ -97,11 +98,14 @@ function contextApi(mapped) {
     name: definition.name,
     getActivities,
     getActivityById,
+    getAssociationById,
     getDataObjects,
     getDataObjectById,
     getExecutableProcesses,
+    getInboundAssociations,
     getInboundSequenceFlows,
     getMessageFlows,
+    getOutboundAssociations,
     getOutboundSequenceFlows,
     getProcessById,
     getProcesses,
@@ -116,6 +120,7 @@ function contextApi(mapped) {
       type: definition.type,
       name: definition.name,
       activities,
+      associations,
       dataObjects,
       definition,
       messageFlows,
@@ -180,13 +185,26 @@ function contextApi(mapped) {
   function getActivityById(activityId) {
     return activities.find(activity => activity.id === activityId);
   }
+
+  function getAssociationById(associationId) {
+    return associations.find(association => association.id === associationId);
+  }
+
+  function getInboundAssociations(activityId) {
+    return associations.filter(flow => flow.targetId === activityId);
+  }
+
+  function getOutboundAssociations(activityId) {
+    return associations.filter(flow => flow.sourceId === activityId);
+  }
 }
 
 function resolveTypes(mappedContext, typeResolver) {
   const {
-    definition,
     activities,
+    associations,
     dataObjects,
+    definition,
     messageFlows,
     processes,
     sequenceFlows
@@ -197,6 +215,7 @@ function resolveTypes(mappedContext, typeResolver) {
   dataObjects.forEach(typeResolver);
   messageFlows.forEach(typeResolver);
   sequenceFlows.forEach(typeResolver);
+  associations.forEach(typeResolver);
   return mappedContext;
 }
 
@@ -224,15 +243,17 @@ function mapModdleContext(moddleContext) {
   } = prepareReferences();
   const {
     activities,
+    associations,
     dataObjects,
     messageFlows,
     processes,
     sequenceFlows
   } = prepareElements(definition, rootHandler.element.rootElements);
   return {
-    definition,
     activities,
+    associations,
     dataObjects,
+    definition,
     messageFlows,
     processes,
     sequenceFlows
@@ -334,6 +355,8 @@ function mapModdleContext(moddleContext) {
 
       switch (element.$type) {
         case 'bpmn:DataObjectReference':
+          break;
+
         case 'bpmn:Collaboration':
           {
             if (element.messageFlows) {
@@ -343,6 +366,23 @@ function mapModdleContext(moddleContext) {
               result.messageFlows = result.messageFlows.concat(flows);
             }
 
+            break;
+          }
+
+        case 'bpmn:DataObject':
+          {
+            result.dataObjects.push({
+              id,
+              name,
+              type,
+              parent: {
+                id: parent.id,
+                type: parent.type
+              },
+              references: prepareDataObjectReferences(),
+              behaviour: { ...element
+              }
+            });
             break;
           }
 
@@ -368,9 +408,10 @@ function mapModdleContext(moddleContext) {
             break;
           }
 
-        case 'bpmn:DataObject':
+        case 'bpmn:Association':
           {
-            result.dataObjects.push({
+            const flowRef = flowRefs[element.id];
+            result.associations.push({
               id,
               name,
               type,
@@ -378,7 +419,8 @@ function mapModdleContext(moddleContext) {
                 id: parent.id,
                 type: parent.type
               },
-              references: prepareDataObjectReferences(),
+              targetId: flowRef.targetId,
+              sourceId: flowRef.sourceId,
               behaviour: { ...element
               }
             });
@@ -419,23 +461,29 @@ function mapModdleContext(moddleContext) {
               behaviour: prepareActivityBehaviour()
             };
             if (type === 'bpmn:Process') result.processes.push(bp);else result.activities.push(bp);
-            const subElements = prepareElements({
+            [prepareElements({
               id,
               type
-            }, element.flowElements);
+            }, element.flowElements), prepareElements({
+              id,
+              type
+            }, element.artifacts)].forEach(subElements => {
+              if (subElements.activities) {
+                result.activities = result.activities.concat(subElements.activities);
+              }
 
-            if (subElements.activities) {
-              result.activities = result.activities.concat(subElements.activities);
-            }
+              if (subElements.sequenceFlows) {
+                result.sequenceFlows = result.sequenceFlows.concat(subElements.sequenceFlows);
+              }
 
-            if (subElements.sequenceFlows) {
-              result.sequenceFlows = result.sequenceFlows.concat(subElements.sequenceFlows);
-            }
+              if (subElements.dataObjects) {
+                result.dataObjects = result.dataObjects.concat(subElements.dataObjects);
+              }
 
-            if (subElements.dataObjects) {
-              result.dataObjects = result.dataObjects.concat(subElements.dataObjects);
-            }
-
+              if (subElements.associations) {
+                result.associations = result.associations.concat(subElements.associations);
+              }
+            });
             break;
           }
 
@@ -502,6 +550,7 @@ function mapModdleContext(moddleContext) {
       }
     }, {
       activities: [],
+      associations: [],
       dataObjects: [],
       messageFlows: [],
       processes: [],

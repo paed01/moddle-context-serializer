@@ -1,6 +1,10 @@
 Changelog
 =========
 
+# 0.10.0
+
+- Loop artifacts and support bpmn:Association
+
 # 0.9.0
 
 - Pick `loopCondition.body` in StandardLoopCharacteristics

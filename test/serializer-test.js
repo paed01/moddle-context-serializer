@@ -8,12 +8,13 @@ const twoProcessesSource = factory.resource('two-executable-processes.bpmn');
 const conditionAndEscalationSource = factory.resource('condition-and-escalation.bpmn');
 const eventDefinitionSource = factory.resource('bound-error-and-timer.bpmn');
 const types = {
-  Definition() {},
-  Process() {},
+  Association() {},
   BoundaryEvent() {},
   BpmnError() {},
+  CompensateEventDefinition() {},
   ConditionalEventDefinition() {},
   DataObject() {},
+  Definition() {},
   Dummy() {},
   EndEvent() {},
   ErrorEventDefinition() {},
@@ -21,29 +22,31 @@ const types = {
   EscalationEventDefinition() {},
   ExclusiveGateway() {},
   InclusiveGateway() {},
-  IntermediateCatchEvent() {},
   InputOutputSpecification() {},
+  IntermediateCatchEvent() {},
+  ManualTask() {},
   Message() {},
   MessageEventDefinition() {},
   MessageFlow() {},
   MultiInstanceLoopCharacteristics() {},
-  StandardLoopCharacteristics() {},
   ParallelGateway() {},
+  Process() {},
   ReceiveTask() {},
   ScriptTask() {},
+  SendTask() {},
   SequenceFlow() {},
   ServiceImplementation() {},
-  SendTask() {},
   ServiceTask() {},
-  UserTask() {},
-  ManualTask() {},
   Signal() {},
   SignalEventDefinition() {},
+  StandardLoopCharacteristics() {},
   StartEvent() {},
   SubProcess() {},
   Task() {},
   TerminateEventDefinition() {},
+  TextAnnotation() {},
   TimerEventDefinition() {},
+  UserTask() {},
 };
 
 const typeResolver = TypeResolver(types);
@@ -826,6 +829,93 @@ describe('moddle context serializer', () => {
     });
   });
 
+  describe('bpmn:Association', () => {
+    let serializer;
+    before(async () => {
+      const moddleContext = await testHelpers.moddleContext(factory.resource('bound-compensation.bpmn'));
+      // const source = `
+      // <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" id="Def" targetNamespace="http://bpmn.io/schema/bpmn">
+      //   <process id="Process_0" isExecutable="true">
+      //     <startEvent id="start" />
+      //     <sequenceFlow id="flow1" sourceRef="start" targetRef="service" />
+      //     <serviceTask id="service" implementation="\${environment.services.exec}" />
+      //     <boundaryEvent id="compensation" attachedToRef="service">
+      //       <compensateEventDefinition />
+      //     </boundaryEvent>
+      //     <serviceTask id="undoService" isForCompensation="true" implementation="\${environment.services.compensate}" />
+      //     <sequenceFlow id="flow2" sourceRef="service" targetRef="decision" />
+      //     <exclusiveGateway id="decision" default="flow3" />
+      //     <sequenceFlow id="flow3" sourceRef="decision" targetRef="end1" />
+      //     <sequenceFlow id="flow4" sourceRef="decision" targetRef="end2">
+      //       <conditionExpression xsi:type="tFormalExpression">\${environment.output.condition}</conditionExpression>
+      //     </sequenceFlow>
+      //     <endEvent id="end1" />
+      //     <endEvent id="end2">
+      //       <compensateEventDefinition />
+      //     </endEvent>
+      //     <association id="association_0" associationDirection="One" sourceRef="compensation" targetRef="undoService" />
+      //   </process>
+      // </definitions>`;
+
+      // const moddleContext = await testHelpers.moddleContext(source);
+      serializer = Serializer(moddleContext, typeResolver);
+    });
+
+    it('association has target and source ref', () => {
+      const association = serializer.getAssociationById('association_0');
+      expect(association).to.be.ok;
+      expect(association).to.have.property('Behaviour').that.equal(types.Association);
+      expect(association).to.have.property('sourceId', 'compensation');
+      expect(association).to.have.property('targetId', 'undoService');
+      expect(association).to.have.property('parent').that.eql({
+        id: 'Process_0',
+        type: 'bpmn:Process',
+      });
+    });
+
+    it('association is deserializable', () => {
+      const serialized = serializer.serialize();
+
+      const deserialized = deserialize(JSON.parse(serialized), typeResolver);
+
+      const association = deserialized.getAssociationById('association_0');
+      expect(association).to.be.ok;
+      expect(association).to.have.property('Behaviour').that.equal(types.Association);
+      expect(association).to.have.property('sourceId', 'compensation');
+      expect(association).to.have.property('targetId', 'undoService');
+      expect(association).to.have.property('parent').that.eql({
+        id: 'Process_0',
+        type: 'bpmn:Process',
+      });
+    });
+
+    it('getOutboundAssociations(activityId) returns outbound associations', () => {
+      const associations = serializer.getOutboundAssociations('compensation');
+      expect(associations).to.have.length(1);
+      const association = associations[0];
+      expect(association).to.be.ok;
+      expect(association).to.have.property('sourceId', 'compensation');
+      expect(association).to.have.property('targetId', 'undoService');
+      expect(association).to.have.property('parent').that.eql({
+        id: 'Process_0',
+        type: 'bpmn:Process',
+      });
+    });
+
+    it('getInboundAssociations(activityId) returns inbound associations', () => {
+      const associations = serializer.getInboundAssociations('undoService');
+      expect(associations).to.have.length(1);
+      const association = associations[0];
+      expect(association).to.be.ok;
+      expect(association).to.have.property('sourceId', 'compensation');
+      expect(association).to.have.property('targetId', 'undoService');
+      expect(association).to.have.property('parent').that.eql({
+        id: 'Process_0',
+        type: 'bpmn:Process',
+      });
+    });
+  });
+
   describe('bpmn:ReceiveTask', () => {
     let contextMapper;
     before(async () => {
@@ -847,6 +937,7 @@ describe('moddle context serializer', () => {
       expect(task).to.have.property('behaviour');
       expect(task.behaviour).to.have.property('messageRef');
       expect(task.behaviour.messageRef).to.have.property('id', 'Message1');
+      expect(task).to.have.property('Behaviour').that.equal(types.ReceiveTask);
     });
 
     it('can be deserialized', () => {
@@ -858,6 +949,7 @@ describe('moddle context serializer', () => {
       expect(task).to.have.property('behaviour');
       expect(task.behaviour).to.have.property('messageRef');
       expect(task.behaviour.messageRef).to.have.property('id', 'Message1');
+      expect(task).to.have.property('Behaviour').that.equal(types.ReceiveTask);
     });
   });
 

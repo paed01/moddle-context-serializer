@@ -20,16 +20,19 @@ Result:
 - `name`: Definition name
 - [`getActivities([scopeId])`](#getactivitiesscopeid): get activities
 - `getActivityById(activityId)`: get activity by id
+- `getAssociationById(associationId)`: get association by id
 - `getDataObjects`: get all dataObjects
 - `getDataObjectById(dataObjectId)`: get dataObject by id
+- `getInboundAssociations(activityId)`: get activity inbound associations
 - `getInboundSequenceFlows(activityId)`: get activity inbound sequence flows
 - `getMessageFlows`: get all message flows
+- `getOutboundAssociations(activityId)`: get activity outbound associations
 - `getOutboundSequenceFlows(activityId)`: get activity outbound sequence flows
 - `getProcessById(processId)`: get process by id
 - `getProcesses`: get all processes
 - `getExecutableProcesses`: get all executable processes
 - `getSequenceFlowById`: get sequence flow by id
-- `getSequenceFlows`: get all sequence flows
+- `getSequenceFlows([scopeId])`: get all sequence flows
 - `serialize`: get stringified serialized object with [deserializable](#deserialize) content
 
 ### `getActivities([scopeId])`
