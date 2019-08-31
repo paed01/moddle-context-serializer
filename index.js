@@ -88,6 +88,7 @@ function contextApi(mapped) {
     getActivities,
     getActivityById,
     getAssociationById,
+    getAssociations,
     getDataObjects,
     getDataObjectById,
     getExecutableProcesses,
@@ -167,6 +168,11 @@ function contextApi(mapped) {
 
   function getActivityById(activityId) {
     return activities.find((activity) => activity.id === activityId);
+  }
+
+  function getAssociations(scopeId) {
+    if (scopeId) return associations.filter((flow) => flow.parent.id === scopeId);
+    return associations;
   }
 
   function getAssociationById(associationId) {

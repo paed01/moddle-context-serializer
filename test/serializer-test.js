@@ -52,7 +52,14 @@ const types = {
 const typeResolver = TypeResolver(types);
 
 describe('moddle context serializer', () => {
-  let lanesModdleContext, subProcessModdleContext, eventDefinitionModdleContext, twoProcessesModdleContext, conditionAndEscalationModdleContext, signalEventModdleContext, messageFlowModdleContext;
+  let lanesModdleContext,
+    subProcessModdleContext,
+    eventDefinitionModdleContext,
+    twoProcessesModdleContext,
+    conditionAndEscalationModdleContext,
+    signalEventModdleContext,
+    messageFlowModdleContext,
+    compensationContext;
   before(async () => {
     lanesModdleContext = await testHelpers.moddleContext(lanesSource);
     subProcessModdleContext = await testHelpers.moddleContext(subProcessSource);
@@ -61,6 +68,7 @@ describe('moddle context serializer', () => {
     twoProcessesModdleContext = await testHelpers.moddleContext(twoProcessesSource);
     signalEventModdleContext = await testHelpers.moddleContext(factory.resource('signal-event.bpmn'));
     messageFlowModdleContext = await testHelpers.moddleContext(factory.resource('message-flows.bpmn'));
+    compensationContext = await testHelpers.moddleContext(factory.resource('bound-compensation.bpmn'));
   });
 
   describe('TypeResolver(types[, extender])', () => {
@@ -77,8 +85,9 @@ describe('moddle context serializer', () => {
 
     it('returns the expected api', async () => {
       expect(serializer).to.have.property('getActivities').that.is.a('function');
-      expect(serializer).to.have.property('getActivities').that.is.a('function');
       expect(serializer).to.have.property('getActivityById').that.is.a('function');
+      expect(serializer).to.have.property('getAssociations').that.is.a('function');
+      expect(serializer).to.have.property('getAssociationById').that.is.a('function');
       expect(serializer).to.have.property('getDataObjects').that.is.a('function');
       expect(serializer).to.have.property('getInboundSequenceFlows').that.is.a('function');
       expect(serializer).to.have.property('getMessageFlows').that.is.a('function');
@@ -443,6 +452,36 @@ describe('moddle context serializer', () => {
         id: 'intermediate',
       });
       expect(flows[1]).to.have.property('Behaviour', types.MessageFlow);
+    });
+  });
+
+  describe('getAssociations(scopeId)', () => {
+    let serializer;
+    before(() => {
+      serializer = Serializer(compensationContext, typeResolver);
+    });
+
+    it('with scope returns associations for scope (process)', () => {
+      const flows = serializer.getAssociations('Process_0');
+      expect(flows).to.have.length(2);
+      expect(flows[0]).to.have.property('type', 'bpmn:Association');
+      expect(flows[0]).to.have.property('Behaviour', types.Association);
+      expect(flows[1]).to.have.property('type', 'bpmn:Association');
+      expect(flows[1]).to.have.property('Behaviour', types.Association);
+    });
+
+    it('without scope returns all associations from scope (process)', () => {
+      const flows = serializer.getAssociations();
+      expect(flows).to.have.length(2);
+      expect(flows[0]).to.have.property('type', 'bpmn:Association');
+      expect(flows[0]).to.have.property('Behaviour', types.Association);
+      expect(flows[1]).to.have.property('type', 'bpmn:Association');
+      expect(flows[1]).to.have.property('Behaviour', types.Association);
+    });
+
+    it('with unknown scope returns no associations', () => {
+      const flows = serializer.getAssociations('Def');
+      expect(flows).to.have.length(0);
     });
   });
 
@@ -832,33 +871,7 @@ describe('moddle context serializer', () => {
   describe('bpmn:Association', () => {
     let serializer;
     before(async () => {
-      const moddleContext = await testHelpers.moddleContext(factory.resource('bound-compensation.bpmn'));
-      // const source = `
-      // <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" id="Def" targetNamespace="http://bpmn.io/schema/bpmn">
-      //   <process id="Process_0" isExecutable="true">
-      //     <startEvent id="start" />
-      //     <sequenceFlow id="flow1" sourceRef="start" targetRef="service" />
-      //     <serviceTask id="service" implementation="\${environment.services.exec}" />
-      //     <boundaryEvent id="compensation" attachedToRef="service">
-      //       <compensateEventDefinition />
-      //     </boundaryEvent>
-      //     <serviceTask id="undoService" isForCompensation="true" implementation="\${environment.services.compensate}" />
-      //     <sequenceFlow id="flow2" sourceRef="service" targetRef="decision" />
-      //     <exclusiveGateway id="decision" default="flow3" />
-      //     <sequenceFlow id="flow3" sourceRef="decision" targetRef="end1" />
-      //     <sequenceFlow id="flow4" sourceRef="decision" targetRef="end2">
-      //       <conditionExpression xsi:type="tFormalExpression">\${environment.output.condition}</conditionExpression>
-      //     </sequenceFlow>
-      //     <endEvent id="end1" />
-      //     <endEvent id="end2">
-      //       <compensateEventDefinition />
-      //     </endEvent>
-      //     <association id="association_0" associationDirection="One" sourceRef="compensation" targetRef="undoService" />
-      //   </process>
-      // </definitions>`;
-
-      // const moddleContext = await testHelpers.moddleContext(source);
-      serializer = Serializer(moddleContext, typeResolver);
+      serializer = Serializer(compensationContext, typeResolver);
     });
 
     it('association has target and source ref', () => {

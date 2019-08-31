@@ -21,6 +21,7 @@ Result:
 - [`getActivities([scopeId])`](#getactivitiesscopeid): get activities
 - `getActivityById(activityId)`: get activity by id
 - `getAssociationById(associationId)`: get association by id
+- `getAssociations([scopeId])`: get associations for scope or all of them
 - `getDataObjects`: get all dataObjects
 - `getDataObjectById(dataObjectId)`: get dataObject by id
 - `getInboundAssociations(activityId)`: get activity inbound associations
