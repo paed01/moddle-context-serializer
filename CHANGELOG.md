@@ -1,10 +1,14 @@
 Changelog
 =========
 
-# 0.11.0
+# 0.12.0
 
 - Map `implementation` and `messageRef` attributes if they exist rather than based on type
 - Add BusinessRuleTask to tests
+
+# 0.11.0
+
+- Add function to get all associations or by scope
 
 # 0.10.0
 
