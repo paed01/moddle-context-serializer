@@ -1,6 +1,11 @@
 Changelog
 =========
 
+# 0.11.0
+
+- Map `implementation` and `messageRef` attributes if they exist rather than based on type
+- Add BusinessRuleTask to tests
+
 # 0.10.0
 
 - Loop artifacts and support bpmn:Association

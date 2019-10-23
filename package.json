@@ -32,15 +32,15 @@
     "isomorphic"
   ],
   "devDependencies": {
-    "@babel/cli": "^7.5.5",
-    "@babel/core": "^7.5.5",
-    "@babel/preset-env": "^7.5.5",
-    "@babel/register": "^7.5.5",
+    "@babel/cli": "^7.6.4",
+    "@babel/core": "^7.6.4",
+    "@babel/preset-env": "^7.6.3",
+    "@babel/register": "^7.6.2",
     "bpmn-moddle": "^6.0.0",
-    "camunda-bpmn-moddle": "^4.1.2",
+    "camunda-bpmn-moddle": "^4.2.0",
     "chai": "^4.2.0",
-    "eslint": "^6.2.2",
-    "mocha": "^6.2.0",
+    "eslint": "^6.5.1",
+    "mocha": "^6.2.2",
     "nyc": "^14.1.1"
   }
 }

@@ -11,6 +11,7 @@ const types = {
   Association() {},
   BoundaryEvent() {},
   BpmnError() {},
+  BusinessRuleTask() {},
   CompensateEventDefinition() {},
   ConditionalEventDefinition() {},
   DataObject() {},
@@ -490,9 +491,11 @@ describe('moddle context serializer', () => {
     <?xml version="1.0" encoding="UTF-8"?>
     <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
       <process id="theProcess" isExecutable="true">
-        <sendTask id="send" implementation="\${environment.services.request}" />
         <serviceTask id="service" implementation="\${environment.services.request}" />
         <serviceTask id="dummyService" />
+        <sendTask id="send" implementation="\${environment.services.request}" />
+        <userTask id="user" implementation="\${environment.services.request}" />
+        <businessRuleTask id="rule" implementation="\${environment.services.rule}" />
       </process>
     </definitions>`;
 
@@ -507,14 +510,24 @@ describe('moddle context serializer', () => {
       expect(activity.behaviour).to.have.property('Service', types.ServiceImplementation);
     });
 
+    it('ServiceTask without implementation receives no implementation', () => {
+      const activity = contextMapper.getActivityById('dummyService');
+      expect(activity.behaviour).to.not.have.property('Service');
+    });
+
     it('SendTask receives service implementation', () => {
       const activity = contextMapper.getActivityById('send');
       expect(activity.behaviour).to.have.property('Service', types.ServiceImplementation);
     });
 
-    it('ServiceTask without implementation receives no implementation', () => {
-      const activity = contextMapper.getActivityById('dummyService');
-      expect(activity.behaviour).to.not.have.property('Service');
+    it('BusinessRuleTask receives service implementation', () => {
+      const activity = contextMapper.getActivityById('rule');
+      expect(activity.behaviour).to.have.property('Service', types.ServiceImplementation);
+    });
+
+    it('UserTask receives service implementation', () => {
+      const activity = contextMapper.getActivityById('user');
+      expect(activity.behaviour).to.have.property('Service', types.ServiceImplementation);
     });
   });
 
@@ -938,7 +951,7 @@ describe('moddle context serializer', () => {
         <process id="theProcess" isExecutable="true">
           <receiveTask id="receive" messageRef="Message1" />
         </process>
-        <message id="Message1" />
+        <message id="Message1" name="My message" />
       </definitions>`;
       const moddleContext = await testHelpers.moddleContext(source);
       contextMapper = Serializer(moddleContext, typeResolver);
@@ -949,7 +962,7 @@ describe('moddle context serializer', () => {
       expect(task).to.be.ok;
       expect(task).to.have.property('behaviour');
       expect(task.behaviour).to.have.property('messageRef');
-      expect(task.behaviour.messageRef).to.have.property('id', 'Message1');
+      expect(task.behaviour).to.have.property('messageRef').that.eql({id: 'Message1', name: 'My message', type: 'bpmn:Message'});
       expect(task).to.have.property('Behaviour').that.equal(types.ReceiveTask);
     });
 
@@ -961,8 +974,47 @@ describe('moddle context serializer', () => {
       expect(task).to.be.ok;
       expect(task).to.have.property('behaviour');
       expect(task.behaviour).to.have.property('messageRef');
-      expect(task.behaviour.messageRef).to.have.property('id', 'Message1');
+      expect(task.behaviour).to.have.property('messageRef').that.eql({id: 'Message1', name: 'My message', type: 'bpmn:Message'});
       expect(task).to.have.property('Behaviour').that.equal(types.ReceiveTask);
+    });
+  });
+
+  describe('bpmn:SendTask', () => {
+    let contextMapper;
+    before(async () => {
+      const source = `
+      <?xml version="1.0" encoding="UTF-8"?>
+      <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <process id="theProcess" isExecutable="true">
+          <sendTask id="send" implementation="\${environment.services.send}" messageRef="Message1" />
+        </process>
+        <message id="Message1" name="My message" />
+      </definitions>`;
+      const moddleContext = await testHelpers.moddleContext(source);
+      contextMapper = Serializer(moddleContext, typeResolver);
+    });
+
+    it('has implementation and reference to message', () => {
+      const task = contextMapper.getActivityById('send');
+      expect(task).to.be.ok;
+      expect(task).to.have.property('behaviour');
+      expect(task.behaviour).to.have.property('Service', types.ServiceImplementation);
+      expect(task.behaviour).to.have.property('messageRef');
+      expect(task.behaviour).to.have.property('messageRef').that.eql({id: 'Message1', name: 'My message', type: 'bpmn:Message'});
+      expect(task).to.have.property('Behaviour').that.equal(types.SendTask);
+    });
+
+    it('can be deserialized', () => {
+      const serialized = contextMapper.serialize();
+
+      const deserialized = deserialize(JSON.parse(serialized), typeResolver);
+      const task = deserialized.getActivityById('send');
+      expect(task).to.be.ok;
+      expect(task).to.have.property('behaviour');
+      expect(task.behaviour).to.have.property('Service', types.ServiceImplementation);
+      expect(task.behaviour).to.have.property('messageRef');
+      expect(task.behaviour).to.have.property('messageRef').that.eql({id: 'Message1', name: 'My message', type: 'bpmn:Message'});
+      expect(task).to.have.property('Behaviour').that.equal(types.SendTask);
     });
   });
 

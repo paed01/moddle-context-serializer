@@ -21,16 +21,10 @@ function TypeResolver(types, extender) {
   return function resolve(entity) {
     const {type, behaviour = {}} = entity;
 
-    switch (type) {
-      case 'bpmn:SendTask':
-      case 'bpmn:ServiceTask':
-        entity.Behaviour = getBehaviourFromType(type);
-        if (behaviour.implementation) {
-          behaviour.Service = ServiceImplementation;
-        }
-        break;
-      default:
-        entity.Behaviour = getBehaviourFromType(type);
+    entity.Behaviour = getBehaviourFromType(type);
+
+    if (behaviour.implementation) {
+      behaviour.Service = ServiceImplementation;
     }
 
     if (behaviour.loopCharacteristics) {
@@ -440,11 +434,6 @@ function mapModdleContext(moddleContext) {
           result.activities.push(prepareActivity({attachedTo}));
           break;
         }
-        case 'bpmn:ReceiveTask': {
-          const messageRef = spreadRef(element.messageRef);
-          result.activities.push(prepareActivity({messageRef}));
-          break;
-        }
         default: {
           result.activities.push(prepareActivity());
         }
@@ -467,6 +456,7 @@ function mapModdleContext(moddleContext) {
 
       function prepareActivityBehaviour(behaviour) {
         const resources = element.resources && element.resources.map(mapResource);
+        const messageRef = spreadRef(element.messageRef);
 
         return {
           ...behaviour,
@@ -474,6 +464,7 @@ function mapModdleContext(moddleContext) {
           eventDefinitions: element.eventDefinitions && element.eventDefinitions.map(mapActivityBehaviour),
           loopCharacteristics: element.loopCharacteristics && mapActivityBehaviour(element.loopCharacteristics),
           ioSpecification: element.ioSpecification && mapActivityBehaviour(element.ioSpecification),
+          messageRef,
           resources,
         };
       }
