@@ -25,6 +25,7 @@ const types = {
   InclusiveGateway() {},
   InputOutputSpecification() {},
   IntermediateCatchEvent() {},
+  IntermediateThrowEvent() {},
   ManualTask() {},
   Message() {},
   MessageEventDefinition() {},
@@ -414,20 +415,20 @@ describe('moddle context serializer', () => {
   });
 
   describe('getMessageFlows()', () => {
-    let contextMapper;
+    let laneSerializer;
     before(() => {
-      contextMapper = Serializer(lanesModdleContext, typeResolver);
+      laneSerializer = Serializer(lanesModdleContext, typeResolver);
     });
 
     it('with scope returns all outbound message flows from scope (process)', () => {
-      const flows = contextMapper.getMessageFlows('mainProcess');
+      const flows = laneSerializer.getMessageFlows('mainProcess');
       expect(flows).to.have.length(1);
       expect(flows[0]).to.have.property('type', 'bpmn:MessageFlow');
       expect(flows[0]).to.have.property('Behaviour', types.MessageFlow);
     });
 
     it('without scope returns all message flows', () => {
-      const flows = contextMapper.getMessageFlows();
+      const flows = laneSerializer.getMessageFlows();
       expect(flows).to.have.length(2);
 
       expect(flows[0]).to.have.property('type', 'bpmn:MessageFlow');
@@ -453,6 +454,87 @@ describe('moddle context serializer', () => {
         id: 'intermediate',
       });
       expect(flows[1]).to.have.property('Behaviour', types.MessageFlow);
+    });
+
+    it('message flow targeting empty lane is ok', async () => {
+      const source = `
+      <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:js="http://paed01.github.io/bpmn-engine/schema/2017/08/bpmn">
+        <collaboration id="Collaboration_0">
+          <messageFlow id="fromMain2Participant" sourceRef="send" targetRef="lane2" />
+          <messageFlow id="fromParticipant2Main" sourceRef="lane2" targetRef="receive" />
+          <participant id="lane1" name="Main" processRef="mainProcess" />
+          <participant id="lane2" name="Participant" processRef="participantProcess" />
+        </collaboration>
+        <process id="mainProcess" isExecutable="true">
+          <startEvent id="start1" />
+          <sequenceFlow id="toTask" sourceRef="start" targetRef="send" />
+          <intermediateThrowEvent id="send">
+            <messageEventDefinition messageRef="Message1" />
+          </intermediateThrowEvent>
+          <sequenceFlow id="toTask" sourceRef="start" targetRef="receive" />
+          <intermediateCatchEvent id="receive">
+            <messageEventDefinition messageRef="Message2" />
+          </intermediateCatchEvent>
+        </process>
+        <process id="participantProcess" />
+        <message id="Message1" name="Start message" />
+        <message id="Message2" name="Second message" />
+      </definitions>`;
+
+      const moddleContext = await testHelpers.moddleContext(source);
+      const serializer = Serializer(moddleContext, typeResolver);
+
+      const messageFlows = serializer.getMessageFlows();
+      expect(messageFlows).to.have.length(2);
+
+      const [fromMain, fromParticipant] = messageFlows;
+      expect(fromMain).to.have.property('source').that.eql({
+        processId: 'mainProcess',
+        id: 'send',
+      });
+      expect(fromMain).to.have.property('target').that.eql({
+        processId: 'participantProcess',
+      });
+
+      expect(fromParticipant).to.have.property('source').that.eql({
+        processId: 'participantProcess',
+      });
+      expect(fromParticipant).to.have.property('target').that.eql({
+        processId: 'mainProcess',
+        id: 'receive',
+      });
+    });
+
+    it('message flow targeting non-existing element doesn´t throw', async () => {
+      const source = `
+      <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:js="http://paed01.github.io/bpmn-engine/schema/2017/08/bpmn">
+        <collaboration id="Collaboration_0">
+          <messageFlow id="fromMain2Participant" sourceRef="send" targetRef="whoami" />
+        </collaboration>
+        <process id="mainProcess" isExecutable="true">
+          <startEvent id="start1" />
+          <sequenceFlow id="toTask" sourceRef="start" targetRef="send" />
+          <intermediateThrowEvent id="send">
+            <messageEventDefinition messageRef="Message1" />
+          </intermediateThrowEvent>
+        </process>
+        <message id="Message1" name="Start message" />
+      </definitions>`;
+
+      const moddleContext = await testHelpers.moddleContext(source);
+      const serializer = Serializer(moddleContext, typeResolver);
+
+      const messageFlows = serializer.getMessageFlows();
+      expect(messageFlows).to.have.length(1);
+
+      const [fromMain] = messageFlows;
+      expect(fromMain).to.have.property('source').that.eql({
+        processId: 'mainProcess',
+        id: 'send',
+      });
+      expect(fromMain).to.have.property('target', undefined);
     });
   });
 

@@ -1,6 +1,10 @@
 Changelog
 =========
 
+# 0.12.1
+
+- Fix unrecoverable bug where a message flow that springs from a participant lane throws undefined
+
 # 0.12.0
 
 - Map `implementation` and `messageRef` attributes if they exist rather than based on type

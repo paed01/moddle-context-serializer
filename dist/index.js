@@ -393,11 +393,7 @@ function mapModdleContext(moddleContext) {
                 id: parent.id,
                 type: parent.type
               },
-              source: {
-                processId: getElementProcessId(flowRef.sourceId),
-                id: flowRef.sourceId
-              },
-              target: getElementTargetById(flowRef.targetId),
+              ...getMessageFlowSourceAndTarget(flowRef),
               behaviour: { ...element
               }
             });
@@ -547,32 +543,34 @@ function mapModdleContext(moddleContext) {
     });
   }
 
-  function getElementProcessId(elementId) {
-    const bp = rootHandler.element.rootElements.find(e => e.$type === 'bpmn:Process' && e.flowElements.find(ce => ce.id === elementId));
-    return bp.id;
-  }
+  function getMessageFlowSourceAndTarget(flowRef) {
+    return {
+      source: getElementRef(flowRef.sourceId),
+      target: getElementRef(flowRef.targetId)
+    };
 
-  function getElementTargetById(elementId) {
-    const targetElement = elementsById[elementId];
-    if (!targetElement) return;
-    const result = {};
+    function getElementRef(elementId) {
+      const targetElement = elementsById[elementId];
+      if (!targetElement) return;
+      const result = {};
 
-    switch (targetElement.$type) {
-      case 'bpmn:Participant':
-        {
-          result.processId = processRefs[elementId].id;
-          break;
-        }
+      switch (targetElement.$type) {
+        case 'bpmn:Participant':
+          {
+            result.processId = processRefs[elementId].id;
+            break;
+          }
 
-      default:
-        {
-          const bp = rootHandler.element.rootElements.find(e => e.$type === 'bpmn:Process' && e.flowElements.find(ce => ce.id === elementId));
-          result.processId = bp.id;
-          result.id = elementId;
-        }
+        default:
+          {
+            const bp = rootHandler.element.rootElements.find(e => e.$type === 'bpmn:Process' && e.flowElements.find(ce => ce.id === elementId));
+            result.processId = bp.id;
+            result.id = elementId;
+          }
+      }
+
+      return result;
     }
-
-    return result;
   }
 
   function mapResource(resource) {
