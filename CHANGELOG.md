@@ -1,6 +1,10 @@
 Changelog
 =========
 
+# 0.13.0
+
+- Serialize bpmn:Transaction as sub process
+
 # 0.12.1
 
 - Fix unrecoverable bug where a message flow that springs from a participant lane throws undefined

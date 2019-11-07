@@ -440,6 +440,7 @@ function mapModdleContext(moddleContext) {
           }
 
         case 'bpmn:SubProcess':
+        case 'bpmn:Transaction':
         case 'bpmn:Process':
           {
             const bp = {

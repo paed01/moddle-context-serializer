@@ -48,6 +48,7 @@ const types = {
   TerminateEventDefinition() {},
   TextAnnotation() {},
   TimerEventDefinition() {},
+  Transaction() {},
   UserTask() {},
 };
 
@@ -695,38 +696,52 @@ describe('moddle context serializer', () => {
     });
   });
 
-  describe('bpmn:SubProcess', () => {
-    const source = `<?xml version="1.0" encoding="UTF-8"?>
-    <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" id="task-definitions" targetNamespace="http://bpmn.io/schema/bpmn">
-      <process id="Process_1" isExecutable="true">
-        <subProcess id="activity">
-          <ioSpecification><dataInput id="activityInput" />
-            <dataOutput id="activityOutput" />
-          </ioSpecification>
-          <dataInputAssociation id="dataInputAssociation">
-            <sourceRef>activityInput</sourceRef>
-            <targetRef>myDataRef</targetRef>
-          </dataInputAssociation>
-          <dataOutputAssociation id="dataOutputAssociation">
-            <sourceRef>activityOutput</sourceRef>
-            <targetRef>myDataRef</targetRef>
-          </dataOutputAssociation>
-        </subProcess>
-        <dataObject id="myData" />
-        <dataObjectReference id="myDataRef" dataObjectRef="myData" />
-      </process>
-    </definitions>`;
+  ['subProcess', 'transaction'].forEach((type) => {
+    describe(type, () => {
+      let contextMapper;
+      before(async () => {
+        const source = `<?xml version="1.0" encoding="UTF-8"?>
+        <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" id="task-definitions" targetNamespace="http://bpmn.io/schema/bpmn">
+          <process id="Process_1" isExecutable="true">
+            <${type} id="activity">
+              <startEvent id="start" />
+              <sequenceFlow id="toTask" sourceRef="start" targetRef="end" />
+              <userTask id="task" />
+              <sequenceFlow id="toEnd" sourceRef="task" targetRef="end" />
+              <endEvent id="end" />
+            </${type}>
+            <${type} id="empty-activity">
+              <ioSpecification><dataInput id="activityInput" />
+                <dataOutput id="activityOutput" />
+              </ioSpecification>
+              <dataInputAssociation id="dataInputAssociation">
+                <sourceRef>activityInput</sourceRef>
+                <targetRef>myDataRef</targetRef>
+              </dataInputAssociation>
+              <dataOutputAssociation id="dataOutputAssociation">
+                <sourceRef>activityOutput</sourceRef>
+                <targetRef>myDataRef</targetRef>
+              </dataOutputAssociation>
+            </${type}>
+            <dataObject id="myData" />
+            <dataObjectReference id="myDataRef" dataObjectRef="myData" />
+          </process>
+        </definitions>`;
+        const moddleContext = await testHelpers.moddleContext(source);
+        contextMapper = Serializer(moddleContext, typeResolver);
+      });
 
-    let contextMapper;
-    before(async () => {
-      const moddleContext = await testHelpers.moddleContext(source);
-      contextMapper = Serializer(moddleContext, typeResolver);
-    });
+      it(`${type} delivers the right amount of children`, () => {
+        const activity = contextMapper.getActivityById('activity');
+        expect(contextMapper.getActivities(activity.id)).to.have.length(3);
+        expect(contextMapper.getSequenceFlows(activity.id)).to.have.length(2);
+      });
 
-    it('process with empty subProcess delivers the right amount of children', () => {
-      expect(contextMapper.getActivities()).to.have.length(1);
-      expect(contextMapper.getSequenceFlows()).to.have.length(0);
-      expect(contextMapper.getDataObjects()).to.have.length(1);
+      it(`empty ${type} delivers the right amount of children`, () => {
+        const activity = contextMapper.getActivityById('empty-activity');
+        expect(contextMapper.getActivities(activity.id)).to.have.length(0);
+        expect(contextMapper.getSequenceFlows(activity.id)).to.have.length(0);
+      });
     });
   });
 
