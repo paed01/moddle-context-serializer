@@ -1,6 +1,6 @@
 {
   "name": "moddle-context-serializer",
-  "version": "0.13.0",
+  "version": "0.13.1",
   "description": "Make bpmn-moddle context serializable and mapped to behaviour functions",
   "module": "index.js",
   "main": "dist/index.js",
@@ -31,16 +31,19 @@
     "deserializable",
     "isomorphic"
   ],
+  "peerDependencies": {
+    "bpmn-moddle": "6.x"
+  },
   "devDependencies": {
-    "@babel/cli": "^7.7.0",
-    "@babel/core": "^7.7.2",
-    "@babel/preset-env": "^7.7.1",
-    "@babel/register": "^7.7.0",
-    "bpmn-moddle": "^6.0.0",
-    "camunda-bpmn-moddle": "^4.3.0",
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.5",
+    "@babel/register": "^7.9.0",
+    "bpmn-moddle": "^6.0.5",
+    "camunda-bpmn-moddle": "^4.4.0",
     "chai": "^4.2.0",
-    "eslint": "^6.6.0",
-    "mocha": "^6.2.2",
-    "nyc": "^14.1.1"
+    "eslint": "^6.8.0",
+    "mocha": "^7.1.1",
+    "nyc": "^15.0.1"
   }
 }

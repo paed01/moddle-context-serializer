@@ -1,6 +1,10 @@
 Changelog
 =========
 
+# 0.13.1
+
+- Bump dev dependencies
+
 # 0.13.0
 
 - Serialize bpmn:Transaction as sub process
