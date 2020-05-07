@@ -205,16 +205,16 @@ function resolveTypes(mappedContext, typeResolver) {
 }
 
 function mapModdleContext(moddleContext) {
-  const {elementsById, references, rootHandler} = moddleContext;
+  const {elementsById, references, rootElement} = moddleContext;
   const refKeyPattern = /^(?!\$).+?Ref$/;
 
   const definition = {
-    id: rootHandler.element.id,
-    type: rootHandler.element.$type,
-    name: rootHandler.element.name,
-    targetNamespace: rootHandler.element.targetNamespace,
-    exporter: rootHandler.element.exporter,
-    exporterVersion: rootHandler.element.exporterVersion,
+    id: rootElement.id,
+    type: rootElement.$type,
+    name: rootElement.name,
+    targetNamespace: rootElement.targetNamespace,
+    exporter: rootElement.exporter,
+    exporterVersion: rootElement.exporterVersion,
   };
 
   const {
@@ -232,7 +232,7 @@ function mapModdleContext(moddleContext) {
     messageFlows,
     processes,
     sequenceFlows,
-  } = prepareElements(definition, rootHandler.element.rootElements);
+  } = prepareElements(definition, rootElement.rootElements);
 
   return {
     activities,
@@ -505,7 +505,7 @@ function mapModdleContext(moddleContext) {
           break;
         }
         default: {
-          const bp = rootHandler.element.rootElements.find((e) => e.$type === 'bpmn:Process' && e.flowElements.find((ce) => ce.id === elementId));
+          const bp = rootElement.rootElements.find((e) => e.$type === 'bpmn:Process' && e.flowElements.find((ce) => ce.id === elementId));
           result.processId = bp.id;
           result.id = elementId;
         }

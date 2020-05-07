@@ -1,6 +1,11 @@
 Changelog
 =========
 
+# 0.14.0
+
+- Support bpmn-moddle@7 that has dropped support for callbacks
+- Bump dev dependencies
+
 # 0.13.1
 
 - Bump dev dependencies
