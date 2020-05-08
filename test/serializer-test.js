@@ -56,6 +56,7 @@ const typeResolver = TypeResolver(types);
 
 describe('moddle context serializer', () => {
   let lanesModdleContext,
+    lanesModdleContextFromCallBack,
     subProcessModdleContext,
     eventDefinitionModdleContext,
     twoProcessesModdleContext,
@@ -65,6 +66,7 @@ describe('moddle context serializer', () => {
     compensationContext;
   before(async () => {
     lanesModdleContext = await testHelpers.moddleContext(lanesSource);
+    lanesModdleContextFromCallBack = require('./resources/lanes-old-callback-context.json');
     subProcessModdleContext = await testHelpers.moddleContext(subProcessSource);
     eventDefinitionModdleContext = await testHelpers.moddleContext(eventDefinitionSource);
     conditionAndEscalationModdleContext = await testHelpers.moddleContext(conditionAndEscalationSource);
@@ -146,11 +148,33 @@ describe('moddle context serializer', () => {
       expect(serialized).to.have.property('processes').that.is.an('array');
       expect(serialized).to.have.property('sequenceFlows').that.is.an('array');
     });
+
+    it('(backward compability) returns stringified copy of mapped old callback context', () => {
+      const serializer = Serializer(lanesModdleContextFromCallBack, typeResolver);
+      const serialized = JSON.parse(serializer.serialize());
+
+      expect(serialized).to.have.property('id').that.is.ok;
+      expect(serialized).to.have.property('type').that.is.ok;
+      expect(serialized).to.have.property('activities').that.is.an('array');
+      expect(serialized).to.have.property('dataObjects').that.is.an('array');
+      expect(serialized).to.have.property('definition').that.is.an('object').and.ok;
+      expect(serialized).to.have.property('messageFlows').that.is.an('array');
+      expect(serialized).to.have.property('processes').that.is.an('array');
+      expect(serialized).to.have.property('sequenceFlows').that.is.an('array');
+    });
   });
 
   describe('deserialize(deserializedContext, typeResolver)', () => {
     it('holds definition id, type, and name', async () => {
       const serializer = Serializer(lanesModdleContext, typeResolver);
+      const deserialized = deserialize(JSON.parse(serializer.serialize()), typeResolver);
+      expect(deserialized).to.have.property('id', 'Definitions_1');
+      expect(deserialized).to.have.property('type', 'bpmn:Definitions');
+      expect(deserialized).to.have.property('name', 'Lanes');
+    });
+
+    it('(backward compability) holds definition id, type, and name', async () => {
+      const serializer = Serializer(lanesModdleContextFromCallBack, typeResolver);
       const deserialized = deserialize(JSON.parse(serializer.serialize()), typeResolver);
       expect(deserialized).to.have.property('id', 'Definitions_1');
       expect(deserialized).to.have.property('type', 'bpmn:Definitions');
@@ -213,6 +237,15 @@ describe('moddle context serializer', () => {
       processes.forEach(assertEntity);
     });
 
+    it('(backward compability) returns processes', async () => {
+      const serializer = Serializer(lanesModdleContextFromCallBack, typeResolver);
+      const processes = serializer.getProcesses();
+
+      expect(processes).to.have.length(2);
+
+      processes.forEach(assertEntity);
+    });
+
     it('returns processes only', async () => {
       const serializer = Serializer(subProcessModdleContext, typeResolver);
       const processes = serializer.getProcesses();
@@ -222,6 +255,16 @@ describe('moddle context serializer', () => {
 
     it('isExecutable is available in behaviour', async () => {
       const serializer = Serializer(lanesModdleContext, typeResolver);
+      const processes = serializer.getProcesses();
+
+      expect(processes).to.have.length(2);
+
+      expect(processes[0]).to.have.property('behaviour').with.property('isExecutable', true);
+      expect(processes[1]).to.have.property('behaviour').with.property('isExecutable', false);
+    });
+
+    it('(backward compability) isExecutable is available in behaviour', async () => {
+      const serializer = Serializer(lanesModdleContextFromCallBack, typeResolver);
       const processes = serializer.getProcesses();
 
       expect(processes).to.have.length(2);

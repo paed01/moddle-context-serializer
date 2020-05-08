@@ -205,8 +205,14 @@ function resolveTypes(mappedContext, typeResolver) {
 }
 
 function mapModdleContext(moddleContext) {
-  const {elementsById, references, rootElement} = moddleContext;
+  const {elementsById, references} = moddleContext;
   const refKeyPattern = /^(?!\$).+?Ref$/;
+
+  let rootElement;
+  if (moddleContext.rootElement) rootElement = moddleContext.rootElement;
+  else if (moddleContext.rootHandler) {
+    rootElement = moddleContext.rootHandler.element;
+  }
 
   const definition = {
     id: rootElement.id,

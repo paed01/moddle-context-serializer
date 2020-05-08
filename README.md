@@ -21,7 +21,8 @@ import EscalationEventDefinition from './mytypes/EscalationEventDefinition';
 import BpmnModdle from 'bpmn-moddle';
 
 export async function getSerializedContext(source) {
-  const moddleContext = await getModdleContext(source);
+  const bpmnModdle = new BpmnModdle();
+  const moddleContext = await bpmnModdle.fromXML(source);
   const typeResolver = TypeResolver(bpmnElementsBehaviour, extender);
   return Serializer(moddleContext, typeResolver);
 }
@@ -29,14 +30,21 @@ export async function getSerializedContext(source) {
 function extender(behaviourMapping) {
   behaviourMapping['bpmn:EscalationEventDefinition'] = EscalationEventDefinition;
 }
+```
+
+In `bpmn-moddle@5` the moddle context is served in the third argument of the callback. It has a sligthly different schema but is still supported.
+
+Promisified example of how to retrieive the moddle context:
+```js
+import BpmnModdle from 'bpmn-moddle';
 
 function getModdleContext(source) {
   const bpmnModdle = new BpmnModdle();
 
   return new Promise((resolve, reject) => {
-    bpmnModdle.fromXML(source, (err, definitions, moddleCtx) => {
+    bpmnModdle.fromXML(source, (err, definitions, moddleContext) => {
       if (err) return reject(err);
-      resolve(moddleCtx);
+      resolve(moddleContext);
     });
   });
 }

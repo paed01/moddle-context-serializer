@@ -1,6 +1,6 @@
 {
   "name": "moddle-context-serializer",
-  "version": "0.14.0",
+  "version": "0.14.1",
   "description": "Make bpmn-moddle context serializable and mapped to behaviour functions",
   "module": "index.js",
   "main": "dist/index.js",
@@ -32,7 +32,7 @@
     "isomorphic"
   ],
   "peerDependencies": {
-    "bpmn-moddle": "7.x"
+    "bpmn-moddle": ">=5"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",

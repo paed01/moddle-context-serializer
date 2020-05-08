@@ -1,6 +1,10 @@
 Changelog
 =========
 
+# 0.14.1
+
+- Add backward compatability for passing old bpmn-moddle@5 callback context as argument
+
 # 0.14.0
 
 - Support bpmn-moddle@7 that has dropped support for callbacks
