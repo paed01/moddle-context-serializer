@@ -63,8 +63,8 @@ function TypeResolver(types, extender) {
   }
 }
 
-function context(moddleContext, typeResolver) {
-  const mapped = mapModdleContext(moddleContext);
+function context(moddleContext, typeResolver, extendFn) {
+  const mapped = mapModdleContext(moddleContext, extendFn);
   return contextApi(resolveTypes(mapped, typeResolver));
 }
 
@@ -80,7 +80,8 @@ function contextApi(mapped) {
     definition,
     messageFlows,
     processes,
-    sequenceFlows
+    sequenceFlows,
+    scripts
   } = mapped;
   return {
     id: definition.id,
@@ -102,6 +103,8 @@ function contextApi(mapped) {
     getProcesses,
     getSequenceFlowById,
     getSequenceFlows,
+    getScripts,
+    getScriptsByElementId,
     serialize
   };
 
@@ -116,7 +119,8 @@ function contextApi(mapped) {
       definition,
       messageFlows,
       processes,
-      sequenceFlows
+      sequenceFlows,
+      scripts
     });
   }
 
@@ -193,6 +197,19 @@ function contextApi(mapped) {
   function getOutboundAssociations(activityId) {
     return associations.filter(flow => flow.sourceId === activityId);
   }
+
+  function getScripts(elementType) {
+    if (!elementType) return scripts.slice();
+    return scripts.filter(({
+      parent
+    }) => parent.type === elementType);
+  }
+
+  function getScriptsByElementId(elementId) {
+    return scripts.filter(({
+      parent
+    }) => parent.id === elementId);
+  }
 }
 
 function resolveTypes(mappedContext, typeResolver) {
@@ -215,12 +232,13 @@ function resolveTypes(mappedContext, typeResolver) {
   return mappedContext;
 }
 
-function mapModdleContext(moddleContext) {
+function mapModdleContext(moddleContext, extendFn) {
   const {
     elementsById,
     references
   } = moddleContext;
   const refKeyPattern = /^(?!\$).+?Ref$/;
+  const scripts = [];
   let rootElement;
   if (moddleContext.rootElement) rootElement = moddleContext.rootElement;else if (moddleContext.rootHandler) {
     rootElement = moddleContext.rootHandler.element;
@@ -255,7 +273,8 @@ function mapModdleContext(moddleContext) {
     definition,
     messageFlows,
     processes,
-    sequenceFlows
+    sequenceFlows,
+    scripts
   };
 
   function prepareReferences() {
@@ -379,8 +398,7 @@ function mapModdleContext(moddleContext) {
                 type: parent.type
               },
               references: prepareDataObjectReferences(),
-              behaviour: { ...element
-              }
+              behaviour: prepareElementBehaviour()
             });
             break;
           }
@@ -397,8 +415,7 @@ function mapModdleContext(moddleContext) {
                 type: parent.type
               },
               ...getMessageFlowSourceAndTarget(flowRef),
-              behaviour: { ...element
-              }
+              behaviour: prepareElementBehaviour()
             });
             break;
           }
@@ -416,8 +433,7 @@ function mapModdleContext(moddleContext) {
               },
               targetId: flowRef.targetId,
               sourceId: flowRef.sourceId,
-              behaviour: { ...element
-              }
+              behaviour: prepareElementBehaviour()
             });
             break;
           }
@@ -436,8 +452,7 @@ function mapModdleContext(moddleContext) {
               isDefault: flowRef.isDefault,
               targetId: flowRef.targetId,
               sourceId: flowRef.sourceId,
-              behaviour: { ...element
-              }
+              behaviour: prepareElementBehaviour()
             });
             break;
           }
@@ -454,7 +469,7 @@ function mapModdleContext(moddleContext) {
                 id: parent.id,
                 type: parent.type
               },
-              behaviour: prepareActivityBehaviour()
+              behaviour: prepareElementBehaviour()
             };
             if (type === 'bpmn:Process') result.processes.push(bp);else result.activities.push(bp);
             [prepareElements({
@@ -492,6 +507,26 @@ function mapModdleContext(moddleContext) {
             break;
           }
 
+        case 'bpmn:ScriptTask':
+          {
+            const {
+              scriptFormat,
+              script,
+              resource
+            } = element;
+            addScript(element.id, {
+              scriptFormat,
+              ...(script ? {
+                body: script
+              } : undefined),
+              ...(resource ? {
+                resource
+              } : undefined)
+            });
+            result.activities.push(prepareActivity());
+            break;
+          }
+
         default:
           {
             result.activities.push(prepareActivity());
@@ -509,21 +544,32 @@ function mapModdleContext(moddleContext) {
             id: parent.id,
             type: parent.type
           },
-          behaviour: prepareActivityBehaviour(behaviour)
+          behaviour: prepareElementBehaviour(behaviour)
         };
       }
 
-      function prepareActivityBehaviour(behaviour) {
+      function prepareElementBehaviour(behaviour) {
         const resources = element.resources && element.resources.map(mapResource);
         const messageRef = spreadRef(element.messageRef);
-        return { ...behaviour,
+        return runExtendFn({ ...behaviour,
           ...element,
-          eventDefinitions: element.eventDefinitions && element.eventDefinitions.map(mapActivityBehaviour),
-          loopCharacteristics: element.loopCharacteristics && mapActivityBehaviour(element.loopCharacteristics),
-          ioSpecification: element.ioSpecification && mapActivityBehaviour(element.ioSpecification),
-          messageRef,
-          resources
-        };
+          ...(element.eventDefinitions ? {
+            eventDefinitions: element.eventDefinitions.map(mapActivityBehaviour)
+          } : undefined),
+          ...(element.loopCharacteristics ? {
+            loopCharacteristics: mapActivityBehaviour(element.loopCharacteristics)
+          } : undefined),
+          ...(element.ioSpecification ? {
+            ioSpecification: mapActivityBehaviour(element.ioSpecification)
+          } : undefined),
+          ...(element.conditionExpression ? prepareCondition(element.conditionExpression, behaviour) : undefined),
+          ...(messageRef ? {
+            messageRef
+          } : undefined),
+          ...(resources ? {
+            resources
+          } : undefined)
+        });
       }
 
       function prepareDataObjectReferences() {
@@ -536,6 +582,58 @@ function mapModdleContext(moddleContext) {
             }
           };
         });
+      }
+
+      function prepareCondition(expr) {
+        const {
+          language: scriptFormat,
+          $type: exprType,
+          ...rest
+        } = expr;
+        if (!scriptFormat) return;
+        return addScript(element.id, {
+          scriptFormat,
+          type: exprType,
+          ...rest
+        });
+      }
+
+      function addScript(scriptName, {
+        scriptFormat,
+        body,
+        resource,
+        type: elmType
+      }) {
+        scripts.push({
+          name: scriptName,
+          parent: {
+            id,
+            type
+          },
+          script: {
+            scriptFormat,
+            ...(body ? {
+              body
+            } : undefined),
+            ...(resource ? {
+              resource
+            } : undefined),
+            ...(elmType ? {
+              type: elmType
+            } : undefined)
+          }
+        });
+      }
+
+      function runExtendFn(preparedElement) {
+        if (!extendFn) return preparedElement;
+        const mod = extendFn(preparedElement, {
+          addScript,
+          scripts
+        });
+        return { ...mod,
+          ...preparedElement
+        };
       }
     }, {
       activities: [],

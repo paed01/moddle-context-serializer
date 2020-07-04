@@ -10,9 +10,12 @@ API
 
 Function to make serializable context.
 
+### `Serializer(moddleContext, typeResolver[, extendFn])`
+
 Arguments:
 - `moddleContext`: context from `bpmn-moddle`
 - `typeResolver`: type resolver function that will receive the mapped element and returns a behaviour function, or use the builtin [TypeResolver](##typeresolvertypes-extender)
+- `extendFn`: optional function to manipulate activity behaviour
 
 Result:
 - `id`: Definition id
@@ -34,11 +37,53 @@ Result:
 - `getExecutableProcesses`: get all executable processes
 - `getSequenceFlowById`: get sequence flow by id
 - `getSequenceFlows([scopeId])`: get all sequence flows
+- `getScripts([elementType])`: get all scripts or just for element of type
+- `getScriptsByElementId(elementId)`: get scripts for element with id
 - `serialize`: get stringified serialized object with [deserializable](#deserialize) content
+
+#### `extendFn(mappedBehaviour, {addScript})`
+
+Function to manipulate activity behaviour after it is mapped.
+
+Arguments:
+- `mappedBehaviour`: the activity behaviour mapped by the serializer
+  - `id`: element id
+  - `type`: element type
+  -
+- `helperFunctions`:
+  - `addScript(name, script)`: function to add a script to the global context, can be retrieved by `getScripts([elementType])` or `getScriptsByElementId(elementId)`
+
+The return value will be merged with `mappedBehaviour` as a shallow copy. Hence, id and other properties can not be manipulated.
 
 ### `getActivities([scopeId])`
 
 Get all definition activities or pass `scopeId` to get scoped activities. Where `scopeId` can be a process or a sub-process.
+
+### `getScripts([elementType])`
+
+Get all scripts or just for element of type.
+
+Returns:
+- list if scripts with items:
+  - `name`: name of script
+  - `parent`: object with parent element props:
+    - `id`: parent element id
+    - `type`: parent element type
+    - `eventDefinitions`: list of event definitions
+    - `loopCharacteristics`: activity multi instance loop characteristics
+    - `ioSpecification`: activity ioSpecifications
+    - `conditionExpression`: flow condition expression
+    - `messageRef`: message reference
+    - `resources`: element resources, e.g. `humanPerformer`, `potentialOwner`, and some
+  - `script`: the script
+    - `type`: the type of element that holds the script
+    - `scriptFormat`: script language
+    - `body`: script body if any
+    - `resource`: external resource if any
+
+### `getScriptsByElementId(elementId)`
+
+Get scripts for element with id.
 
 ## `deserialize(deserializedContext, typeResolver)`
 

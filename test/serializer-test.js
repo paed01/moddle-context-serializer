@@ -1,5 +1,6 @@
 import factory from './helpers/factory';
 import testHelpers from './helpers/testHelpers';
+import types from './helpers/types';
 import {default as Serializer, TypeResolver, deserialize} from '../index';
 
 const lanesSource = factory.resource('lanes.bpmn');
@@ -7,50 +8,6 @@ const subProcessSource = factory.resource('sub-process.bpmn');
 const twoProcessesSource = factory.resource('two-executable-processes.bpmn');
 const conditionAndEscalationSource = factory.resource('condition-and-escalation.bpmn');
 const eventDefinitionSource = factory.resource('bound-error-and-timer.bpmn');
-const types = {
-  Association() {},
-  BoundaryEvent() {},
-  BpmnError() {},
-  BusinessRuleTask() {},
-  CompensateEventDefinition() {},
-  ConditionalEventDefinition() {},
-  DataObject() {},
-  Definition() {},
-  Dummy() {},
-  EndEvent() {},
-  ErrorEventDefinition() {},
-  Escalation() {},
-  EscalationEventDefinition() {},
-  ExclusiveGateway() {},
-  InclusiveGateway() {},
-  InputOutputSpecification() {},
-  IntermediateCatchEvent() {},
-  IntermediateThrowEvent() {},
-  ManualTask() {},
-  Message() {},
-  MessageEventDefinition() {},
-  MessageFlow() {},
-  MultiInstanceLoopCharacteristics() {},
-  ParallelGateway() {},
-  Process() {},
-  ReceiveTask() {},
-  ScriptTask() {},
-  SendTask() {},
-  SequenceFlow() {},
-  ServiceImplementation() {},
-  ServiceTask() {},
-  Signal() {},
-  SignalEventDefinition() {},
-  StandardLoopCharacteristics() {},
-  StartEvent() {},
-  SubProcess() {},
-  Task() {},
-  TerminateEventDefinition() {},
-  TextAnnotation() {},
-  TimerEventDefinition() {},
-  Transaction() {},
-  UserTask() {},
-};
 
 const typeResolver = TypeResolver(types);
 

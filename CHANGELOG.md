@@ -1,6 +1,13 @@
 Changelog
 =========
 
+# 0.15.0
+
+Script handling.
+
+## Additions:
+- Extracts all known scripts into an array that can be retreived by `getScripts` or `getScriptsByElementId`
+
 # 0.14.1
 
 - Add backward compatability for passing old bpmn-moddle@5 callback context as argument

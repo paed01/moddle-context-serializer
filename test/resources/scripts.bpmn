@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_03uozbm" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.7.2">
+  <bpmn:process id="script-process" name="Script process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_03eq9ux</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_03eq9ux" sourceRef="StartEvent_1" targetRef="script-js" />
+    <bpmn:scriptTask id="script-js" name="inline javascript" scriptFormat="javascript">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="scriptInline">
+            <camunda:script scriptFormat="javascript">content/2;</camunda:script>
+          </camunda:inputParameter>
+          <camunda:outputParameter name="scriptExternal">
+            <camunda:script scriptFormat="javascript" resource="/script/extractOutput.js" />
+          </camunda:outputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_03eq9ux</bpmn:incoming>
+      <bpmn:outgoing>Flow_1nqqcz3</bpmn:outgoing>
+      <bpmn:script>next();</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="Flow_1nqqcz3" sourceRef="script-js" targetRef="script-ps1" />
+    <bpmn:scriptTask id="script-ps1" name="inline powershell" scriptFormat="powershell">
+      <bpmn:incoming>Flow_1nqqcz3</bpmn:incoming>
+      <bpmn:outgoing>Flow_1xfxet6</bpmn:outgoing>
+      <bpmn:script>$LdapConnection=new-object System.DirectoryServices.Protocols.LdapConnection(new-object System.DirectoryServices.Protocols.LdapDirectoryIdentifier())</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="Flow_1xfxet6" sourceRef="script-ps1" targetRef="script-resource" />
+    <bpmn:scriptTask id="script-resource" name="external javascript" scriptFormat="javascript" camunda:resource="/scripts/embed.js">
+      <bpmn:incoming>Flow_1xfxet6</bpmn:incoming>
+      <bpmn:outgoing>Flow_0lahp85</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="Flow_0lahp85" sourceRef="script-resource" targetRef="decision" />
+    <bpmn:exclusiveGateway id="decision">
+      <bpmn:incoming>Flow_0lahp85</bpmn:incoming>
+      <bpmn:outgoing>to-javascript</bpmn:outgoing>
+      <bpmn:outgoing>to-powershell</bpmn:outgoing>
+      <bpmn:outgoing>to-resource</bpmn:outgoing>
+      <bpmn:outgoing>to-expression</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="Event_1jeooce">
+      <bpmn:incoming>to-javascript</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="to-javascript" name="js&#10;" sourceRef="decision" targetRef="Event_1jeooce">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" language="javascript">return a === 1;</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:endEvent id="Event_19b79bv">
+      <bpmn:incoming>to-powershell</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="to-powershell" name="ps1" sourceRef="decision" targetRef="Event_19b79bv">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" language="powershell">return $null</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:endEvent id="Event_153dlsd">
+      <bpmn:incoming>to-resource</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="to-resource" name="resource&#10;" sourceRef="decision" targetRef="Event_153dlsd">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" language="javascript" camunda:resource="/scripts/embed.js" />
+    </bpmn:sequenceFlow>
+    <bpmn:endEvent id="end-expression">
+      <bpmn:incoming>to-expression</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="to-expression" name="expression" sourceRef="decision" targetRef="end-expression">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${environment.output.takeExpression}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="script-process">
+      <bpmndi:BPMNEdge id="Flow_03eq9ux_di" bpmnElement="Flow_03eq9ux">
+        <di:waypoint x="215" y="187" />
+        <di:waypoint x="270" y="187" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1nqqcz3_di" bpmnElement="Flow_1nqqcz3">
+        <di:waypoint x="370" y="187" />
+        <di:waypoint x="430" y="187" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1xfxet6_di" bpmnElement="Flow_1xfxet6">
+        <di:waypoint x="530" y="187" />
+        <di:waypoint x="590" y="187" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0lahp85_di" bpmnElement="Flow_0lahp85">
+        <di:waypoint x="690" y="187" />
+        <di:waypoint x="755" y="187" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1fxyctt_di" bpmnElement="to-javascript">
+        <di:waypoint x="780" y="162" />
+        <di:waypoint x="780" y="100" />
+        <di:waypoint x="872" y="100" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="806" y="80" width="8" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0gvzpye_di" bpmnElement="to-powershell">
+        <di:waypoint x="805" y="187" />
+        <di:waypoint x="872" y="187" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="830" y="169" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0fehvd8_di" bpmnElement="to-resource">
+        <di:waypoint x="780" y="212" />
+        <di:waypoint x="780" y="270" />
+        <di:waypoint x="872" y="270" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="798" y="250" width="43" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0uadtiv_di" bpmnElement="to-expression">
+        <di:waypoint x="780" y="212" />
+        <di:waypoint x="780" y="410" />
+        <di:waypoint x="872" y="410" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="793" y="393" width="54" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="169" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_18uceqg_di" bpmnElement="script-js">
+        <dc:Bounds x="270" y="147" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0lxfvju_di" bpmnElement="script-ps1">
+        <dc:Bounds x="430" y="147" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0j63a5d_di" bpmnElement="script-resource">
+        <dc:Bounds x="590" y="147" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_068g26o_di" bpmnElement="decision" isMarkerVisible="true">
+        <dc:Bounds x="755" y="162" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1jeooce_di" bpmnElement="Event_1jeooce">
+        <dc:Bounds x="872" y="82" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_19b79bv_di" bpmnElement="Event_19b79bv">
+        <dc:Bounds x="872" y="169" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_153dlsd_di" bpmnElement="Event_153dlsd">
+        <dc:Bounds x="872" y="252" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1e3oj2v_di" bpmnElement="end-expression">
+        <dc:Bounds x="872" y="392" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="863" y="435" width="54" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
