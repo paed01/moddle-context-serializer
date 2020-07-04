@@ -20,7 +20,8 @@ describe('moddle context serializer', () => {
     conditionAndEscalationModdleContext,
     signalEventModdleContext,
     messageFlowModdleContext,
-    compensationContext;
+    compensationContext,
+    timersModdleContext;
   before(async () => {
     lanesModdleContext = await testHelpers.moddleContext(lanesSource);
     lanesModdleContextFromCallBack = require('./resources/lanes-old-callback-context.json');
@@ -31,6 +32,7 @@ describe('moddle context serializer', () => {
     signalEventModdleContext = await testHelpers.moddleContext(factory.resource('signal-event.bpmn'));
     messageFlowModdleContext = await testHelpers.moddleContext(factory.resource('message-flows.bpmn'));
     compensationContext = await testHelpers.moddleContext(factory.resource('bound-compensation.bpmn'));
+    timersModdleContext = await testHelpers.moddleContext(factory.resource('timers.bpmn'));
   });
 
   describe('TypeResolver(types[, extender])', () => {
@@ -800,151 +802,160 @@ describe('moddle context serializer', () => {
     });
   });
 
-  describe('bpmn:TimerEventDefinition', () => {
-    let contextMapper;
-    before(async () => {
-      contextMapper = Serializer(eventDefinitionModdleContext, typeResolver);
-    });
+  describe('event definitions', () => {
+    describe('bpmn:TimerEventDefinition', () => {
+      let contextMapper;
+      before(async () => {
+        contextMapper = Serializer(eventDefinitionModdleContext, typeResolver);
+      });
 
-    it('time duration is stored with activity', () => {
-      const activity = contextMapper.getActivityById('timerEvent');
-      expect(activity).to.be.ok;
+      it('time duration is stored with activity', () => {
+        const activity = contextMapper.getActivityById('timerEvent');
+        expect(activity).to.be.ok;
 
-      expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
-      expect(activity.behaviour.eventDefinitions[0])
-        .to.have.property('Behaviour', types.TimerEventDefinition);
-      expect(activity.behaviour.eventDefinitions[0])
-        .to.have.property('behaviour')
-        .with.property('timeDuration', 'PT0.05S');
-    });
+        expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
+        expect(activity.behaviour.eventDefinitions[0])
+          .to.have.property('Behaviour', types.TimerEventDefinition);
+        expect(activity.behaviour.eventDefinitions[0])
+          .to.have.property('behaviour')
+          .with.property('timeDuration', 'PT0.05S');
+      });
 
-    it('can be deserialized', () => {
-      const serialized = contextMapper.serialize();
+      it('can be deserialized', () => {
+        const serialized = contextMapper.serialize();
 
-      const deserialized = deserialize(JSON.parse(serialized), typeResolver);
-      const activity = deserialized.getActivityById('timerEvent');
+        const deserialized = deserialize(JSON.parse(serialized), typeResolver);
+        const activity = deserialized.getActivityById('timerEvent');
 
-      expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
-      expect(activity.behaviour.eventDefinitions[0])
-        .to.have.property('Behaviour', types.TimerEventDefinition);
-      expect(activity.behaviour.eventDefinitions[0])
-        .to.have.property('behaviour')
-        .with.property('timeDuration', 'PT0.05S');
-    });
-  });
-
-  describe('bpmn:ConditionalEventDefinition', () => {
-    let contextMapper;
-    before(async () => {
-      contextMapper = Serializer(conditionAndEscalationModdleContext, typeResolver);
-    });
-
-    it('condition expression is stored with activity', () => {
-      const activity = contextMapper.getActivityById('conditionalBoundaryEvent');
-      expect(activity).to.be.ok;
-
-      expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
-      expect(activity.behaviour.eventDefinitions[0])
-        .to.have.property('Behaviour', types.ConditionalEventDefinition);
-      expect(activity.behaviour.eventDefinitions[0])
-        .to.have.property('behaviour')
-        .with.property('expression', '${environment.variables.conditionMet}');
-      expect(activity.behaviour.eventDefinitions[0].behaviour)
-        .to.have.property('condition').that.include({
-          $type: 'bpmn:FormalExpression',
-          body: '${environment.variables.conditionMet}',
-        });
-    });
-
-    it('can be deserialized', () => {
-      const serialized = contextMapper.serialize();
-
-      const deserialized = deserialize(JSON.parse(serialized), typeResolver);
-      const activity = deserialized.getActivityById('conditionalBoundaryEvent');
-
-      expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
-      expect(activity.behaviour.eventDefinitions[0])
-        .to.have.property('Behaviour', types.ConditionalEventDefinition);
-      expect(activity.behaviour.eventDefinitions[0])
-        .to.have.property('behaviour')
-        .with.property('expression', '${environment.variables.conditionMet}');
-      expect(activity.behaviour.eventDefinitions[0].behaviour)
-        .to.have.property('condition').that.include({
-          $type: 'bpmn:FormalExpression',
-          body: '${environment.variables.conditionMet}',
-        });
-    });
-  });
-
-  describe('bpmn:BoundaryEvent', () => {
-    let contextMapper;
-    before(async () => {
-      contextMapper = Serializer(eventDefinitionModdleContext, typeResolver);
-    });
-
-    it('boundary event has attached to', () => {
-      const activity = contextMapper.getActivityById('errorEvent');
-      expect(activity).to.be.ok;
-
-      expect(activity.behaviour).to.have.property('attachedTo').that.include({
-        id: 'scriptTask',
-        type: 'bpmn:ScriptTask',
+        expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
+        expect(activity.behaviour.eventDefinitions[0])
+          .to.have.property('Behaviour', types.TimerEventDefinition);
+        expect(activity.behaviour.eventDefinitions[0])
+          .to.have.property('behaviour')
+          .with.property('timeDuration', 'PT0.05S');
       });
     });
 
-    it('can be deserialized', () => {
-      const serialized = contextMapper.serialize();
+    describe('bpmn:ConditionalEventDefinition', () => {
+      let contextMapper;
+      before(async () => {
+        contextMapper = Serializer(conditionAndEscalationModdleContext, typeResolver);
+      });
 
-      const deserialized = deserialize(JSON.parse(serialized), typeResolver);
-      const activity = deserialized.getActivityById('errorEvent');
+      it('condition expression is stored with activity', () => {
+        const activity = contextMapper.getActivityById('conditionalBoundaryEvent');
+        expect(activity).to.be.ok;
 
-      expect(activity.behaviour).to.have.property('attachedTo').that.include({
-        id: 'scriptTask',
-        type: 'bpmn:ScriptTask',
+        expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
+        expect(activity.behaviour.eventDefinitions[0])
+          .to.have.property('Behaviour', types.ConditionalEventDefinition);
+        expect(activity.behaviour.eventDefinitions[0])
+          .to.have.property('behaviour')
+          .with.property('expression', '${environment.variables.conditionMet}');
+        expect(activity.behaviour.eventDefinitions[0].behaviour)
+          .to.have.property('condition').that.include({
+            $type: 'bpmn:FormalExpression',
+            body: '${environment.variables.conditionMet}',
+          });
+      });
+
+      it('can be deserialized', () => {
+        const serialized = contextMapper.serialize();
+
+        const deserialized = deserialize(JSON.parse(serialized), typeResolver);
+        const activity = deserialized.getActivityById('conditionalBoundaryEvent');
+
+        expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
+        expect(activity.behaviour.eventDefinitions[0])
+          .to.have.property('Behaviour', types.ConditionalEventDefinition);
+        expect(activity.behaviour.eventDefinitions[0])
+          .to.have.property('behaviour')
+          .with.property('expression', '${environment.variables.conditionMet}');
+        expect(activity.behaviour.eventDefinitions[0].behaviour)
+          .to.have.property('condition').that.include({
+            $type: 'bpmn:FormalExpression',
+            body: '${environment.variables.conditionMet}',
+          });
       });
     });
-  });
 
-  describe('bpmn:ErrorEventDefinition', () => {
-    let contextMapper;
-    before(async () => {
-      contextMapper = Serializer(eventDefinitionModdleContext, typeResolver);
+    describe('bpmn:BoundaryEvent', () => {
+      let contextMapper;
+      before(async () => {
+        contextMapper = Serializer(eventDefinitionModdleContext, typeResolver);
+      });
+
+      it('boundary event has attached to', () => {
+        const activity = contextMapper.getActivityById('errorEvent');
+        expect(activity).to.be.ok;
+
+        expect(activity.behaviour).to.have.property('attachedTo').that.include({
+          id: 'scriptTask',
+          type: 'bpmn:ScriptTask',
+        });
+      });
+
+      it('can be deserialized', () => {
+        const serialized = contextMapper.serialize();
+
+        const deserialized = deserialize(JSON.parse(serialized), typeResolver);
+        const activity = deserialized.getActivityById('errorEvent');
+
+        expect(activity.behaviour).to.have.property('attachedTo').that.include({
+          id: 'scriptTask',
+          type: 'bpmn:ScriptTask',
+        });
+      });
     });
 
-    it('boundary event has event definition with error', () => {
-      const activity = contextMapper.getActivityById('errorEvent');
-      expect(activity).to.be.ok;
+    describe('bpmn:ErrorEventDefinition', () => {
+      let contextMapper;
+      before(async () => {
+        contextMapper = Serializer(eventDefinitionModdleContext, typeResolver);
+      });
 
-      expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
-      expect(activity.behaviour.eventDefinitions[0])
-        .to.have.property('Behaviour', types.ErrorEventDefinition);
-      expect(activity.behaviour.eventDefinitions[0])
-        .to.have.property('behaviour')
-        .with.property('errorRef');
-      expect(activity.behaviour.eventDefinitions[0].behaviour.errorRef)
-        .to.include({
-          type: 'bpmn:Error',
-          id: 'Error_0',
-        });
+      it('boundary event has event definition with error', () => {
+        const activity = contextMapper.getActivityById('errorEvent');
+        expect(activity).to.be.ok;
+
+        expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
+        expect(activity.behaviour.eventDefinitions[0])
+          .to.have.property('Behaviour', types.ErrorEventDefinition);
+        expect(activity.behaviour.eventDefinitions[0])
+          .to.have.property('behaviour')
+          .with.property('errorRef');
+        expect(activity.behaviour.eventDefinitions[0].behaviour.errorRef)
+          .to.include({
+            type: 'bpmn:Error',
+            id: 'Error_0',
+          });
+      });
+
+      it('can be deserialized', () => {
+        const serialized = contextMapper.serialize();
+
+        const deserialized = deserialize(JSON.parse(serialized), typeResolver);
+        const activity = deserialized.getActivityById('errorEvent');
+
+        expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
+        expect(activity.behaviour.eventDefinitions[0])
+          .to.have.property('Behaviour', types.ErrorEventDefinition);
+        expect(activity.behaviour.eventDefinitions[0])
+          .to.have.property('behaviour')
+          .with.property('errorRef');
+        expect(activity.behaviour.eventDefinitions[0].behaviour.errorRef)
+          .to.include({
+            type: 'bpmn:Error',
+            id: 'Error_0',
+          });
+      });
     });
 
-    it('can be deserialized', () => {
-      const serialized = contextMapper.serialize();
-
-      const deserialized = deserialize(JSON.parse(serialized), typeResolver);
-      const activity = deserialized.getActivityById('errorEvent');
-
-      expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
-      expect(activity.behaviour.eventDefinitions[0])
-        .to.have.property('Behaviour', types.ErrorEventDefinition);
-      expect(activity.behaviour.eventDefinitions[0])
-        .to.have.property('behaviour')
-        .with.property('errorRef');
-      expect(activity.behaviour.eventDefinitions[0].behaviour.errorRef)
-        .to.include({
-          type: 'bpmn:Error',
-          id: 'Error_0',
-        });
+    it('returns id of event definition', () => {
+      const contextMapper = Serializer(timersModdleContext, typeResolver);
+      const activity = contextMapper.getActivityById('start-cycle');
+      const [ed] = activity.behaviour.eventDefinitions;
+      expect(ed).to.have.property('id').that.is.ok;
     });
   });
 

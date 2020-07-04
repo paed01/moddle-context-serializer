@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1l30pnv" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.7.2">
+  <bpmn:process id="Process_0cn5rdh" isExecutable="true">
+    <bpmn:startEvent id="start-cycle">
+      <bpmn:outgoing>Flow_1m7hqmj</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_153vloi">
+        <bpmn:timeCycle xsi:type="bpmn:tFormalExpression">R3/PT10H</bpmn:timeCycle>
+      </bpmn:timerEventDefinition>
+    </bpmn:startEvent>
+    <bpmn:task id="task">
+      <bpmn:incoming>Flow_1m7hqmj</bpmn:incoming>
+      <bpmn:outgoing>Flow_1aakq06</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_1m7hqmj" sourceRef="start-cycle" targetRef="task" />
+    <bpmn:boundaryEvent id="bound-timeout" cancelActivity="false" attachedToRef="task">
+      <bpmn:outgoing>Flow_02c72iy</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_17vw751">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT1M</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:endEvent id="Event_14lp80l">
+      <bpmn:incoming>Flow_1esokq4</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1aakq06" sourceRef="task" targetRef="catch-date" />
+    <bpmn:endEvent id="Event_0hutah0">
+      <bpmn:incoming>Flow_02c72iy</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_02c72iy" sourceRef="bound-timeout" targetRef="Event_0hutah0" />
+    <bpmn:sequenceFlow id="Flow_0zifguq" sourceRef="catch-date" targetRef="user-due" />
+    <bpmn:intermediateCatchEvent id="catch-date">
+      <bpmn:incoming>Flow_1aakq06</bpmn:incoming>
+      <bpmn:outgoing>Flow_0zifguq</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_1mj6p21">
+        <bpmn:timeDate xsi:type="bpmn:tFormalExpression">${date}</bpmn:timeDate>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_1esokq4" sourceRef="user-due" targetRef="Event_14lp80l" />
+    <bpmn:userTask id="user-due" camunda:dueDate="${dueDate}">
+      <bpmn:incoming>Flow_0zifguq</bpmn:incoming>
+      <bpmn:outgoing>Flow_1esokq4</bpmn:outgoing>
+    </bpmn:userTask>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_0cn5rdh">
+      <bpmndi:BPMNEdge id="Flow_1m7hqmj_di" bpmnElement="Flow_1m7hqmj">
+        <di:waypoint x="215" y="97" />
+        <di:waypoint x="270" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1aakq06_di" bpmnElement="Flow_1aakq06">
+        <di:waypoint x="370" y="97" />
+        <di:waypoint x="442" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02c72iy_di" bpmnElement="Flow_02c72iy">
+        <di:waypoint x="320" y="155" />
+        <di:waypoint x="320" y="202" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0zifguq_di" bpmnElement="Flow_0zifguq">
+        <di:waypoint x="478" y="97" />
+        <di:waypoint x="530" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1esokq4_di" bpmnElement="Flow_1esokq4">
+        <di:waypoint x="630" y="97" />
+        <di:waypoint x="692" y="97" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_1wbepyc_di" bpmnElement="start-cycle">
+        <dc:Bounds x="179" y="79" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1piw1ag_di" bpmnElement="task">
+        <dc:Bounds x="270" y="57" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0hutah0_di" bpmnElement="Event_0hutah0">
+        <dc:Bounds x="302" y="202" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0e093ao_di" bpmnElement="catch-date">
+        <dc:Bounds x="442" y="79" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_14lp80l_di" bpmnElement="Event_14lp80l">
+        <dc:Bounds x="692" y="79" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1s6l340_di" bpmnElement="user-due">
+        <dc:Bounds x="530" y="57" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_04tvv6v_di" bpmnElement="bound-timeout">
+        <dc:Bounds x="302" y="119" width="36" height="36" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

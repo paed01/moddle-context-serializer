@@ -74,6 +74,7 @@ function contextApi(mapped) {
     processes,
     sequenceFlows,
     scripts,
+    timers,
   } = mapped;
 
   return {
@@ -98,6 +99,8 @@ function contextApi(mapped) {
     getSequenceFlows,
     getScripts,
     getScriptsByElementId,
+    getTimers,
+    getTimersByElementId,
     serialize,
   };
 
@@ -114,6 +117,7 @@ function contextApi(mapped) {
       processes,
       sequenceFlows,
       scripts,
+      timers,
     });
   }
 
@@ -193,6 +197,15 @@ function contextApi(mapped) {
   function getScriptsByElementId(elementId) {
     return scripts.filter(({parent}) => parent.id === elementId);
   }
+
+  function getTimers(elementType) {
+    if (!elementType) return timers.slice();
+    return timers.filter(({parent}) => parent.type === elementType);
+  }
+
+  function getTimersByElementId(elementId) {
+    return timers.filter(({parent}) => parent.id === elementId);
+  }
 }
 
 function resolveTypes(mappedContext, typeResolver) {
@@ -221,6 +234,7 @@ function mapModdleContext(moddleContext, extendFn) {
   const {elementsById, references} = moddleContext;
   const refKeyPattern = /^(?!\$).+?Ref$/;
   const scripts = [];
+  const timers = [];
 
   let rootElement;
   if (moddleContext.rootElement) rootElement = moddleContext.rootElement;
@@ -263,6 +277,7 @@ function mapModdleContext(moddleContext, extendFn) {
     processes,
     sequenceFlows,
     scripts,
+    timers,
   };
 
   function prepareReferences() {
@@ -489,13 +504,17 @@ function mapModdleContext(moddleContext, extendFn) {
         return runExtendFn({
           ...behaviour,
           ...element,
-          ...(element.eventDefinitions ? {eventDefinitions: element.eventDefinitions.map(mapActivityBehaviour)} : undefined),
-          ...(element.loopCharacteristics ? {loopCharacteristics: mapActivityBehaviour(element.loopCharacteristics)} : undefined),
-          ...(element.ioSpecification ? {ioSpecification: mapActivityBehaviour(element.ioSpecification)} : undefined),
+          ...(element.eventDefinitions ? {eventDefinitions: element.eventDefinitions.map(mapEventDefinitions)} : undefined),
+          ...(element.loopCharacteristics ? {loopCharacteristics: mapActivityBehaviour(element.loopCharacteristics, {addTimer})} : undefined),
+          ...(element.ioSpecification ? {ioSpecification: mapActivityBehaviour(element.ioSpecification, {addTimer})} : undefined),
           ...(element.conditionExpression ? prepareCondition(element.conditionExpression, behaviour) : undefined),
           ...(messageRef ? {messageRef} : undefined),
           ...(resources ? {resources} : undefined),
         });
+      }
+
+      function mapEventDefinitions(ed) {
+        return mapActivityBehaviour(ed, {addTimer});
       }
 
       function prepareDataObjectReferences() {
@@ -516,7 +535,7 @@ function mapModdleContext(moddleContext, extendFn) {
         return addScript(element.id, {scriptFormat, type: exprType, ...rest});
       }
 
-      function addScript(scriptName, {scriptFormat, body, resource, type: elmType}) {
+      function addScript(scriptName, {id: scriptId, scriptFormat, body, resource, type: elmType}) {
         scripts.push({
           name: scriptName,
           parent: {
@@ -524,6 +543,7 @@ function mapModdleContext(moddleContext, extendFn) {
             type,
           },
           script: {
+            ...(scriptId ? {id, scriptId} : undefined),
             scriptFormat,
             ...(body ? {body} : undefined),
             ...(resource ? {resource} : undefined),
@@ -532,9 +552,25 @@ function mapModdleContext(moddleContext, extendFn) {
         });
       }
 
+      function addTimer(timerName, {id: timerId, timerType, type: elmType, value}) {
+        timers.push({
+          name: timerName,
+          parent: {
+            id,
+            type,
+          },
+          timer: {
+            ...(timerId ? {id, timerId} : undefined),
+            timerType,
+            ...(value ? {value} : undefined),
+            ...(elmType ? {type: elmType} : undefined),
+          },
+        });
+      }
+
       function runExtendFn(preparedElement) {
         if (!extendFn) return preparedElement;
-        const mod = extendFn(preparedElement, {addScript, scripts});
+        const mod = extendFn(preparedElement, {addScript, scripts, addTimer, timers});
         return {
           ...mod,
           ...preparedElement,
@@ -590,10 +626,10 @@ function mapModdleContext(moddleContext, extendFn) {
     };
   }
 
-  function mapActivityBehaviour(ed) {
+  function mapActivityBehaviour(ed, {addTimer}) {
     if (!ed) return;
 
-    const {$type: type} = ed;
+    const {$type: type, id} = ed;
     let behaviour = {...ed};
 
     const keys = Object.getOwnPropertyNames(ed);
@@ -620,12 +656,23 @@ function mapModdleContext(moddleContext, extendFn) {
         break;
       }
       case 'bpmn:TimerEventDefinition': {
-        behaviour.timeDuration = ed.timeDuration && ed.timeDuration.body;
+        for (const timerType of ['timeCycle', 'timeDuration', 'timeDate']) {
+          if (timerType in behaviour && behaviour[timerType].body) {
+            const value = behaviour[timerType] = behaviour[timerType].body;
+            addTimer(id || timerType, {
+              id,
+              type,
+              timerType,
+              value,
+            });
+          }
+        }
         break;
       }
     }
 
     return {
+      id,
       type,
       behaviour,
     };

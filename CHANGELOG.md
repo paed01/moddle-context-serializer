@@ -3,10 +3,11 @@ Changelog
 
 # 0.15.0
 
-Script handling.
+Extract scripts and timers.
 
 ## Additions:
 - Extracts all known scripts into an array that can be retreived by `getScripts` or `getScriptsByElementId`
+- Extracts all known timers into an array that can be retreived by `getTimers` or `getTimersByElementId`
 
 # 0.14.1
 

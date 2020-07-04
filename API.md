@@ -37,8 +37,10 @@ Result:
 - `getExecutableProcesses`: get all executable processes
 - `getSequenceFlowById`: get sequence flow by id
 - `getSequenceFlows([scopeId])`: get all sequence flows
-- `getScripts([elementType])`: get all scripts or just for element of type
+- `getScripts([elementType])`: get all scripts or just for elements of type
 - `getScriptsByElementId(elementId)`: get scripts for element with id
+- `getTimers([elementType])`: get all timers or just for elements of type
+- `getTimersByElementId(elementId)`: get timers for element with id
 - `serialize`: get stringified serialized object with [deserializable](#deserialize) content
 
 #### `extendFn(mappedBehaviour, {addScript})`
@@ -49,9 +51,15 @@ Arguments:
 - `mappedBehaviour`: the activity behaviour mapped by the serializer
   - `id`: element id
   - `type`: element type
-  -
-- `helperFunctions`:
+  - `eventDefinitions`: list of event definitions
+  - `loopCharacteristics`: activity multi instance loop characteristics
+  - `ioSpecification`: activity ioSpecifications
+  - `conditionExpression`: flow condition expression
+  - `messageRef`: message reference
+  - `resources`: element resources, e.g. `humanPerformer`, `potentialOwner`, and some
+- `helperContext`:
   - `addScript(name, script)`: function to add a script to the global context, can be retrieved by `getScripts([elementType])` or `getScriptsByElementId(elementId)`
+  - `addTimer(name, timer)`: function to add a timer to the global context, can be retrieved by `getScripts([elementType])` or `getScriptsByElementId(elementId)`
 
 The return value will be merged with `mappedBehaviour` as a shallow copy. Hence, id and other properties can not be manipulated.
 
@@ -69,12 +77,6 @@ Returns:
   - `parent`: object with parent element props:
     - `id`: parent element id
     - `type`: parent element type
-    - `eventDefinitions`: list of event definitions
-    - `loopCharacteristics`: activity multi instance loop characteristics
-    - `ioSpecification`: activity ioSpecifications
-    - `conditionExpression`: flow condition expression
-    - `messageRef`: message reference
-    - `resources`: element resources, e.g. `humanPerformer`, `potentialOwner`, and some
   - `script`: the script
     - `type`: the type of element that holds the script
     - `scriptFormat`: script language
@@ -84,6 +86,26 @@ Returns:
 ### `getScriptsByElementId(elementId)`
 
 Get scripts for element with id.
+
+### `getTimers([elementType])`
+
+Get all timers or just for element of type.
+
+Returns:
+- list if scripts with items:
+  - `name`: name of timer
+  - `parent`: object with parent element props:
+    - `id`: parent element id
+    - `type`: parent element type
+  - `timer`: the script
+    - `id`: the id of element that holds the timer, if any
+    - `type`: the type of element that holds the timer, if any
+    - `timerType`: type of timer, e.g. `timeDuration`, `timeCycle`, `timeDate`
+    - `value`: timer value, `PT1M` for instance
+
+### `getTimersByElementId(elementId)`
+
+Get timers for element with id.
 
 ## `deserialize(deserializedContext, typeResolver)`
 
