@@ -4,7 +4,7 @@ API
 - [`default`](#default-export)
 - [`deserialize`](#deserializedeserializedcontext-typeresolver)
 - [`map`](#map)
-- [`Builtin TypeResolver`](##typeresolvertypes-extender)
+- [`Builtin TypeResolver`](#typeresolvertypes-extender)
 
 ## Default export
 
