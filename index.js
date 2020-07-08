@@ -73,8 +73,8 @@ function contextApi(mapped) {
     messageFlows,
     processes,
     sequenceFlows,
-    scripts,
-    timers,
+    scripts = [],
+    timers = [],
   } = mapped;
 
   return {
@@ -88,6 +88,9 @@ function contextApi(mapped) {
     getDataObjects,
     getDataObjectById,
     getExecutableProcesses,
+    getExtendContext() {
+      return getExtendContext({scripts, timers});
+    },
     getInboundAssociations,
     getInboundSequenceFlows,
     getMessageFlows,
@@ -236,11 +239,7 @@ function mapModdleContext(moddleContext, extendFn) {
   const scripts = [];
   const timers = [];
 
-  let rootElement;
-  if (moddleContext.rootElement) rootElement = moddleContext.rootElement;
-  else if (moddleContext.rootHandler) {
-    rootElement = moddleContext.rootHandler.element;
-  }
+  const rootElement = moddleContext.rootElement ? moddleContext.rootElement : moddleContext.rootHandler.element;
 
   const definition = {
     id: rootElement.id,
@@ -469,7 +468,11 @@ function mapModdleContext(moddleContext, extendFn) {
         }
         case 'bpmn:ScriptTask': {
           const {scriptFormat, script, resource} = element;
-          addScript(element.id, {
+          getExtendContext({scripts}).addScript(element.id, {
+            parent: {
+              id,
+              type,
+            },
             scriptFormat,
             ...(script ? {body: script} : undefined),
             ...(resource ? {resource} : undefined),
@@ -501,20 +504,33 @@ function mapModdleContext(moddleContext, extendFn) {
         const resources = element.resources && element.resources.map(mapResource);
         const messageRef = spreadRef(element.messageRef);
 
+        const {eventDefinitions, loopCharacteristics, ioSpecification, conditionExpression} = element;
+
+        const extendContext = getExtendContext({scripts, timers, parent: {
+          id,
+          type,
+        }});
+
         return runExtendFn({
           ...behaviour,
           ...element,
-          ...(element.eventDefinitions ? {eventDefinitions: element.eventDefinitions.map(mapEventDefinitions)} : undefined),
-          ...(element.loopCharacteristics ? {loopCharacteristics: mapActivityBehaviour(element.loopCharacteristics, {addTimer})} : undefined),
-          ...(element.ioSpecification ? {ioSpecification: mapActivityBehaviour(element.ioSpecification, {addTimer})} : undefined),
-          ...(element.conditionExpression ? prepareCondition(element.conditionExpression, behaviour) : undefined),
+          ...(eventDefinitions ? {eventDefinitions: eventDefinitions.map(mapEventDefinitions)} : undefined),
+          ...(loopCharacteristics ? {loopCharacteristics: mapActivityBehaviour(loopCharacteristics, extendContext)} : undefined),
+          ...(ioSpecification ? {ioSpecification: mapActivityBehaviour(ioSpecification, extendContext)} : undefined),
+          ...(conditionExpression ? prepareCondition(conditionExpression, behaviour) : undefined),
           ...(messageRef ? {messageRef} : undefined),
           ...(resources ? {resources} : undefined),
-        });
-      }
+        }, extendContext);
 
-      function mapEventDefinitions(ed) {
-        return mapActivityBehaviour(ed, {addTimer});
+        function mapEventDefinitions(ed) {
+          return mapActivityBehaviour(ed, extendContext);
+        }
+
+        function prepareCondition(expr) {
+          const {language: scriptFormat, $type: exprType, ...rest} = expr;
+          if (!scriptFormat) return;
+          return extendContext.addScript(element.id, {scriptFormat, type: exprType, ...rest});
+        }
       }
 
       function prepareDataObjectReferences() {
@@ -529,48 +545,9 @@ function mapModdleContext(moddleContext, extendFn) {
         });
       }
 
-      function prepareCondition(expr) {
-        const {language: scriptFormat, $type: exprType, ...rest} = expr;
-        if (!scriptFormat) return;
-        return addScript(element.id, {scriptFormat, type: exprType, ...rest});
-      }
-
-      function addScript(scriptName, {id: scriptId, scriptFormat, body, resource, type: elmType}) {
-        scripts.push({
-          name: scriptName,
-          parent: {
-            id,
-            type,
-          },
-          script: {
-            ...(scriptId ? {id, scriptId} : undefined),
-            scriptFormat,
-            ...(body ? {body} : undefined),
-            ...(resource ? {resource} : undefined),
-            ...(elmType ? {type: elmType} : undefined),
-          },
-        });
-      }
-
-      function addTimer(timerName, {id: timerId, timerType, type: elmType, value}) {
-        timers.push({
-          name: timerName,
-          parent: {
-            id,
-            type,
-          },
-          timer: {
-            ...(timerId ? {id, timerId} : undefined),
-            timerType,
-            ...(value ? {value} : undefined),
-            ...(elmType ? {type: elmType} : undefined),
-          },
-        });
-      }
-
-      function runExtendFn(preparedElement) {
+      function runExtendFn(preparedElement, extendContext) {
         if (!extendFn) return preparedElement;
-        const mod = extendFn(preparedElement, {addScript, scripts, addTimer, timers});
+        const mod = extendFn(preparedElement, extendContext);
         return {
           ...mod,
           ...preparedElement,
@@ -615,8 +592,6 @@ function mapModdleContext(moddleContext, extendFn) {
   }
 
   function mapResource(resource) {
-    if (!resource) return;
-
     const {$type: type, resourceAssignmentExpression} = resource;
 
     return {
@@ -733,5 +708,41 @@ function mapModdleContext(moddleContext, extendFn) {
     if (!ref) return;
     const {id, $type: type, name} = ref;
     return {id, type, name};
+  }
+}
+
+function getExtendContext({timers = [], scripts = [], parent: heritage}) {
+  return {addScript, scripts, addTimer, timers};
+
+  function addScript(scriptName, {id, scriptFormat, body, resource, type, parent = heritage}) {
+    scripts.push({
+      ...prepare(scriptName, parent),
+      script: {
+        ...(id ? {id} : undefined),
+        scriptFormat,
+        ...(body ? {body} : undefined),
+        ...(resource ? {resource} : undefined),
+        ...(type ? {type} : undefined),
+      },
+    });
+  }
+
+  function addTimer(timerName, {id, timerType, type, value, parent = heritage}) {
+    timers.push({
+      ...prepare(timerName, parent),
+      timer: {
+        ...(id ? {id} : undefined),
+        timerType,
+        ...(value ? {value} : undefined),
+        ...(type ? {type} : undefined),
+      },
+    });
+  }
+
+  function prepare(name, {id, type} = {}) {
+    return {
+      name,
+      ...(id && type ? {parent: {id, type}} : undefined),
+    };
   }
 }

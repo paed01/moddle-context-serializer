@@ -27,6 +27,7 @@ Result:
 - `getAssociations([scopeId])`: get associations for scope or all of them
 - `getDataObjects`: get all dataObjects
 - `getDataObjectById(dataObjectId)`: get dataObject by id
+- `getExtendContext()`: get extend functions and properties
 - `getInboundAssociations(activityId)`: get activity inbound associations
 - `getInboundSequenceFlows(activityId)`: get activity inbound sequence flows
 - `getMessageFlows`: get all message flows
@@ -43,7 +44,7 @@ Result:
 - `getTimersByElementId(elementId)`: get timers for element with id
 - `serialize`: get stringified serialized object with [deserializable](#deserialize) content
 
-#### `extendFn(mappedBehaviour, {addScript})`
+#### `extendFn(mappedBehaviour, helperContext)`
 
 Function to manipulate activity behaviour after it is mapped.
 
@@ -57,9 +58,7 @@ Arguments:
   - `conditionExpression`: flow condition expression
   - `messageRef`: message reference
   - `resources`: element resources, e.g. `humanPerformer`, `potentialOwner`, and some
-- `helperContext`:
-  - `addScript(name, script)`: function to add a script to the global context, can be retrieved by `getScripts([elementType])` or `getScriptsByElementId(elementId)`
-  - `addTimer(name, timer)`: function to add a timer to the global context, can be retrieved by `getScripts([elementType])` or `getScriptsByElementId(elementId)`
+- `helperContext`: the result of [getExtendContext()](#getextendcontext)
 
 The return value will be merged with `mappedBehaviour` as a shallow copy. Hence, id and other properties can not be manipulated.
 
@@ -67,21 +66,55 @@ The return value will be merged with `mappedBehaviour` as a shallow copy. Hence,
 
 Get all definition activities or pass `scopeId` to get scoped activities. Where `scopeId` can be a process or a sub-process.
 
+### `getExtendContext()`
+
+Get all definition activities or pass `scopeId` to get scoped activities. Where `scopeId` can be a process or a sub-process.
+
+Returns object with:
+- `scripts`: list of known scripts, can be mutated
+- `timers`: list of known timers, can be mutated
+- `addScript(name, script)`: function to add a script to the global context, can be retrieved by `getScripts([elementType])` or `getScriptsByElementId(elementId)`
+- `addTimer(name, timer)`: function to add a timer to the global context, can be retrieved by `getScripts([elementType])` or `getScriptsByElementId(elementId)`
+
+#### addScript(name, script)
+
+Add known script.
+
+Arguments:
+- `name`: name of script
+- `script`: script object
+  - `parent`: parent element as an object with `id` and `type`
+  - `id`: optional id as string that makes it easy to distinguish
+  - `scriptFormat`: script language
+  - `body`: optional script body as string
+  - `resource`: external resource if any
+
+#### addTimer(name, timer)
+
+Add known script.
+
+Arguments:
+- `name`: name of script
+- `timer`: timer object
+  - `parent`: parent element as an object with `id` and `type`
+  - `id`: optional id as string that makes it easy to distinguish
+  - `timerType`: timer type as string
+  - `value`: timer value
+
 ### `getScripts([elementType])`
 
-Get all scripts or just for element of type.
+Get all scripts or just for element of type. Can be used to generate a script resource with all scripts if running in strict mode.
 
-Returns:
-- list if scripts with items:
-  - `name`: name of script
-  - `parent`: object with parent element props:
-    - `id`: parent element id
-    - `type`: parent element type
-  - `script`: the script
-    - `type`: the type of element that holds the script
-    - `scriptFormat`: script language
-    - `body`: script body if any
-    - `resource`: external resource if any
+Returns list if scripts with items:
+- `name`: name of script
+- `parent`: object with parent element props:
+  - `id`: parent element id
+  - `type`: parent element type
+- `script`: the script
+  - `type`: the type of element that holds the script
+  - `scriptFormat`: script language
+  - `body`: script body if any
+  - `resource`: external resource if any
 
 ### `getScriptsByElementId(elementId)`
 

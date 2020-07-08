@@ -196,15 +196,6 @@ describe('moddle context serializer', () => {
       processes.forEach(assertEntity);
     });
 
-    it('(backward compability) returns processes', async () => {
-      const serializer = Serializer(lanesModdleContextFromCallBack, typeResolver);
-      const processes = serializer.getProcesses();
-
-      expect(processes).to.have.length(2);
-
-      processes.forEach(assertEntity);
-    });
-
     it('returns processes only', async () => {
       const serializer = Serializer(subProcessModdleContext, typeResolver);
       const processes = serializer.getProcesses();
@@ -568,6 +559,34 @@ describe('moddle context serializer', () => {
     it('with unknown scope returns no associations', () => {
       const flows = serializer.getAssociations('Def');
       expect(flows).to.have.length(0);
+    });
+  });
+
+  describe('getExtendContext()', () => {
+    let serializer;
+    before(() => {
+      serializer = Serializer(compensationContext, typeResolver);
+    });
+
+    it('returns scripts and timers', () => {
+      const context = serializer.getExtendContext();
+      expect(context).to.have.property('scripts').that.is.an('array');
+      expect(context).to.have.property('timers').that.is.an('array');
+    });
+
+    it('and add functions', () => {
+      const context = serializer.getExtendContext();
+      expect(context).to.have.property('addScript').that.is.a('function');
+      expect(context).to.have.property('addTimer').that.is.a('function');
+    });
+
+    it('add function with empty body is ok, but to what end?', () => {
+      const context = serializer.getExtendContext();
+      context.addScript('foo', {});
+      context.addTimer('bar', {});
+
+      expect(context.scripts).to.have.length(1);
+      expect(context.timers).to.have.length(1);
     });
   });
 

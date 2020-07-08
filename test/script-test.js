@@ -82,6 +82,7 @@ describe('scripts', () => {
         type: 'bpmn:ScriptTask',
       });
       expect(input).to.have.property('script').that.deep.equal({
+        id: 'parameter_scriptInline',
         type: 'camunda:InputParameter',
         scriptFormat: 'javascript',
         body: 'content/2;',
@@ -92,6 +93,7 @@ describe('scripts', () => {
         type: 'bpmn:ScriptTask',
       });
       expect(output).to.have.property('script').that.deep.equal({
+        id: 'parameter_scriptExternal',
         type: 'camunda:OutputParameter',
         scriptFormat: 'javascript',
         resource: '/script/extractOutput.js',
@@ -110,6 +112,7 @@ describe('scripts', () => {
           const {$type: parmType, name, definition} = parm;
           if (!definition || !definition.scriptFormat) return;
           addScript(`parameter/${name}`, {
+            id: `parameter_${name}`,
             type: parmType,
             scriptFormat: definition.scriptFormat,
             body: definition.value,

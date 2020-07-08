@@ -32,7 +32,9 @@ function extender(behaviourMapping) {
 }
 ```
 
-In `bpmn-moddle@5` the moddle context is served in the third argument of the callback. It has a sligthly different schema but is still supported.
+## Backward compatibility
+
+In `bpmn-moddle@5` the moddle context is served in the third argument of the callback. It has a sligthly different scheme but is still supported.
 
 Promisified example of how to retrieive the moddle context:
 ```js

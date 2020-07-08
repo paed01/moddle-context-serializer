@@ -91,19 +91,22 @@ describe('timers', () => {
         id: 'user-due',
         type: 'bpmn:UserTask',
       });
-      expect(timer.timer).to.have.property('timerType', 'dueDate');
-      expect(timer.timer).to.have.property('value', '${dueDate}');
+      expect(timer.timer).to.deep.equal({
+        id: 'user-due_due',
+        timerType: 'dueDate',
+        value: '${dueDate}',
+      });
 
       expect(rest).to.have.length(0);
 
       function extend(element, {addTimer}) {
         if (!element.dueDate) return;
         addTimer(`${element.id}/dueDate`, {
+          id: element.id + '_due',
           timerType: 'dueDate',
           value: element.dueDate,
         });
       }
     });
-
   });
 });

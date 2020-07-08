@@ -1,6 +1,16 @@
 Changelog
 =========
 
+# 0.16.0
+
+Scripts and timers again.
+
+## Additions:
+- Add context `getExtendContext` function to get scripts and timers and an ability to add some more
+
+## Bugfix
+- deserialized context without scripts or timers breaks when trying to retreive them
+
 # 0.15.0
 
 Extract scripts and timers.
