@@ -63,7 +63,7 @@ describe('timers', () => {
       const [timer] = serializer.getTimers('bpmn:BoundaryEvent');
       expect(timer).to.have.property('name');
       expect(timer).to.have.property('parent').that.deep.equal({
-        id: 'bound-timeout',
+        id: 'bound-duration',
         type: 'bpmn:BoundaryEvent',
       });
       expect(timer.timer).to.have.property('timerType', 'timeDuration');

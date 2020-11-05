@@ -13,9 +13,9 @@ Function to make serializable context.
 ### `Serializer(moddleContext, typeResolver[, extendFn])`
 
 Arguments:
-- `moddleContext`: context from `bpmn-moddle`
+- `moddleContext`: context from [`bpmn-moddle`](https://www.npmjs.com/package/bpmn-moddle)
 - `typeResolver`: type resolver function that will receive the mapped element and returns a behaviour function, or use the builtin [TypeResolver](##typeresolvertypes-extender)
-- `extendFn`: optional function to manipulate activity behaviour
+- [`extendFn`](#extendfnmappedbehaviour-helpercontext): optional function to manipulate activity behaviour
 
 Result:
 - `id`: Definition id
@@ -36,12 +36,12 @@ Result:
 - `getProcessById(processId)`: get process by id
 - `getProcesses`: get all processes
 - `getExecutableProcesses`: get all executable processes
-- `getSequenceFlowById`: get sequence flow by id
+- `getSequenceFlowById(flowId)`: get sequence flow by id
 - `getSequenceFlows([scopeId])`: get all sequence flows
-- `getScripts([elementType])`: get all scripts or just for elements of type
-- `getScriptsByElementId(elementId)`: get scripts for element with id
-- `getTimers([elementType])`: get all timers or just for elements of type
-- `getTimersByElementId(elementId)`: get timers for element with id
+- `[getScripts([elementType])](#getscriptselementtype)`: get all scripts or just for elements of type
+- `[getScriptsByElementId(elementId)](#getscriptsbyelementidelementid)`: get scripts for element with id
+- `[getTimers([elementType])](#gettimerselementtype)`: get all timers or just for elements of type
+- `[getTimersByElementId(elementId)](#gettimersbyelementidelementid)`: get timers for element with id
 - `serialize`: get stringified serialized object with [deserializable](#deserialize) content
 
 #### `extendFn(mappedBehaviour, helperContext)`

@@ -21,7 +21,8 @@ describe('moddle context serializer', () => {
     signalEventModdleContext,
     messageFlowModdleContext,
     compensationContext,
-    timersModdleContext;
+    timersModdleContext,
+    conditionalFlows;
   before(async () => {
     lanesModdleContext = await testHelpers.moddleContext(lanesSource);
     lanesModdleContextFromCallBack = require('./resources/lanes-old-callback-context.json');
@@ -33,6 +34,7 @@ describe('moddle context serializer', () => {
     messageFlowModdleContext = await testHelpers.moddleContext(factory.resource('message-flows.bpmn'));
     compensationContext = await testHelpers.moddleContext(factory.resource('bound-compensation.bpmn'));
     timersModdleContext = await testHelpers.moddleContext(factory.resource('timers.bpmn'));
+    conditionalFlows = await testHelpers.moddleContext(factory.resource('conditional-flows.bpmn'));
   });
 
   describe('TypeResolver(types[, extender])', () => {
@@ -371,6 +373,12 @@ describe('moddle context serializer', () => {
       const flows = Serializer(lanesModdleContext, typeResolver).getOutboundSequenceFlows('task1');
       expect(flows).to.have.length(1);
       expect(flows[0]).to.have.property('type', 'bpmn:SequenceFlow');
+    });
+
+    it('default flow is returned on task', () => {
+      const flows = Serializer(conditionalFlows, typeResolver).getOutboundSequenceFlows('task1');
+      expect(flows).to.have.length(3);
+      expect(flows.some((f) => f.isDefault)).to.be.true;
     });
   });
 
