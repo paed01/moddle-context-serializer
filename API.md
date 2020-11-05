@@ -38,10 +38,10 @@ Result:
 - `getExecutableProcesses`: get all executable processes
 - `getSequenceFlowById(flowId)`: get sequence flow by id
 - `getSequenceFlows([scopeId])`: get all sequence flows
-- `[getScripts([elementType])](#getscriptselementtype)`: get all scripts or just for elements of type
-- `[getScriptsByElementId(elementId)](#getscriptsbyelementidelementid)`: get scripts for element with id
-- `[getTimers([elementType])](#gettimerselementtype)`: get all timers or just for elements of type
-- `[getTimersByElementId(elementId)](#gettimersbyelementidelementid)`: get timers for element with id
+- [`getScripts([elementType])`](#getscriptselementtype): get all scripts or just for elements of type
+- [`getScriptsByElementId(elementId)`](#getscriptsbyelementidelementid): get scripts for element with id
+- [`getTimers([elementType])`](#gettimerselementtype): get all timers or just for elements of type
+- [`getTimersByElementId(elementId)`](#gettimersbyelementidelementid): get timers for element with id
 - `serialize`: get stringified serialized object with [deserializable](#deserialize) content
 
 #### `extendFn(mappedBehaviour, helperContext)`
