@@ -9,6 +9,7 @@
     "posttest": "npm run dist && eslint . --cache",
     "prepare": "npm run dist",
     "dist": "babel index.js -d dist",
+    "test:lcov": "nyc mocha -R dot && nyc report --reporter lcov && npm run posttest",
     "cov:html": "nyc mocha -R dot && nyc report --reporter html"
   },
   "repository": {
