@@ -122,4 +122,93 @@ describe('scripts', () => {
       }
     });
   });
+
+  describe('SequenceFlow conditions', () => {
+    it('script language without xsi:type bpmn prefix is ignored', async () => {
+      const source = `
+      <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Def_0" targetNamespace="http://bpmn.io/schema/bpmn">
+        <bpmn:process id="no-typens">
+          <bpmn:sequenceFlow id="to-nothing" name="verified" sourceRef="decision" targetRef="to-end">
+            <bpmn:conditionExpression xsi:type="tFormalExpression" language="JavaScript">next(null, this.environment.variables.take);</bpmn:conditionExpression>
+          </bpmn:sequenceFlow>
+        </bpmn:process>
+      </bpmn:definitions>`;
+
+      const moddleContext = await testHelpers.moddleContext(source);
+
+      const serializer = Serializer(moddleContext, typeResolver);
+      const scripts = serializer.getScripts();
+      expect(scripts.length).to.equal(0);
+    });
+
+    it('script language with xsi:type with bpmn prefix adds script', async () => {
+      const source = `
+      <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Def_0" targetNamespace="http://bpmn.io/schema/bpmn">
+        <bpmn:process id="no-typens">
+          <bpmn:sequenceFlow id="to-nothing" name="verified" sourceRef="decision" targetRef="to-end">
+            <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" language="JavaScript">next(null, this.environment.variables.take);</bpmn:conditionExpression>
+          </bpmn:sequenceFlow>
+        </bpmn:process>
+      </bpmn:definitions>`;
+
+      const moddleContext = await testHelpers.moddleContext(source);
+
+      const serializer = Serializer(moddleContext, typeResolver);
+      const scripts = serializer.getScripts();
+      expect(scripts.length).to.equal(1);
+    });
+
+    it('definition without xsi:ns adds script', async () => {
+      const source = `
+      <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL">
+        <bpmn:process id="no-typens">
+          <bpmn:sequenceFlow id="to-nothing" name="verified" sourceRef="decision" targetRef="to-end">
+            <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" language="JavaScript">next(null, this.environment.variables.take);</bpmn:conditionExpression>
+          </bpmn:sequenceFlow>
+        </bpmn:process>
+      </bpmn:definitions>`;
+
+      const moddleContext = await testHelpers.moddleContext(source);
+
+      const serializer = Serializer(moddleContext, typeResolver);
+      const scripts = serializer.getScripts();
+      expect(scripts.length).to.equal(1);
+    });
+
+    it('script without xsi:type ignores script', async () => {
+      const source = `
+      <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL">
+        <bpmn:process id="no-typens">
+          <bpmn:sequenceFlow id="to-nothing" name="verified" sourceRef="decision" targetRef="to-end">
+            <bpmn:conditionExpression language="JavaScript">next(null, this.environment.variables.take);</bpmn:conditionExpression>
+          </bpmn:sequenceFlow>
+        </bpmn:process>
+      </bpmn:definitions>`;
+
+      const moddleContext = await testHelpers.moddleContext(source);
+
+      const serializer = Serializer(moddleContext, typeResolver);
+      const scripts = serializer.getScripts();
+      expect(scripts.length).to.equal(0);
+    });
+
+    it('definition stripped of targetNamespace adds script', async () => {
+      const source = `
+      <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL">
+        <process id="no-typens">
+          <sequenceFlow id="to-nothing" name="verified" sourceRef="decision" targetRef="to-end">
+            <conditionExpression xsi:type="tFormalExpression" language="JavaScript">next(null, this.environment.variables.take);</conditionExpression>
+          </sequenceFlow>
+        </process>
+      </definitions>`;
+
+      const moddleContext = await testHelpers.moddleContext(source);
+
+      const serializer = Serializer(moddleContext, typeResolver);
+      const scripts = serializer.getScripts();
+      expect(scripts.length).to.equal(1);
+    });
+  });
 });
