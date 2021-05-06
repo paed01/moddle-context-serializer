@@ -582,7 +582,7 @@ function mapModdleContext(moddleContext, extendFn) {
         const resources = element.resources && element.resources.map(mapResource);
         const messageRef = spreadRef(element.messageRef);
         const {
-          eventDefinitions,
+          eventDefinitions: eds,
           loopCharacteristics,
           ioSpecification,
           conditionExpression
@@ -595,10 +595,11 @@ function mapModdleContext(moddleContext, extendFn) {
             type
           }
         });
+        const eventDefinitions = eds && eds.map(mapEventDefinitions).filter(Boolean);
         return runExtendFn({ ...behaviour,
           ...element,
           ...(eventDefinitions ? {
-            eventDefinitions: eventDefinitions.map(mapEventDefinitions)
+            eventDefinitions
           } : undefined),
           ...(loopCharacteristics ? {
             loopCharacteristics: mapActivityBehaviour(loopCharacteristics, extendContext)
@@ -845,8 +846,8 @@ function mapModdleContext(moddleContext, extendFn) {
 }
 
 function getExtendContext({
+  scripts,
   timers = [],
-  scripts = [],
   parent: heritage
 }) {
   return {

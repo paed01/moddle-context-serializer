@@ -1,6 +1,10 @@
 Changelog
 =========
 
+# 1.0.0
+
+No breaking but used in production.
+
 # 0.16.0
 
 Scripts and timers again.

@@ -504,17 +504,20 @@ function mapModdleContext(moddleContext, extendFn) {
         const resources = element.resources && element.resources.map(mapResource);
         const messageRef = spreadRef(element.messageRef);
 
-        const {eventDefinitions, loopCharacteristics, ioSpecification, conditionExpression} = element;
+        const {eventDefinitions: eds, loopCharacteristics, ioSpecification, conditionExpression} = element;
 
         const extendContext = getExtendContext({scripts, timers, parent: {
           id,
           type,
         }});
 
+
+        const eventDefinitions = eds && eds.map(mapEventDefinitions).filter(Boolean);
+
         return runExtendFn({
           ...behaviour,
           ...element,
-          ...(eventDefinitions ? {eventDefinitions: eventDefinitions.map(mapEventDefinitions)} : undefined),
+          ...(eventDefinitions ? {eventDefinitions} : undefined),
           ...(loopCharacteristics ? {loopCharacteristics: mapActivityBehaviour(loopCharacteristics, extendContext)} : undefined),
           ...(ioSpecification ? {ioSpecification: mapActivityBehaviour(ioSpecification, extendContext)} : undefined),
           ...(conditionExpression ? prepareCondition(conditionExpression, behaviour) : undefined),
@@ -603,7 +606,6 @@ function mapModdleContext(moddleContext, extendFn) {
 
   function mapActivityBehaviour(ed, {addTimer}) {
     if (!ed) return;
-
     const {$type: type, id} = ed;
     let behaviour = {...ed};
 
@@ -711,7 +713,7 @@ function mapModdleContext(moddleContext, extendFn) {
   }
 }
 
-function getExtendContext({timers = [], scripts = [], parent: heritage}) {
+function getExtendContext({scripts, timers = [], parent: heritage}) {
   return {addScript, scripts, addTimer, timers};
 
   function addScript(scriptName, {id, scriptFormat, body, resource, type, parent = heritage}) {
