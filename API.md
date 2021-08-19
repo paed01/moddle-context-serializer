@@ -27,6 +27,7 @@ Result:
 - `getAssociations([scopeId])`: get associations for scope or all of them
 - `getDataObjects`: get all dataObjects
 - `getDataObjectById(dataObjectId)`: get dataObject by id
+- `getDataStoreReferenceById(dataStoreId)`: get dataStoreReference by id
 - `getExtendContext()`: get extend functions and properties
 - `getInboundAssociations(activityId)`: get activity inbound associations
 - `getInboundSequenceFlows(activityId)`: get activity inbound sequence flows
@@ -200,7 +201,7 @@ Some default type mapping exist:
 - `Definition`: `bpmn:Definitions`, singular just sounds better
 - `BpmnError`: `bpmn:Error` since using `Error` is not recommended
 - `ServiceImplementation`: mapped to Service- or SendTask implementation property
-
+- `Properties`: behaviour for list of `bpmn:Property`'s
 
 ### Extender
 

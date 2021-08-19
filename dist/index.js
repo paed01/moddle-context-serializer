@@ -45,6 +45,10 @@ function TypeResolver(types, extender) {
     if (behaviour.ioSpecification) {
       resolve(behaviour.ioSpecification);
     }
+
+    if (behaviour.properties) {
+      behaviour.properties.Behaviour = types.Properties;
+    }
   };
 
   function getBehaviourFromType(type) {
@@ -77,6 +81,7 @@ function contextApi(mapped) {
     activities,
     associations,
     dataObjects,
+    dataStores = [],
     definition,
     messageFlows,
     processes,
@@ -94,6 +99,8 @@ function contextApi(mapped) {
     getAssociations,
     getDataObjects,
     getDataObjectById,
+    getDataStoreReferences,
+    getDataStoreReferenceById,
     getExecutableProcesses,
 
     getExtendContext() {
@@ -127,6 +134,7 @@ function contextApi(mapped) {
       activities,
       associations,
       dataObjects,
+      dataStores,
       definition,
       messageFlows,
       processes,
@@ -183,10 +191,20 @@ function contextApi(mapped) {
     return dataObjects;
   }
 
+  function getDataStoreReferences() {
+    return dataStores;
+  }
+
   function getDataObjectById(dataObjectId) {
     return dataObjects.find(({
       id
     }) => id === dataObjectId);
+  }
+
+  function getDataStoreReferenceById(dataStoreId) {
+    return dataStores.find(({
+      id
+    }) => id === dataStoreId);
   }
 
   function getActivityById(activityId) {
@@ -242,6 +260,7 @@ function resolveTypes(mappedContext, typeResolver) {
     activities,
     associations,
     dataObjects,
+    dataStores = [],
     definition,
     messageFlows,
     processes,
@@ -251,6 +270,7 @@ function resolveTypes(mappedContext, typeResolver) {
   processes.forEach(typeResolver);
   activities.forEach(typeResolver);
   dataObjects.forEach(typeResolver);
+  dataStores.forEach(typeResolver);
   messageFlows.forEach(typeResolver);
   sequenceFlows.forEach(typeResolver);
   associations.forEach(typeResolver);
@@ -285,6 +305,7 @@ function mapModdleContext(moddleContext, extendFn) {
     activities,
     associations,
     dataObjects,
+    dataStores,
     messageFlows,
     processes,
     sequenceFlows
@@ -293,6 +314,7 @@ function mapModdleContext(moddleContext, extendFn) {
     activities,
     associations,
     dataObjects,
+    dataStores,
     definition,
     messageFlows,
     processes,
@@ -353,12 +375,6 @@ function mapModdleContext(moddleContext, extendFn) {
       }
 
       switch (element.$type) {
-        case 'bpmn:OutputSet':
-        case 'bpmn:InputSet':
-          {
-            break;
-          }
-
         case 'bpmn:DataInputAssociation':
           result.dataInputAssociations.push(r);
           break;
@@ -395,7 +411,7 @@ function mapModdleContext(moddleContext, extendFn) {
         name
       } = element;
 
-      switch (element.$type) {
+      switch (type) {
         case 'bpmn:DataObjectReference':
           break;
 
@@ -422,6 +438,21 @@ function mapModdleContext(moddleContext, extendFn) {
                 type: parent.type
               },
               references: prepareDataObjectReferences(),
+              behaviour: prepareElementBehaviour()
+            });
+            break;
+          }
+
+        case 'bpmn:DataStoreReference':
+          {
+            result.dataStores.push({
+              id,
+              name,
+              type,
+              parent: {
+                id: parent.id,
+                type: parent.type
+              },
               behaviour: prepareElementBehaviour()
             });
             break;
@@ -515,6 +546,10 @@ function mapModdleContext(moddleContext, extendFn) {
                 result.dataObjects = result.dataObjects.concat(subElements.dataObjects);
               }
 
+              if (subElements.dataStores) {
+                result.dataStores = result.dataStores.concat(subElements.dataStores);
+              }
+
               if (subElements.associations) {
                 result.associations = result.associations.concat(subElements.associations);
               }
@@ -585,7 +620,8 @@ function mapModdleContext(moddleContext, extendFn) {
           eventDefinitions: eds,
           loopCharacteristics,
           ioSpecification,
-          conditionExpression
+          conditionExpression,
+          properties: props
         } = element;
         const extendContext = getExtendContext({
           scripts,
@@ -595,7 +631,8 @@ function mapModdleContext(moddleContext, extendFn) {
             type
           }
         });
-        const eventDefinitions = eds && eds.map(mapEventDefinitions).filter(Boolean);
+        const eventDefinitions = eds && eds.map(mapElementBehaviourDefinitions).filter(Boolean);
+        const properties = props && props.map(mapElementBehaviourDefinitions).filter(Boolean);
         return runExtendFn({ ...behaviour,
           ...element,
           ...(eventDefinitions ? {
@@ -607,6 +644,12 @@ function mapModdleContext(moddleContext, extendFn) {
           ...(ioSpecification ? {
             ioSpecification: mapActivityBehaviour(ioSpecification, extendContext)
           } : undefined),
+          ...(properties ? {
+            properties: {
+              type: 'properties',
+              values: properties
+            }
+          } : undefined),
           ...(conditionExpression ? prepareCondition(conditionExpression, behaviour) : undefined),
           ...(messageRef ? {
             messageRef
@@ -616,7 +659,7 @@ function mapModdleContext(moddleContext, extendFn) {
           } : undefined)
         }, extendContext);
 
-        function mapEventDefinitions(ed) {
+        function mapElementBehaviourDefinitions(ed) {
           return mapActivityBehaviour(ed, extendContext);
         }
 
@@ -658,6 +701,7 @@ function mapModdleContext(moddleContext, extendFn) {
       activities: [],
       associations: [],
       dataObjects: [],
+      dataStores: [],
       messageFlows: [],
       processes: [],
       sequenceFlows: []
@@ -736,6 +780,12 @@ function mapModdleContext(moddleContext, extendFn) {
           break;
         }
 
+      case 'bpmn:Property':
+        {
+          behaviour = preparePropertyBehaviour(ed);
+          break;
+        }
+
       case 'bpmn:MultiInstanceLoopCharacteristics':
         {
           behaviour.loopCardinality = ed.loopCardinality && ed.loopCardinality.body;
@@ -795,24 +845,30 @@ function mapModdleContext(moddleContext, extendFn) {
     };
   }
 
+  function preparePropertyBehaviour(propertyDef) {
+    const dataInput = getDataInputBehaviour(propertyDef.id);
+    const dataOutput = getDataOutputBehaviour(propertyDef.id);
+    return { ...propertyDef,
+      ...(dataInput.association.source ? {
+        dataInput
+      } : undefined),
+      ...(dataOutput.association.target ? {
+        dataOutput
+      } : undefined)
+    };
+  }
+
   function getDataInputBehaviour(dataInputId) {
     const target = dataInputAssociations.find(assoc => assoc.property === 'bpmn:targetRef' && assoc.id === dataInputId && assoc.element);
     const source = target && dataInputAssociations.find(assoc => assoc.property === 'bpmn:sourceRef' && assoc.element && assoc.element.id === target.element.id);
     return {
       association: {
         source: source && { ...source,
-          dataObject: getDataObjectRef(source.id)
+          ...getDataRef(source.id)
         },
         target: target && { ...target
         }
       }
-    };
-  }
-
-  function getDataObjectRef(dataObjectReferenceId) {
-    const dataObjectRef = refs.find(dor => dor.element && dor.element.id === dataObjectReferenceId);
-    if (!dataObjectRef) return;
-    return { ...dataObjectRef
     };
   }
 
@@ -824,9 +880,37 @@ function mapModdleContext(moddleContext, extendFn) {
         source: source && { ...source
         },
         target: target && { ...target,
-          dataObject: getDataObjectRef(target.id)
+          ...getDataRef(target.id)
         }
       }
+    };
+  }
+
+  function getDataRef(referenceId) {
+    const dataObject = getDataObjectRef(referenceId);
+    const dataStore = getDataStore(referenceId);
+    return { ...(dataObject ? {
+        dataObject
+      } : undefined),
+      ...(dataStore ? {
+        dataStore
+      } : undefined)
+    };
+  }
+
+  function getDataObjectRef(referenceId) {
+    const dataElementRef = refs.find(dor => dor.element && dor.element.id === referenceId);
+    if (!dataElementRef) return;
+    return { ...dataElementRef
+    };
+  }
+
+  function getDataStore(storeId) {
+    const dataStore = elementsById[storeId];
+    if (!dataStore) return;
+    return {
+      id: dataStore.id,
+      $type: dataStore.$type
     };
   }
 

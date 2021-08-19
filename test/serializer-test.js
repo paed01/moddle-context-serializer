@@ -1272,12 +1272,12 @@ describe('moddle context serializer', () => {
     <?xml version="1.0" encoding="UTF-8"?>
     <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
       <process id="theProcess" isExecutable="true">
-        <dataObjectReference id="inputToUserRef" dataObjectRef="userInfo" />
-        <dataObjectReference id="outputFromUserRef" dataObjectRef="global" />
-        <dataObjectReference id="globalRef" dataObjectRef="global" />
         <dataObject id="userInfo" />
         <dataObject id="global" />
         <dataObject id="noref" />
+        <dataObjectReference id="inputToUserRef" dataObjectRef="userInfo" />
+        <dataObjectReference id="outputFromUserRef" dataObjectRef="global" />
+        <dataObjectReference id="globalRef" dataObjectRef="global" />
         <userTask id="userTask">
           <ioSpecification id="inputSpec">
             <dataInput id="userInput" name="info" />
@@ -1288,8 +1288,8 @@ describe('moddle context serializer', () => {
         </userTask>
       </process>
       <process id="theOtherProcess" isExecutable="true">
-        <dataObjectReference id="inputToUserRefTo" dataObjectRef="duplex" />
         <dataObject id="duplex" />
+        <dataObjectReference id="inputToUserRefTo" dataObjectRef="duplex" />
         <userTask id="userTaskTo">
           <ioSpecification id="inputSpecTo">
             <dataInput id="userInputTo" name="info" />
@@ -1392,6 +1392,203 @@ describe('moddle context serializer', () => {
         .with.property('target')
         .with.property('dataObject')
         .with.property('id', 'duplex');
+    });
+  });
+
+  describe('bpmn:property', () => {
+    it('activity with bpmn:Property returns reference to dataObject', async () => {
+      const moddleContext = await testHelpers.moddleContext(factory.resource('engine-issue-139.bpmn'));
+      const serialized = Serializer(moddleContext, typeResolver);
+
+      const activity = serialized.getActivityById('Activity_0ksziuo');
+      const properties = activity.behaviour.properties;
+
+      expect(properties).to.be.an('object').with.property('values').with.length(1);
+      expect(properties).to.have.property('Behaviour', types.Properties);
+      expect(properties.values[0]).to.have.property('id');
+      expect(properties.values[0]).to.have.property('type');
+      expect(properties.values[0].behaviour).to.have.property('dataInput').with.property('association').with.property('source');
+      expect(properties.values[0].behaviour.dataInput.association.source).to.have.property('dataObject').with.property('id');
+      expect(properties.values[0].behaviour).to.not.have.property('dataOutput');
+    });
+  });
+
+  describe('bpmn:dataStoreReference', () => {
+    it('activity with bpmn:Property returns reference to dataStoreReference', async () => {
+      const source = `<?xml version="1.0" encoding="UTF-8"?>
+      <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+        id="Definitions_1ke2tm6"
+        targetNamespace="http://bpmn.io/schema/bpmn">
+        <process id="Process_15ozyjy" isExecutable="true">
+          <startEvent id="start" />
+          <sequenceFlow id="to-task" sourceRef="start" targetRef="task" />
+          <task id="task">
+            <property id="ds-prop" name="__targetRef_placeholder" />
+            <dataInputAssociation id="DataInputAssociation_1">
+              <sourceRef>DataStoreReference_1</sourceRef>
+              <targetRef>ds-prop</targetRef>
+            </dataInputAssociation>
+          </task>
+          <dataStoreReference id="DataStoreReference_1" />
+        </process>
+       </definitions>
+      `;
+      const moddleContext = await testHelpers.moddleContext(source);
+
+      const serialized = Serializer(moddleContext, typeResolver);
+
+      const activity = serialized.getActivityById('task');
+      const properties = activity.behaviour.properties;
+
+      expect(properties).to.be.an('object').with.property('values').with.length(1);
+      expect(properties).to.have.property('Behaviour', types.Properties);
+      expect(properties.values[0]).to.have.property('id');
+      expect(properties.values[0]).to.have.property('type');
+      expect(properties.values[0].behaviour, 'dataInput association').to.have.property('dataInput').with.property('association').with.property('source');
+      expect(properties.values[0].behaviour.dataInput.association.source, 'dataStoreReference').to.have.property('dataStore').with.property('id', 'DataStoreReference_1');
+    });
+
+    it('activity with bpmn:Property output returns reference to dataStoreReference', async () => {
+      const source = `<?xml version="1.0" encoding="UTF-8"?>
+      <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+        id="Definitions_1ke2tm6"
+        targetNamespace="http://bpmn.io/schema/bpmn">
+        <process id="Process_15ozyjy" isExecutable="true">
+          <startEvent id="start" />
+          <sequenceFlow id="to-task" sourceRef="start" targetRef="task" />
+          <task id="task">
+            <property id="ds-prop" name="__targetRef_placeholder" />
+            <dataOutputAssociation id="DataInputAssociation_1">
+              <sourceRef>ds-prop</sourceRef>
+              <targetRef>DataStoreReference_1</targetRef>
+            </dataOutputAssociation>
+          </task>
+          <dataStoreReference id="DataStoreReference_1" />
+        </process>
+       </definitions>
+      `;
+      const moddleContext = await testHelpers.moddleContext(source);
+      expect(moddleContext.warnings).to.be.empty;
+
+      const serialized = Serializer(moddleContext, typeResolver);
+
+      const activity = serialized.getActivityById('task');
+      const properties = activity.behaviour.properties;
+
+      expect(properties).to.be.an('object').with.property('values').with.length(1);
+      expect(properties).to.have.property('Behaviour', types.Properties);
+      expect(properties.values[0]).to.have.property('id');
+      expect(properties.values[0]).to.have.property('type');
+      expect(properties.values[0].behaviour, 'dataOutput association').to.have.property('dataOutput').with.property('association').with.property('source');
+      expect(properties.values[0].behaviour.dataOutput.association.target, 'dataStoreReference').to.have.property('dataStore').with.property('id', 'DataStoreReference_1');
+    });
+
+    it('activity with bpmn:InputOutputSpecification returns reference to dataStoreReference', async () => {
+      const source = `
+      <?xml version="1.0" encoding="UTF-8"?>
+      <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <process id="theProcess" isExecutable="true">
+          <task id="task">
+            <ioSpecification id="inputSpec">
+              <dataInput id="userInput" name="info" />
+              <dataOutput id="userOutput" name="result" />
+            </ioSpecification>
+            <dataInputAssociation id="associatedWith" sourceRef="DataStoreReference_1" targetRef="userInput" />
+            <dataOutputAssociation id="associatedWithOut" sourceRef="userOutput" targetRef="DataStoreReference_1" />
+          </task>
+          <dataStoreReference id="DataStoreReference_1" />
+        </process>
+      </definitions>`;
+
+      const moddleContext = await testHelpers.moddleContext(source);
+      expect(moddleContext.warnings).to.be.empty;
+
+      const serialized = Serializer(moddleContext, typeResolver);
+
+      const activity = serialized.getActivityById('task');
+      const ioSpecification = activity.behaviour.ioSpecification;
+
+      expect(ioSpecification.behaviour).to.be.an('object').with.property('dataInputs').with.length(1);
+      expect(ioSpecification.behaviour.dataInputs[0].behaviour.association.source.dataStore).to.deep.equal({
+        $type: 'bpmn:DataStoreReference',
+        id: 'DataStoreReference_1',
+      });
+
+      expect(ioSpecification.behaviour).to.be.an('object').with.property('dataOutputs').with.length(1);
+      expect(ioSpecification.behaviour.dataOutputs[0].behaviour.association.target.dataStore).to.deep.equal({
+        $type: 'bpmn:DataStoreReference',
+        id: 'DataStoreReference_1',
+      });
+    });
+
+    it('deserializes dataStores', async () => {
+      const source = `<?xml version="1.0" encoding="UTF-8"?>
+      <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+        id="Definitions_1ke2tm6"
+        targetNamespace="http://bpmn.io/schema/bpmn">
+        <process id="Process_15ozyjy" isExecutable="true">
+          <startEvent id="start" />
+          <sequenceFlow id="to-task" sourceRef="start" targetRef="task" />
+          <task id="task">
+            <property id="ds-prop" name="__targetRef_placeholder" />
+            <dataInputAssociation id="DataInputAssociation_1">
+              <sourceRef>DataStoreReference_1</sourceRef>
+              <targetRef>ds-prop</targetRef>
+            </dataInputAssociation>
+          </task>
+          <dataStoreReference id="DataStoreReference_1" />
+        </process>
+       </definitions>
+      `;
+      const moddleContext = await testHelpers.moddleContext(source);
+
+      const serializer = Serializer(moddleContext, typeResolver);
+      let serialized = serializer.serialize();
+
+      expect(JSON.parse(serialized)).to.have.property('dataStores').with.length(1);
+
+      let deserialized = deserialize(JSON.parse(serialized), typeResolver);
+      expect(deserialized.getDataStoreReferences()).to.have.property('length', 1);
+
+      serialized = deserialized.serialize();
+
+      expect(JSON.parse(serialized)).to.have.property('dataStores').with.length(1);
+
+      deserialized = deserialize(JSON.parse(serialized), typeResolver);
+      expect(deserialized.getDataStoreReferences()).to.have.property('length', 1);
+    });
+
+    it('getDataStoreReferenceById(referenceId) returns dataStoreReference or undefined', async () => {
+      const source = `<?xml version="1.0" encoding="UTF-8"?>
+      <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+        id="Definitions_1ke2tm6"
+        targetNamespace="http://bpmn.io/schema/bpmn">
+        <process id="Process_1" isExecutable="true">
+          <startEvent id="start" />
+          <sequenceFlow id="to-task" sourceRef="start" targetRef="task" />
+          <task id="task">
+            <property id="ds-prop" name="__targetRef_placeholder" />
+            <dataInputAssociation id="DataInputAssociation_1">
+              <sourceRef>DataStoreReference_1</sourceRef>
+              <targetRef>ds-prop</targetRef>
+            </dataInputAssociation>
+          </task>
+          <dataStoreReference id="DataStoreReference_1" />
+        </process>
+       </definitions>
+      `;
+      const moddleContext = await testHelpers.moddleContext(source);
+
+      const serializer = Serializer(moddleContext, typeResolver);
+      expect(serializer.getDataStoreReferenceById('DataStoreReference_2')).to.be.undefined;
+
+      const dataStore = serializer.getDataStoreReferenceById('DataStoreReference_1');
+      expect(dataStore).to.have.property('id', 'DataStoreReference_1');
+      expect(dataStore).to.have.property('parent').that.deep.equal({
+        id: 'Process_1',
+        type: 'bpmn:Process',
+      });
+      expect(dataStore).to.have.property('Behaviour', types.DataStoreReference);
     });
   });
 

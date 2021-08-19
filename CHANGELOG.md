@@ -1,6 +1,14 @@
 Changelog
 =========
 
+# 1.1.0
+
+BPMN IO stuff
+
+## Additions:
+- add support for `bpmn:property`
+- add support for `bpmn:dataStoreReference`
+
 # 1.0.0
 
 No breaking but used in production.
