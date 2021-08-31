@@ -3,7 +3,7 @@ bpmn-moddle context serializer
 
 Make bpmn-moddle context serializable and mapped to behaviour functions
 
-[![Build Status](https://travis-ci.com/paed01/moddle-context-serializer.svg?branch=master)](https://travis-ci.com/paed01/moddle-context-serializer)[![Coverage Status](https://coveralls.io/repos/github/paed01/moddle-context-serializer/badge.svg?branch=master)](https://coveralls.io/github/paed01/moddle-context-serializer?branch=master)
+[![Build Status](https://app.travis-ci.com/paed01/moddle-context-serializer.svg?branch=master)](https://app.travis-ci.com/paed01/moddle-context-serializer)[![Coverage Status](https://coveralls.io/repos/github/paed01/moddle-context-serializer/badge.svg?branch=master)](https://coveralls.io/github/paed01/moddle-context-serializer?branch=master)
 
 - [API](/API.md)
 
