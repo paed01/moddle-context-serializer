@@ -25,9 +25,12 @@ Result:
 - `getActivityById(activityId)`: get activity by id
 - `getAssociationById(associationId)`: get association by id
 - `getAssociations([scopeId])`: get associations for scope or all of them
-- `getDataObjects`: get all dataObjects
+- `getDataObjects([scopeId])`: get dataObjects for scope or all of them
 - `getDataObjectById(dataObjectId)`: get dataObject by id
+- `getDataStoreReferences([scopeId])`: get dataStoreReferences for scope or all of them
 - `getDataStoreReferenceById(dataStoreId)`: get dataStoreReference by id
+- `getDataStores()`: get all dataStores
+- `getDataStoreById(dataStoreId)`: get dataStore by id
 - `getExtendContext()`: get extend functions and properties
 - `getInboundAssociations(activityId)`: get activity inbound associations
 - `getInboundSequenceFlows(activityId)`: get activity inbound sequence flows

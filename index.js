@@ -94,6 +94,8 @@ function contextApi(mapped) {
     getDataObjectById,
     getDataStoreReferences,
     getDataStoreReferenceById,
+    getDataStoreById,
+    getDataStores,
     getExecutableProcesses,
     getExtendContext() {
       return getExtendContext({scripts, timers});
@@ -171,20 +173,30 @@ function contextApi(mapped) {
     return activities.filter((activity) => activity.parent.id === scopeId);
   }
 
-  function getDataObjects() {
-    return dataObjects;
-  }
-
-  function getDataStoreReferences() {
-    return dataStores;
+  function getDataObjects(scopeId) {
+    if (!scopeId) return dataObjects;
+    return dataObjects.filter((elm) => elm.parent.id === scopeId);
   }
 
   function getDataObjectById(dataObjectId) {
     return dataObjects.find(({id}) => id === dataObjectId);
   }
 
+  function getDataStoreReferences(scopeId) {
+    if (!scopeId) return dataStores;
+    return dataStores.filter((elm) => elm.parent.id === scopeId);
+  }
+
   function getDataStoreReferenceById(dataStoreId) {
     return dataStores.find(({id}) => id === dataStoreId);
+  }
+
+  function getDataStoreById(dataStoreId) {
+    return dataStores.find(({id, type}) => id === dataStoreId && type === 'bpmn:DataStore');
+  }
+
+  function getDataStores() {
+    return dataStores.filter(({type}) => type === 'bpmn:DataStore');
   }
 
   function getActivityById(activityId) {
@@ -269,9 +281,10 @@ function mapModdleContext(moddleContext, extendFn) {
   };
 
   const {
-    refs,
     dataInputAssociations,
+    dataObjectRefs,
     dataOutputAssociations,
+    dataStoreRefs,
     flowRefs,
     processRefs,
   } = prepareReferences();
@@ -326,8 +339,11 @@ function mapModdleContext(moddleContext, extendFn) {
         case 'bpmn:default':
           upsertFlowRef(r.id, {isDefault: true});
           break;
+        case 'bpmn:dataStoreRef':
+          result.dataStoreRefs.push(r);
+          break;
         case 'bpmn:dataObjectRef':
-          result.refs.push(r);
+          result.dataObjectRefs.push(r);
           break;
         case 'bpmn:processRef': {
           result.processRefs[element.id] = {
@@ -355,7 +371,8 @@ function mapModdleContext(moddleContext, extendFn) {
         return flow;
       }
     }, {
-      refs: [],
+      dataStoreRefs: [],
+      dataObjectRefs: [],
       dataInputAssociations: [],
       dataOutputAssociations: [],
       flowRefs: {},
@@ -391,6 +408,20 @@ function mapModdleContext(moddleContext, extendFn) {
               type: parent.type,
             },
             references: prepareDataObjectReferences(),
+            behaviour: prepareElementBehaviour(),
+          });
+          break;
+        }
+        case 'bpmn:DataStore': {
+          result.dataStores.push({
+            id,
+            name,
+            type,
+            parent: {
+              id: parent.id,
+              type: parent.type,
+            },
+            references: prepareDataStoreReferences(),
             behaviour: prepareElementBehaviour(),
           });
           break;
@@ -570,7 +601,19 @@ function mapModdleContext(moddleContext, extendFn) {
       }
 
       function prepareDataObjectReferences() {
-        const objectRefs = refs.filter((objectRef) => objectRef.id === element.id);
+        const objectRefs = dataObjectRefs.filter((objectRef) => objectRef.id === element.id);
+
+        return objectRefs.map((objectRef) => {
+          return {
+            id: objectRef.element.id,
+            type: objectRef.element.$type,
+            behaviour: {...objectRef.element},
+          };
+        });
+      }
+
+      function prepareDataStoreReferences() {
+        const objectRefs = dataStoreRefs.filter((objectRef) => objectRef.id === element.id);
 
         return objectRefs.map((objectRef) => {
           return {
@@ -750,7 +793,7 @@ function mapModdleContext(moddleContext, extendFn) {
   }
 
   function getDataRef(referenceId) {
-    const dataObject = getDataObjectRef(referenceId);
+    const dataObject = getDataObject(referenceId);
     const dataStore = getDataStore(referenceId);
 
     return {
@@ -759,16 +802,27 @@ function mapModdleContext(moddleContext, extendFn) {
     };
   }
 
-  function getDataObjectRef(referenceId) {
-    const dataElementRef = refs.find((dor) => dor.element && dor.element.id === referenceId);
-    if (!dataElementRef) return;
-    return {...dataElementRef};
+  function getDataObject(referenceId) {
+    const dataReference = dataObjectRefs.find((dor) => dor.element && dor.element.id === referenceId);
+    if (!dataReference) {
+      const dataElm = elementsById[referenceId];
+      return dataElm && dataElm.$type === 'bpmn:DataObject' && {...dataElm};
+    }
+
+    return {...elementsById[dataReference.id]};
   }
 
-  function getDataStore(storeId) {
-    const dataStore = elementsById[storeId];
-    if (!dataStore) return;
-    return {id: dataStore.id, $type: dataStore.$type};
+  function getDataStore(referenceId) {
+    const dataReference = dataStoreRefs.find((dor) => dor.element && dor.element.id === referenceId);
+    if (dataReference) return {...elementsById[dataReference.id]};
+
+    const dataElm = elementsById[referenceId];
+    if (!dataElm) return;
+    switch (dataElm.$type) {
+      case 'bpmn:DataStore':
+      case 'bpmn:DataStoreReference':
+        return {...dataElm};
+    }
   }
 
   function spreadRef(ref) {

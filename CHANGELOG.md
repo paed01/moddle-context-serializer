@@ -1,6 +1,11 @@
 Changelog
 =========
 
+# 1.1.1
+
+- add support for `bpmn:dataStore`
+- remove dataStore prop if none
+
 # 1.1.0
 
 BPMN IO stuff

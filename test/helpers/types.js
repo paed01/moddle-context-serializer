@@ -5,6 +5,7 @@ export default {
   BusinessRuleTask() {},
   CompensateEventDefinition() {},
   ConditionalEventDefinition() {},
+  DataStore() {},
   DataObject() {},
   DataStoreReference() {},
   Definition() {},
