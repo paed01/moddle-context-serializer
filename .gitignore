@@ -32,3 +32,4 @@ coverage*
 
 package-lock.json
 .nyc_output
+*.log

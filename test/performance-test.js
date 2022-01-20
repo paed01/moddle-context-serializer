@@ -13,7 +13,7 @@ describe('performance', () => {
     largeContext = await testHelpers.moddleContext(largeSource);
   });
 
-  it('getScripts returns empty array if serialized without scripts', async () => {
+  it('large source performance', async () => {
     const context = Serializer(largeContext, typeResolver);
 
     const activities = context.getActivities();

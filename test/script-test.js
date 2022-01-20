@@ -99,7 +99,7 @@ describe('scripts', () => {
         resource: '/script/extractOutput.js',
       });
 
-      function extend(element, {addScript}) {
+      function extend(element, extendContext) {
         const {extensionElements} = element;
         if (!extensionElements || !extensionElements.values) return;
 
@@ -111,7 +111,7 @@ describe('scripts', () => {
         function addParameterScript(parm) {
           const {$type: parmType, name, definition} = parm;
           if (!definition || !definition.scriptFormat) return;
-          addScript(`parameter/${name}`, {
+          extendContext.addScript(`parameter/${name}`, {
             id: `parameter_${name}`,
             type: parmType,
             scriptFormat: definition.scriptFormat,

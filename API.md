@@ -21,6 +21,7 @@ Result:
 - `id`: Definition id
 - `type`: Definition type
 - `name`: Definition name
+- `elements`: object with elements
 - [`getActivities([scopeId])`](#getactivitiesscopeid): get activities
 - `getActivityById(activityId)`: get activity by id
 - `getAssociationById(associationId)`: get association by id
@@ -72,11 +73,9 @@ Get all definition activities or pass `scopeId` to get scoped activities. Where 
 
 ### `getExtendContext()`
 
-Get all definition activities or pass `scopeId` to get scoped activities. Where `scopeId` can be a process or a sub-process.
-
-Returns object with:
-- `scripts`: list of known scripts, can be mutated
-- `timers`: list of known timers, can be mutated
+Returns an ExtendContext instance:
+- `scripts`: list of known scripts
+- `timers`: list of known timers
 - `addScript(name, script)`: function to add a script to the global context, can be retrieved by `getScripts([elementType])` or `getScriptsByElementId(elementId)`
 - `addTimer(name, timer)`: function to add a timer to the global context, can be retrieved by `getScripts([elementType])` or `getScriptsByElementId(elementId)`
 
@@ -95,7 +94,7 @@ Arguments:
 
 #### addTimer(name, timer)
 
-Add known script.
+Add known timer.
 
 Arguments:
 - `name`: name of script

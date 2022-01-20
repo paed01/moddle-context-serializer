@@ -1,7 +1,7 @@
 import factory from './helpers/factory';
 import testHelpers from './helpers/testHelpers';
 import types from './helpers/types';
-import {default as Serializer, TypeResolver, deserialize} from '../index';
+import {default as Serializer, TypeResolver, deserialize, map} from '../index';
 
 const lanesSource = factory.resource('lanes.bpmn');
 const subProcessSource = factory.resource('sub-process.bpmn');
@@ -185,6 +185,23 @@ describe('moddle context serializer', () => {
       deserialized.getActivities().forEach(assertEntity);
       deserialized.getDataObjects().forEach(assertEntity);
       deserialized.getMessageFlows().forEach(assertEntity);
+    });
+  });
+
+  describe('map(moddleContext[, extendFn])', () => {
+    it('returns mapped context', () => {
+      const mapped = map(subProcessModdleContext);
+
+      expect(mapped).to.have.property('definition').that.is.an('object');
+      expect(mapped).to.have.property('activities').that.is.an('array');
+      expect(mapped).to.have.property('associations').that.is.an('array');
+      expect(mapped).to.have.property('dataObjects').that.is.an('array');
+      expect(mapped).to.have.property('dataStores').that.is.an('array');
+      expect(mapped).to.have.property('messageFlows').that.is.an('array');
+      expect(mapped).to.have.property('processes').that.is.an('array');
+      expect(mapped).to.have.property('sequenceFlows').that.is.an('array');
+      expect(mapped).to.have.property('scripts').that.is.an('array');
+      expect(mapped).to.have.property('timers').that.is.an('array');
     });
   });
 
@@ -458,15 +475,15 @@ describe('moddle context serializer', () => {
       expect(flows[1]).to.have.property('Behaviour', types.MessageFlow);
     });
 
-    it('message flow targeting empty lane is ok', async () => {
+    it('message flow targeting empty participant is ok', async () => {
       const source = `
       <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns:js="http://paed01.github.io/bpmn-engine/schema/2017/08/bpmn">
         <collaboration id="Collaboration_0">
-          <messageFlow id="fromMain2Participant" sourceRef="send" targetRef="lane2" />
-          <messageFlow id="fromParticipant2Main" sourceRef="lane2" targetRef="receive" />
+          <messageFlow id="fromMain2Participant" sourceRef="send" targetRef="part2" />
+          <messageFlow id="fromParticipant2Main" sourceRef="part2" targetRef="receive" />
           <participant id="lane1" name="Main" processRef="mainProcess" />
-          <participant id="lane2" name="Participant" processRef="participantProcess" />
+          <participant id="part2" name="Participant" processRef="participantProcess" />
         </collaboration>
         <process id="mainProcess" isExecutable="true">
           <startEvent id="start1" />
@@ -496,10 +513,14 @@ describe('moddle context serializer', () => {
         id: 'send',
       });
       expect(fromMain).to.have.property('target').that.eql({
+        participantId: 'part2',
+        participantName: 'Participant',
         processId: 'participantProcess',
       });
 
       expect(fromParticipant).to.have.property('source').that.eql({
+        participantId: 'part2',
+        participantName: 'Participant',
         processId: 'participantProcess',
       });
       expect(fromParticipant).to.have.property('target').that.eql({
@@ -1405,6 +1426,67 @@ describe('moddle context serializer', () => {
         .with.property('dataObject')
         .with.property('id', 'duplex');
     });
+
+    it('input and output only', async () => {
+      const source2 = `
+      <?xml version="1.0" encoding="UTF-8"?>
+      <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <process id="theProcess" isExecutable="true">
+          <dataObject id="userInfo" />
+          <dataObject id="global" />
+          <dataObject id="noref" />
+          <dataObjectReference id="inputToUserRef" dataObjectRef="userInfo" />
+          <dataObjectReference id="outputFromUserRef" dataObjectRef="global" />
+          <dataObjectReference id="globalRef" dataObjectRef="global" />
+          <userTask id="userTask">
+            <ioSpecification id="inputSpec">
+              <dataInput id="userInput" name="info" />
+            </ioSpecification>
+            <dataInputAssociation id="associatedWith" sourceRef="inputToUserRef" targetRef="userInput" />
+          </userTask>
+        </process>
+        <process id="theOtherProcess" isExecutable="true">
+          <dataObject id="duplex" />
+          <dataObjectReference id="inputToUserRefTo" dataObjectRef="duplex" />
+          <userTask id="userTaskTo">
+            <ioSpecification id="inputSpecTo">
+              <dataOutput id="userOutputTo" name="info" />
+              <outputSet id="outputGroup">
+                <dataOutputRefs>userOutputTo</dataOutputRefs>
+              </outputSet>
+            </ioSpecification>
+            <dataOutputAssociation id="associatedWithTo" sourceRef="userOutputTo" targetRef="inputToUserRefTo" />
+          </userTask>
+        </process>
+      </definitions>`;
+
+      const mc = await testHelpers.moddleContext(source2);
+      const serializer = Serializer(mc, typeResolver);
+
+      const task1 = serializer.getActivityById('userTask');
+      const ioSpecification1 = task1.behaviour.ioSpecification;
+      expect(ioSpecification1).to.be.ok;
+      expect(ioSpecification1).to.have.property('Behaviour', types.InputOutputSpecification);
+
+      expect(ioSpecification1).to.have.property('behaviour').with.property('dataInputs').with.length(1);
+
+      expect(ioSpecification1.behaviour.dataInputs[0]).to.have.property('id', 'userInput');
+      expect(ioSpecification1.behaviour.dataInputs[0]).to.have.property('name', 'info');
+
+      expect(ioSpecification1.behaviour).to.not.have.property('dataOutputs');
+
+      const task2 = serializer.getActivityById('userTaskTo');
+      const ioSpecification2 = task2.behaviour.ioSpecification;
+      expect(ioSpecification2).to.be.ok;
+      expect(ioSpecification2).to.have.property('Behaviour', types.InputOutputSpecification);
+
+      expect(ioSpecification2).to.have.property('behaviour').with.property('dataOutputs').with.length(1);
+
+      expect(ioSpecification2.behaviour.dataOutputs[0]).to.have.property('id', 'userOutputTo');
+      expect(ioSpecification2.behaviour.dataOutputs[0]).to.have.property('name', 'info');
+
+      expect(ioSpecification2.behaviour).to.not.have.property('dataInputs');
+    });
   });
 
   describe('bpmn:property', () => {
@@ -2007,6 +2089,105 @@ describe('moddle context serializer', () => {
       expect(toActivityFlow).to.be.ok;
       expect(toActivityFlow).to.have.property('target').with.property('processId', 'mainProcess');
       expect(toActivityFlow.target).to.have.property('id', 'intermediate');
+    });
+  });
+
+  describe('bpmn:Collaboration', () => {
+    let serializer;
+    before(async () => {
+      const source = `
+      <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <collaboration id="Collaboration_0">
+          <participant id="lane1" name="Main" processRef="mainProcess" />
+          <participant id="part2" name="Participant" processRef="participantProcess" />
+          <messageFlow id="mflow1" sourceRef="lane1" targetRef="part2" />
+        </collaboration>
+        <collaboration id="Collaboration_1" name="Among peers">
+          <participant id="part3" name="Peer 1" processRef="mainProcess" />
+          <participant id="part4" name="Peer 2" processRef="participantProcess" />
+          <messageFlow id="mflow2" sourceRef="part4" targetRef="part3" />
+        </collaboration>
+        <process id="mainProcess" isExecutable="true">
+          <startEvent id="start1" />
+        </process>
+        <process id="participantProcess" />
+      </definitions>`;
+      const moddleContext = await testHelpers.moddleContext(source);
+      serializer = Serializer(moddleContext, typeResolver);
+    });
+
+    it('participants are stored in elements', () => {
+      expect(serializer.elements.participants).to.deep.equal([{
+        id: 'lane1',
+        type: 'bpmn:Participant',
+        name: 'Main',
+        processId: 'mainProcess',
+        parent: {
+          id: 'Collaboration_0',
+          type: 'bpmn:Collaboration',
+        },
+      }, {
+        id: 'part2',
+        type: 'bpmn:Participant',
+        name: 'Participant',
+        processId: 'participantProcess',
+        parent: {
+          id: 'Collaboration_0',
+          type: 'bpmn:Collaboration',
+        },
+      }, {
+        id: 'part3',
+        type: 'bpmn:Participant',
+        name: 'Peer 1',
+        processId: 'mainProcess',
+        parent: {
+          id: 'Collaboration_1',
+          type: 'bpmn:Collaboration',
+        },
+      }, {
+        id: 'part4',
+        type: 'bpmn:Participant',
+        name: 'Peer 2',
+        processId: 'participantProcess',
+        parent: {
+          id: 'Collaboration_1',
+          type: 'bpmn:Collaboration',
+        },
+      }]);
+    });
+
+    it('participants are deserialized', () => {
+      const deserialized = deserialize(JSON.parse(serializer.serialize()), typeResolver);
+      expect(deserialized.elements.participants).to.have.length(4);
+      for (const p of deserialized.elements.participants) {
+        expect(p).to.have.property('id');
+        expect(p).to.have.property('parent').with.property('id');
+      }
+    });
+
+    it('collaboration message flows get participant information', () => {
+      const [mflow1, mflow2] = serializer.getMessageFlows();
+
+      expect(mflow1).to.have.property('source').that.deep.equal({
+        participantId: 'lane1',
+        participantName: 'Main',
+        processId: 'mainProcess',
+      });
+      expect(mflow1).to.have.property('target').that.deep.equal({
+        participantId: 'part2',
+        participantName: 'Participant',
+        processId: 'participantProcess',
+      });
+      expect(mflow2).to.have.property('source').that.deep.equal({
+        participantId: 'part4',
+        participantName: 'Peer 2',
+        processId: 'participantProcess',
+      });
+      expect(mflow2).to.have.property('target').that.deep.equal({
+        participantId: 'part3',
+        participantName: 'Peer 1',
+        processId: 'mainProcess',
+      });
     });
   });
 });

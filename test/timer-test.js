@@ -99,9 +99,9 @@ describe('timers', () => {
 
       expect(rest).to.have.length(0);
 
-      function extend(element, {addTimer}) {
+      function extend(element, extendContext) {
         if (!element.dueDate) return;
-        addTimer(`${element.id}/dueDate`, {
+        extendContext.addTimer(`${element.id}/dueDate`, {
           id: element.id + '_due',
           timerType: 'dueDate',
           value: element.dueDate,

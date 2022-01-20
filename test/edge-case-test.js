@@ -59,4 +59,18 @@ describe('edge-cases (mainly for coverage)', () => {
     const activity = context.getActivityById('task');
     expect(activity.behaviour).to.have.property('ioSpecification');
   });
+
+  it('single boundary event', async () => {
+    const source = `<?xml version="1.0" encoding="UTF-8"?>
+    <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" id="task-definitions" targetNamespace="http://bpmn.io/schema/bpmn">
+      <process id="Process_1" isExecutable="true">
+        <boundaryEvent id="event" />
+      </process>
+    </definitions>`;
+
+    const mc = await testHelpers.moddleContext(source);
+    const context = Serializer(mc, typeResolver);
+    const activity = context.getActivityById('event');
+    expect(activity).to.have.property('id', 'event');
+  });
 });

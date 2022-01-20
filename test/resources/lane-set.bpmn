@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_06787hr" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.12.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.15.0">
+  <bpmn:collaboration id="Collaboration_0pnq894">
+    <bpmn:participant id="Participant_1xh932n" name="Count" processRef="Process_0q0r3jb" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_0q0r3jb" isExecutable="true">
+    <bpmn:laneSet id="LaneSet_04k36si">
+      <bpmn:lane id="Lane_0cm283a" name="One">
+        <bpmn:flowNodeRef>start</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_1utubf8" name="Two" />
+      <bpmn:lane id="Lane_1m88mgi" name="Three">
+        <bpmn:flowNodeRef>task</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:task id="task">
+      <bpmn:incoming>to-task</bpmn:incoming>
+    </bpmn:task>
+    <bpmn:startEvent id="start">
+      <bpmn:outgoing>to-task</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="to-task" sourceRef="start" targetRef="task" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_0pnq894">
+      <bpmndi:BPMNShape id="Participant_1xh932n_di" bpmnElement="Participant_1xh932n" isHorizontal="true">
+        <dc:Bounds x="129" y="80" width="681" height="360" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_0cm283a_di" bpmnElement="Lane_0cm283a" isHorizontal="true">
+        <dc:Bounds x="159" y="80" width="651" height="83" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_1utubf8_di" bpmnElement="Lane_1utubf8" isHorizontal="true">
+        <dc:Bounds x="159" y="163" width="651" height="83" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_1m88mgi_di" bpmnElement="Lane_1m88mgi" isHorizontal="true">
+        <dc:Bounds x="159" y="246" width="651" height="194" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1f6253n_di" bpmnElement="to-task">
+        <di:waypoint x="288" y="120" />
+        <di:waypoint x="314" y="120" />
+        <di:waypoint x="314" y="330" />
+        <di:waypoint x="340" y="330" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Activity_1w4nimq_di" bpmnElement="task">
+        <dc:Bounds x="340" y="290" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0tb7eup_di" bpmnElement="start">
+        <dc:Bounds x="252" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
