@@ -1,12 +1,6 @@
 Changelog
 =========
 
-<<<<<<< HEAD
-# 1.1.1
-
-- add support for `bpmn:dataStore`
-- remove dataStore prop if none
-=======
 # 2.0.0
 
 Handle participants add add participant information to message flows. To reduce CPU footprint the api is prototyped.
@@ -20,7 +14,11 @@ Handle participants add add participant information to message flows. To reduce 
 - elements are exposed in new api elements property
 - expose participants in elements property
 - add lane information to activity
->>>>>>> refactor to prototype
+
+# 1.1.1
+
+- add support for `bpmn:dataStore`
+- remove dataStore prop if none
 
 # 1.1.0
 
