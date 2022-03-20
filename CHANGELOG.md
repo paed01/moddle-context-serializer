@@ -1,6 +1,14 @@
 Changelog
 =========
 
+# 2.1.0
+
+Activity data associations
+
+## Additions:
+- add activity behaviour property `dataInputAssociations` holding a list of the same
+- add activity behaviour property `dataOutputAssociations` holding a list of the same
+
 # 2.0.0
 
 Handle participants add add participant information to message flows. To reduce CPU footprint the api is prototyped.

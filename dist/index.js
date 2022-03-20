@@ -321,7 +321,7 @@ Mapper.prototype._prepareReferences = function prepareReferences() {
     switch (property) {
       case 'bpmn:sourceRef':
         {
-          const flow = this._upsertFlowRef(result, element.id, {
+          const flow = this._upsertRef(result.flowRefs, element.id, {
             id: element.id,
             $type: element.$type,
             sourceId: r.id,
@@ -335,7 +335,7 @@ Mapper.prototype._prepareReferences = function prepareReferences() {
 
       case 'bpmn:targetRef':
         {
-          const flow = this._upsertFlowRef(result, element.id, {
+          const flow = this._upsertRef(result.flowRefs, element.id, {
             targetId: r.id
           });
 
@@ -345,7 +345,7 @@ Mapper.prototype._prepareReferences = function prepareReferences() {
         }
 
       case 'bpmn:default':
-        this._upsertFlowRef(result, r.id, {
+        this._upsertRef(result.flowRefs, r.id, {
           isDefault: true
         });
 
@@ -388,8 +388,8 @@ Mapper.prototype._prepareReferences = function prepareReferences() {
   return result;
 };
 
-Mapper.prototype._upsertFlowRef = function upsertFlowRef(result, id, value) {
-  const flow = result.flowRefs[id] = result.flowRefs[id] || {};
+Mapper.prototype._upsertRef = function upsertFlowRef(target, id, value) {
+  const flow = target[id] = target[id] || {};
   Object.assign(flow, value);
   return flow;
 };
@@ -698,6 +698,22 @@ Mapper.prototype._prepareElementBehaviour = function prepareElementBehaviour(ele
     preparedElement.ioSpecification = this._mapActivityBehaviour(ioSpecification, extendContext);
   }
 
+  if (element.dataInputAssociations) {
+    const associations = preparedElement.dataInputAssociations = [];
+
+    for (const association of element.dataInputAssociations) {
+      associations.push(this._mapActivityBehaviour(association, extendContext));
+    }
+  }
+
+  if (element.dataOutputAssociations) {
+    const associations = preparedElement.dataOutputAssociations = [];
+
+    for (const association of element.dataOutputAssociations) {
+      associations.push(this._mapActivityBehaviour(association, extendContext));
+    }
+  }
+
   if (conditionExpression && conditionExpression.language) {
     const {
       $type: exprType,
@@ -798,6 +814,16 @@ Mapper.prototype._mapActivityBehaviour = function mapActivityBehaviour(ed, exten
               value
             });
           }
+        }
+
+        break;
+      }
+
+    case 'bpmn:DataOutputAssociation':
+    case 'bpmn:DataInputAssociation':
+      {
+        if (Array.isArray(ed.sourceRef) && ed.sourceRef.length) {
+          behaviour.sourceRef = spreadRef(ed.sourceRef[0]);
         }
 
         break;
