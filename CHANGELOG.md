@@ -1,6 +1,11 @@
 Changelog
 =========
 
+# 2.1.1
+
+- Stop building node 12
+- Lint some
+
 # 2.1.0
 
 Activity data associations

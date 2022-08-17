@@ -5,12 +5,12 @@ import path from 'path';
 const eventActivities = [
   'bpmn:IntermediateCatchEvent',
   'bpmn:StartEvent',
-  'bpmn:EndEvent'
+  'bpmn:EndEvent',
 ];
 
 const gateways = [
   'bpmn:ExclusiveGateway',
-  'bpmn:InclusiveGateway'
+  'bpmn:InclusiveGateway',
 ];
 
 const activities = [
@@ -19,7 +19,7 @@ const activities = [
   'bpmn:ServiceTask',
   'bpmn:UserTask',
   'bpmn:SubProcess',
-  'bpmn:ParallelGateway'
+  'bpmn:ParallelGateway',
 ];
 
 const moddle = new BpmnModdle();
@@ -135,14 +135,14 @@ async function create(activityType) {
   const flowElements = [
     moddle.create('bpmn:StartEvent', {id: 'start'}),
     moddle.create(activityType, { id: 'activity' }),
-    moddle.create('bpmn:EndEvent', {id: 'end1'})
+    moddle.create('bpmn:EndEvent', {id: 'end1'}),
   ];
 
   const [start, activity, end] = flowElements;
 
   const flows = [
     moddle.create('bpmn:SequenceFlow', {id: 'flow1', sourceRef: start, targetRef: activity}),
-    moddle.create('bpmn:SequenceFlow', {id: 'flow2', sourceRef: activity, targetRef: end})
+    moddle.create('bpmn:SequenceFlow', {id: 'flow2', sourceRef: activity, targetRef: end}),
   ];
   const [, flow2, flow3] = flows;
 
@@ -164,7 +164,6 @@ async function create(activityType) {
 
   return toXml(definitions);
 }
-
 
 function fromXML(source) {
   return new Promise((resolve, reject) => {

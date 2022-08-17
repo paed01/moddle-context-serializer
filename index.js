@@ -820,7 +820,6 @@ Mapper.prototype._getDataStore = function getDataStore(referenceId) {
   }
 };
 
-
 Mapper.prototype._prepareDataObjectReferences = function prepareDataObjectReferences(element) {
   const objectRefs = this._references.dataObjectRefs.filter((objectRef) => objectRef.id === element.id);
 
