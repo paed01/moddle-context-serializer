@@ -1,6 +1,11 @@
 Changelog
 =========
 
+# 3.0.0
+
+- Converted to module
+- Remove backward compatibility test for bpmn-moddle@5
+
 # 2.2.0
 
 - Add property `script.type` to added scripts

@@ -1,17 +1,14 @@
 {
   "name": "moddle-context-serializer",
-  "version": "2.2.0",
+  "version": "3.0.0",
   "description": "Make bpmn-moddle context serializable and mapped to behaviour functions",
-  "module": "index.js",
-  "main": "dist/index.js",
+  "type": "module",
   "sideEffects": false,
   "scripts": {
     "test": "mocha",
-    "posttest": "npm run dist && eslint . --cache",
-    "prepare": "npm run dist",
-    "dist": "babel index.js -d dist",
-    "test:lcov": "nyc mocha -R dot && nyc report --reporter lcov && npm run posttest",
-    "cov:html": "nyc mocha -R dot && nyc report --reporter html"
+    "posttest": "eslint . --cache",
+    "test:lcov": "c8 -r lcov mocha && npm run posttest",
+    "cov:html": "c8 -r html -r text mocha"
   },
   "repository": {
     "type": "git",
@@ -22,7 +19,6 @@
     "url": "https://github.com/paed01"
   },
   "files": [
-    "dist/index.js",
     "index.js"
   ],
   "license": "MIT",
@@ -34,21 +30,17 @@
     "isomorphic"
   ],
   "peerDependencies": {
-    "bpmn-moddle": ">=5"
+    "bpmn-moddle": ">=6"
   },
   "devDependencies": {
-    "@babel/cli": "^7.20.7",
-    "@babel/core": "^7.20.7",
-    "@babel/preset-env": "^7.20.2",
-    "@babel/register": "^7.18.9",
-    "bpmn-moddle": "^7.1.2",
-    "bpmn-moddle-5": "npm:bpmn-moddle@5",
+    "bpmn-moddle": "^8.0.0",
     "bpmn-moddle-6": "npm:bpmn-moddle@6",
+    "bpmn-moddle-7": "npm:bpmn-moddle@7",
+    "c8": "^7.12.0",
     "camunda-bpmn-moddle": "^7.0.1",
     "camunda-bpmn-moddle-6": "npm:camunda-bpmn-moddle@6",
     "chai": "^4.3.7",
     "eslint": "^8.30.0",
-    "mocha": "^10.2.0",
-    "nyc": "^15.1.0"
+    "mocha": "^10.2.0"
   }
 }

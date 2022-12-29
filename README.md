@@ -31,23 +31,3 @@ function extender(behaviourMapping) {
   behaviourMapping['bpmn:EscalationEventDefinition'] = EscalationEventDefinition;
 }
 ```
-
-## Backward compatibility
-
-In `bpmn-moddle@5` the moddle context is served in the third argument of the callback. It has a sligthly different scheme but is still supported.
-
-Promisified example of how to retrieive the moddle context:
-```js
-import BpmnModdle from 'bpmn-moddle';
-
-function getModdleContext(source) {
-  const bpmnModdle = new BpmnModdle();
-
-  return new Promise((resolve, reject) => {
-    bpmnModdle.fromXML(source, (err, definitions, moddleContext) => {
-      if (err) return reject(err);
-      resolve(moddleContext);
-    });
-  });
-}
-```
