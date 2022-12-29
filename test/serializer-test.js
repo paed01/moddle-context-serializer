@@ -1,7 +1,8 @@
-import factory from './helpers/factory';
-import testHelpers from './helpers/testHelpers';
-import types from './helpers/types';
-import {default as Serializer, TypeResolver, deserialize, map} from '../index';
+import factory from './helpers/factory.js';
+import fs from 'fs';
+import testHelpers from './helpers/testHelpers.js';
+import types from './helpers/types.js';
+import {default as Serializer, TypeResolver, deserialize, map} from '../index.js';
 
 const lanesSource = factory.resource('lanes.bpmn');
 const subProcessSource = factory.resource('sub-process.bpmn');
@@ -25,7 +26,7 @@ describe('moddle context serializer', () => {
     conditionalFlows;
   before(async () => {
     lanesModdleContext = await testHelpers.moddleContext(lanesSource);
-    lanesModdleContextFromCallBack = require('./resources/lanes-old-callback-context.json');
+    lanesModdleContextFromCallBack = JSON.parse(fs.readFileSync('./test/resources/lanes-old-callback-context.json'));
     subProcessModdleContext = await testHelpers.moddleContext(subProcessSource);
     eventDefinitionModdleContext = await testHelpers.moddleContext(eventDefinitionSource);
     conditionAndEscalationModdleContext = await testHelpers.moddleContext(conditionAndEscalationSource);
@@ -1863,7 +1864,7 @@ describe('moddle context serializer', () => {
         </process>
       </definitions>`;
 
-      const moddleOptions = {camunda: require('camunda-bpmn-moddle/resources/camunda')};
+      const moddleOptions = {camunda: testHelpers.getCamundaExtension()};
       const context = Serializer(await testHelpers.moddleContext(source, moddleOptions), typeResolver);
       const task = context.getActivityById('task');
       expect(task.behaviour).to.have.property('assignee', 'pal');

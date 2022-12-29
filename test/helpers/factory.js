@@ -1,6 +1,9 @@
 import BpmnModdle from 'bpmn-moddle';
 import fs from 'fs';
 import path from 'path';
+import {fileURLToPath} from 'url';
+
+const dirname = fileURLToPath(new URL('.', import.meta.url));
 
 const eventActivities = [
   'bpmn:IntermediateCatchEvent',
@@ -121,7 +124,7 @@ function multipleInbound() {
 }
 
 function resource(name) {
-  return fs.readFileSync(path.join(__dirname, '..', 'resources', name));
+  return fs.readFileSync(path.join(dirname, '..', 'resources', name));
 }
 
 async function create(activityType) {

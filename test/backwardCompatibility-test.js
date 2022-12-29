@@ -1,35 +1,14 @@
-import factory from './helpers/factory';
-import types from './helpers/types';
-import BpmnModdle5 from 'bpmn-moddle-5';
+import factory from './helpers/factory.js';
+import types from './helpers/types.js';
 import BpmnModdle6 from 'bpmn-moddle-6';
-import testHelpers from './helpers/testHelpers';
+import BpmnModdle7 from 'bpmn-moddle-7';
+import testHelpers from './helpers/testHelpers.js';
 
-import {default as Serializer, TypeResolver, deserialize} from '../index';
+import {default as Serializer, TypeResolver, deserialize} from '../index.js';
 
 const typeResolver = TypeResolver(types);
 
 describe('backward compatibility', () => {
-  describe('bpmn-moddle@5', () => {
-    let moddleContext;
-    before('load context', async () => {
-      const source = factory.userTask();
-      moddleContext = await new Promise((resolve, reject) => {
-        const bpmnModdle = new BpmnModdle5();
-        return bpmnModdle.fromXML(source, (err, definitions, ctx) => {
-          if (err) return reject(err);
-          resolve(ctx);
-        });
-      });
-    });
-
-    it('returns processes', () => {
-      const serializer = Serializer(moddleContext, typeResolver);
-      const processes = serializer.getProcesses();
-
-      expect(processes).to.have.length(1);
-    });
-  });
-
   describe('bpmn-moddle@6', () => {
     let moddleContext;
     before('load context', async () => {
@@ -48,6 +27,42 @@ describe('backward compatibility', () => {
       const processes = serializer.getProcesses();
 
       expect(processes).to.have.length(1);
+    });
+  });
+
+  describe('bpmn-moddle@7', () => {
+    let moddleContext;
+    before('load context', async () => {
+      const source = factory.userTask();
+      const bpmnModdle = new BpmnModdle7();
+      moddleContext = await bpmnModdle.fromXML(source);
+    });
+
+    it('returns processes', () => {
+      const serializer = Serializer(moddleContext, typeResolver);
+      const processes = serializer.getProcesses();
+
+      expect(processes).to.have.length(1);
+    });
+  });
+
+  describe('camunda-bpmn-moddle@6', () => {
+    let moddleContext, moddleContext6;
+    before('load context', async () => {
+      const source = factory.resource('scripts.bpmn');
+      moddleContext = await testHelpers.moddleContext(source, {
+        camunda: testHelpers.getCamundaExtension(),
+      });
+      moddleContext6 = await testHelpers.moddleContext(source, {
+        camunda: testHelpers.getCamundaExtension('camunda-bpmn-moddle-6'),
+      });
+    });
+
+    it('returns the same serialized context as latest version', () => {
+      const serializer = Serializer(moddleContext, typeResolver);
+      const serializer6 = Serializer(moddleContext6, typeResolver);
+
+      expect(serializer.serialize()).to.equal(serializer6.serialize());
     });
   });
 

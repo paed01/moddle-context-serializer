@@ -1,7 +1,7 @@
-import testHelpers from './helpers/testHelpers';
-import types from './helpers/types';
+import testHelpers from './helpers/testHelpers.js';
+import types from './helpers/types.js';
 
-import {default as Serializer, TypeResolver, deserialize} from '../index';
+import {default as Serializer, TypeResolver, deserialize} from '../index.js';
 
 const typeResolver = TypeResolver(types);
 

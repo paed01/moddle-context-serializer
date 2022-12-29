@@ -1,7 +1,8 @@
-import testHelpers from './helpers/testHelpers';
-import types from './helpers/types';
+import factory from './helpers/factory.js';
+import testHelpers from './helpers/testHelpers.js';
+import types from './helpers/types.js';
 
-import {default as Serializer, TypeResolver, deserialize} from '../index';
+import {default as Serializer, TypeResolver, deserialize} from '../index.js';
 
 const typeResolver = TypeResolver(types);
 
@@ -24,7 +25,7 @@ describe('sequence flow', () => {
     </definitions>`;
 
     const moddleContext = await testHelpers.moddleContext(source, {
-      js: require('./resources/js-bpmn-moddle.json'),
+      js: JSON.parse(factory.resource('js-bpmn-moddle.json')),
     });
     const serializer = Serializer(moddleContext, typeResolver);
 

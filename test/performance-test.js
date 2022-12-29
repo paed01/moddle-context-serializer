@@ -1,8 +1,8 @@
-import factory from './helpers/factory';
-import testHelpers from './helpers/testHelpers';
-import types from './helpers/types';
+import factory from './helpers/factory.js';
+import testHelpers from './helpers/testHelpers.js';
+import types from './helpers/types.js';
 
-import {default as Serializer, TypeResolver} from '../index';
+import {default as Serializer, TypeResolver} from '../index.js';
 
 const typeResolver = TypeResolver(types);
 const largeSource = factory.resource('nested-joins.bpmn');
