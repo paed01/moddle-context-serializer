@@ -3,20 +3,15 @@
     "node": true,
     "mocha": true
   },
+  "parserOptions": {
+    "ecmaVersion": 2020
+  },
   "rules": {
     "no-unused-expressions": 0,
     "no-var": 1,
     "prefer-arrow-callback": 1
   },
   "globals": {
-    "expect": false,
-    "Buffer": false,
-    "Feature": false,
-    "Scenario": false,
-    "Given": false,
-    "When": false,
-    "Then": false,
-    "And": false,
-    "But": false
+    "expect": false
   }
 }
