@@ -88,6 +88,7 @@ Arguments:
 - `script`: script object
   - `parent`: parent element as an object with `id` and `type`
   - `id`: optional id as string that makes it easy to distinguish
+  - `type`: element type that holds script, e.g. `bpmn:Script`
   - `scriptFormat`: script language
   - `body`: optional script body as string
   - `resource`: external resource if any
@@ -220,5 +221,3 @@ const typeResolver = TypeResolver(types, (typeMapping) => {
   typeMapping['bpmn:EscalationEventDefinition'] = EscalationEventDefinition;
 });
 ```
-
-
