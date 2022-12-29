@@ -34,6 +34,7 @@ describe('scripts', () => {
         expect(script.parent, script.id).to.have.property('type');
         expect(script, script.id).to.have.property('script').that.is.an('object');
         expect(script.script, script.id).to.have.property('scriptFormat');
+        expect(script.script, script.id).to.have.property('type').that.is.ok;
       }
     });
 
@@ -120,6 +121,12 @@ describe('scripts', () => {
           });
         }
       }
+    });
+
+    it('script task has type bpmn:Script as script type', () => {
+      const serializer = Serializer(moddleContext, typeResolver);
+      const [script] = serializer.getScriptsByElementId('script-js');
+      expect(script).to.have.property('script').with.property('type', 'bpmn:Script');
     });
   });
 

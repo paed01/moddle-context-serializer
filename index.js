@@ -520,8 +520,9 @@ Mapper.prototype._prepareElements = function prepareElements(parent, elements) {
             type,
           },
           scriptFormat,
-          ...(script ? {body: script} : undefined),
-          ...(resource ? {resource} : undefined),
+          ...(script && {body: script}),
+          ...(resource && {resource}),
+          type: 'bpmn:Script',
         });
         result.activities.push(this._prepareActivity(element, parent));
         break;
@@ -547,7 +548,7 @@ Mapper.prototype._prepareActivity = function prepareActivity(element, parent, be
       id: parent.id,
       type: parent.type,
     },
-    ...(lane ? {lane: {...lane}} : undefined),
+    ...(lane && {lane: {...lane}}),
     behaviour: this._prepareElementBehaviour(element, behaviour),
   };
 };
@@ -566,7 +567,7 @@ Mapper.prototype._prepareElementBehaviour = function prepareElementBehaviour(ele
   const preparedElement = {
     ...behaviour,
     ...element,
-    ...(eventDefinitions ? {eventDefinitions} : undefined),
+    ...(eventDefinitions && {eventDefinitions}),
   };
 
   const extendContext = new ExtendContext({
@@ -717,8 +718,8 @@ Mapper.prototype._preparePropertyBehaviour = function preparePropertyBehaviour(p
 
   return {
     ...propertyDef,
-    ...(dataInput.association.source ? {dataInput} : undefined),
-    ...(dataOutput.association.target ? {dataOutput} : undefined),
+    ...(dataInput.association.source && {dataInput}),
+    ...(dataOutput.association.target && {dataOutput}),
   };
 };
 
@@ -792,8 +793,8 @@ Mapper.prototype._getDataRef = function getDataRef(referenceId) {
   const dataStore = this._getDataStore(referenceId);
 
   return {
-    ...(dataObject ? {dataObject} : undefined),
-    ...(dataStore ? {dataStore} : undefined),
+    ...(dataObject && {dataObject}),
+    ...(dataStore && {dataStore}),
   };
 };
 
@@ -872,15 +873,16 @@ function ExtendContext({scripts, timers = [], parent}) {
   this._parent = parent;
 }
 
-ExtendContext.prototype.addScript = function addScript(scriptName, {id, scriptFormat, body, resource, type, parent}) {
+ExtendContext.prototype.addScript = function addScript(scriptName, elm) {
+  const {id, scriptFormat, body, resource, type, parent} = elm;
   this.scripts.push({
     ...this._prepare(scriptName, parent || this._parent),
     script: {
-      ...(id ? {id} : undefined),
+      ...(id && {id}),
       scriptFormat,
-      ...(body ? {body} : undefined),
-      ...(resource ? {resource} : undefined),
-      ...(type ? {type} : undefined),
+      ...(body && {body}),
+      ...(resource && {resource}),
+      ...(type && {type}),
     },
   });
 };
@@ -889,10 +891,10 @@ ExtendContext.prototype.addTimer = function addTimer(timerName, {id, timerType, 
   this.timers.push({
     ...this._prepare(timerName, parent || this._parent),
     timer: {
-      ...(id ? {id} : undefined),
+      ...(id && {id}),
       timerType,
-      ...(value ? {value} : undefined),
-      ...(type ? {type} : undefined),
+      ...(value && {value}),
+      ...(type && {type}),
     },
   });
 };
@@ -900,7 +902,7 @@ ExtendContext.prototype.addTimer = function addTimer(timerName, {id, timerType, 
 ExtendContext.prototype._prepare = function prepare(name, {id, type} = {}) {
   return {
     name,
-    ...(id && type ? {parent: {id, type}} : undefined),
+    ...(id && type && {parent: {id, type}}),
   };
 };
 

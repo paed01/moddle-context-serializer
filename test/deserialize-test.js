@@ -58,6 +58,7 @@ describe('deserialize', () => {
       },
       scriptFormat: activity.behaviour.scriptFormat,
       body: activity.behaviour.script,
+      type: 'bpmn:Script',
     });
 
     expect(deserialized.getScripts()).to.deep.equal(scripts);
