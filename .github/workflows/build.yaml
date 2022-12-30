@@ -24,7 +24,7 @@ jobs:
           flag-name: run-${{ matrix.node-version }}
           parallel: true
 
-finish:
+  finish:
     needs: test
     runs-on: ubuntu-latest
     steps:
