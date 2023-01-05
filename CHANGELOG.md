@@ -1,6 +1,10 @@
 Changelog
 =========
 
+# 3.1.0
+
+- Export as module and node require module
+
 # 3.0.0
 
 - Convert to module

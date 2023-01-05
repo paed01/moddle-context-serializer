@@ -2,7 +2,7 @@ import factory from './helpers/factory.js';
 import testHelpers from './helpers/testHelpers.js';
 import types from './helpers/types.js';
 
-import {default as Serializer, TypeResolver, deserialize} from '../index.js';
+import {default as Serializer, TypeResolver, deserialize} from '../src/index.js';
 
 const typeResolver = TypeResolver(types);
 const camunda = testHelpers.getCamundaExtension();
@@ -17,7 +17,7 @@ describe('timers', () => {
       });
     });
 
-    it('getTimers() extracts known scripts', async () => {
+    it('getTimers() extracts known timers', async () => {
       const serializer = Serializer(moddleContext, typeResolver);
       const timers = serializer.getTimers();
       expect(timers.length).to.equal(3);
