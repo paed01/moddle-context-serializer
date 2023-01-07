@@ -1,9 +1,9 @@
 Changelog
 =========
 
-# 3.1.0
+# 3.1.0-1
 
-- Export as module and node require module
+- Add exports for node
 
 # 3.0.0
 

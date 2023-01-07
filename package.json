@@ -1,13 +1,15 @@
 {
   "name": "moddle-context-serializer",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "Make bpmn-moddle context serializable and mapped to behaviour functions",
   "type": "module",
-  "main": "dist/index.cjs",
-  "module": "src/index.js",
+  "main": "./dist/index.cjs",
+  "module": "./src/index.js",
   "exports": {
-    "import": "./src/index.js",
-    "require": "./dist/index.cjs"
+    ".": {
+      "import": "./src/index.js",
+      "require": "./dist/index.cjs"
+    }
   },
   "sideEffects": false,
   "scripts": {
