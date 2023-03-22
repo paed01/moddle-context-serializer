@@ -2,7 +2,7 @@ import factory from './helpers/factory.js';
 import fs from 'fs';
 import testHelpers from './helpers/testHelpers.js';
 import types from './helpers/types.js';
-import {default as Serializer, TypeResolver, deserialize, map} from '../src/index.js';
+import {default as Serializer, TypeResolver, deserialize, map} from '../index.js';
 
 const lanesSource = factory.resource('lanes.bpmn');
 const subProcessSource = factory.resource('sub-process.bpmn');

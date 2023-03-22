@@ -1,6 +1,12 @@
 Changelog
 =========
 
+# 3.2.0
+
+- Add type declarations
+- Use rollup in favor of babel, some ms faster
+- Remove directory structure with scr and dist, the purpose for just one file seems stupid
+
 # 3.1.0-1
 
 - Add exports for node

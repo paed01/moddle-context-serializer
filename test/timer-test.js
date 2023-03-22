@@ -2,7 +2,7 @@ import factory from './helpers/factory.js';
 import testHelpers from './helpers/testHelpers.js';
 import types from './helpers/types.js';
 
-import {default as Serializer, TypeResolver, deserialize} from '../src/index.js';
+import {default as Serializer, TypeResolver, deserialize} from '../index.js';
 
 const typeResolver = TypeResolver(types);
 const camunda = testHelpers.getCamundaExtension();
