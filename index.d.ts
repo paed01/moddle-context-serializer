@@ -4,7 +4,7 @@ declare module 'moddle-context-serializer' {
   import { Definitions, BaseElement } from 'bpmn-moddle';
 
   type resolver = (entity: any) => void;
-  type extendFn = (elementBehaviour: BaseElement, context: ExtendContext) => any;
+  type extendFn = (elementBehaviour: BaseElement, context: ExtendContext) => Record<string, any>;
 
   interface SerializableElement {
     id?: string;
@@ -101,7 +101,7 @@ declare module 'moddle-context-serializer' {
     getInboundAssociations(activityId: string): SerializableElement[];
     getOutboundAssociations(activityId: string): SerializableElement[];
     getScripts(elementType?: string): Script[];
-    getScriptsByElementId(elementId: string): Script | undefined;
+    getScriptsByElementId(elementId: string): Script[];
     getTimers(elementType?: string): Timer[];
     getTimersByElementId(elementId: string): Timer[];
   }
@@ -113,7 +113,7 @@ declare module 'moddle-context-serializer' {
     addTimer(timerName: string, elm: TimerElement): void;
   }
 
-  function TypeResolver(types: any, extender?: any): resolver;
+  function TypeResolver(types: Record<string, any>, extender?: (typeMapping: Record<string, any>) => void): resolver;
   function resolveTypes(mappedContext: MappedContext, typeResolver: typeof TypeResolver): MappedContext;
   function deserialize(deserializedContext: object, typeResolver: resolver): SerializableContext;
   function context(moddleContext: Definitions, typeResolver: resolver, extendFn?: extendFn): SerializableContext;

@@ -1,6 +1,10 @@
 Changelog
 =========
 
+# 3.2.1
+
+- ts: Fix `getScriptsByElementId` return type
+
 # 3.2.0
 
 - Add type declarations

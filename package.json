@@ -1,6 +1,6 @@
 {
   "name": "moddle-context-serializer",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "description": "Make bpmn-moddle context serializable and mapped to behaviour functions",
   "type": "module",
   "main": "main.cjs",
