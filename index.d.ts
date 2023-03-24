@@ -4,9 +4,9 @@ declare module 'moddle-context-serializer' {
   import { Definitions, BaseElement } from 'bpmn-moddle';
 
   type resolver = (entity: any) => void;
-  type extendFn = (elementBehaviour: BaseElement, context: ExtendContext) => Record<string, any>;
+  type extendFn = (elementBehaviour: BaseElement, context: ExtendContext) => Record<string, any> | undefined | void;
 
-  interface SerializableElement {
+  export interface SerializableElement {
     id?: string;
     type?: string;
     parent?: Parent;
@@ -73,7 +73,7 @@ declare module 'moddle-context-serializer' {
     };
   }
 
-  interface SerializableContext {
+  export interface SerializableContext {
     id: string;
     type: string;
     name: string;
@@ -113,12 +113,9 @@ declare module 'moddle-context-serializer' {
     addTimer(timerName: string, elm: TimerElement): void;
   }
 
-  function TypeResolver(types: Record<string, any>, extender?: (typeMapping: Record<string, any>) => void): resolver;
-  function resolveTypes(mappedContext: MappedContext, typeResolver: typeof TypeResolver): MappedContext;
-  function deserialize(deserializedContext: object, typeResolver: resolver): SerializableContext;
-  function context(moddleContext: Definitions, typeResolver: resolver, extendFn?: extendFn): SerializableContext;
-  function map(moddleContext: Definitions, extendFn: extendFn): MappedContext;
-
-  export default context;
-  export { TypeResolver, deserialize, map, SerializableContext, resolveTypes };
+  export function TypeResolver(types: Record<string, any>, extender?: (typeMapping: Record<string, any>) => void): resolver;
+  export function resolveTypes(mappedContext: MappedContext, typeResolver: typeof TypeResolver): MappedContext;
+  export function deserialize(deserializedContext: object, typeResolver: resolver): SerializableContext;
+  export function map(moddleContext: Definitions, extendFn: extendFn): MappedContext;
+  export default function context(moddleContext: Definitions, typeResolver: resolver, extendFn?: extendFn): SerializableContext;
 }

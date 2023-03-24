@@ -1,6 +1,10 @@
 Changelog
 =========
 
+# 3.2.2
+
+- ts: fix declaration exports and extendFn accepted return
+
 # 3.2.1
 
 - ts: Fix `getScriptsByElementId` return type

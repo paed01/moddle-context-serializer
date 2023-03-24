@@ -1,6 +1,6 @@
 {
   "name": "moddle-context-serializer",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "description": "Make bpmn-moddle context serializable and mapped to behaviour functions",
   "type": "module",
   "main": "main.cjs",
@@ -55,6 +55,6 @@
     "chai": "^4.3.7",
     "eslint": "^8.36.0",
     "mocha": "^10.2.0",
-    "rollup": "^3.20.0"
+    "rollup": "^3.20.2"
   }
 }
