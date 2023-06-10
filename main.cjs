@@ -23,7 +23,7 @@ function TypeResolver(types, extender) {
   return function resolve(entity) {
     const {type, behaviour} = entity;
 
-    entity.Behaviour = getBehaviourFromType(type);
+    entity.Behaviour = getBehaviourFromType(typeMapper, types, type);
     if (!behaviour) return;
 
     if (behaviour.implementation) {
@@ -40,6 +40,12 @@ function TypeResolver(types, extender) {
       }
     }
 
+    if (behaviour.lanes) {
+      for (const lane of behaviour.lanes) {
+        resolve(lane);
+      }
+    }
+
     if (behaviour.ioSpecification) {
       resolve(behaviour.ioSpecification);
     }
@@ -48,27 +54,27 @@ function TypeResolver(types, extender) {
       behaviour.properties.Behaviour = types.Properties;
     }
   };
-
-  function getBehaviourFromType(type) {
-    let activityType = typeMapper[type];
-    if (!activityType && type) {
-      const nonPrefixedType = type.split(':').slice(1).join(':');
-      activityType = types[nonPrefixedType];
-    }
-
-    if (!activityType) {
-      throw new Error(`Unknown activity type ${type}`);
-    }
-
-    return activityType;
-  }
 }
 
-function mapModdleContext(moddleContext, extendFn) {
+function getBehaviourFromType(typeMapper, types, type) {
+  let activityType = typeMapper[type];
+  if (!activityType && type) {
+    const nonPrefixedType = type.split(':').slice(1).join(':');
+    activityType = types[nonPrefixedType];
+  }
+
+  if (!activityType) {
+    throw new Error(`Unknown activity type ${type}`);
+  }
+
+  return activityType;
+}
+
+function map(moddleContext, extendFn) {
   return new Mapper(moddleContext, extendFn).map();
 }
 
-function context(moddleContext, typeResolver, extendFn) {
+function Serializer(moddleContext, typeResolver, extendFn) {
   const mapped = new Mapper(moddleContext, extendFn).map();
   return new ContextApi(resolveTypes(mapped, typeResolver));
 }
@@ -245,7 +251,7 @@ function Mapper(moddleContext, extendFn) {
   this.timers = [];
 }
 
-Mapper.prototype.map = function map() {
+Mapper.prototype.map = function MapperConstructor() {
   const moddleContext = this.moddleContext;
   const rootElement = this._root = moddleContext.rootElement ? moddleContext.rootElement : moddleContext.rootHandler.element;
   const definition = {
@@ -484,16 +490,7 @@ Mapper.prototype._prepareElements = function prepareElements(parent, elements) {
       case 'bpmn:SubProcess':
       case 'bpmn:Transaction':
       case 'bpmn:Process': {
-        const bp = {
-          id,
-          type,
-          name,
-          parent: {
-            id: parent.id,
-            type: parent.type,
-          },
-          behaviour: this._prepareElementBehaviour(element),
-        };
+        const bp = this._prepareActivity(element, parent, element);
         if (type === 'bpmn:Process') result.processes.push(bp);
         else result.activities.push(bp);
 
@@ -622,6 +619,15 @@ Mapper.prototype._prepareElementBehaviour = function prepareElementBehaviour(ele
       scriptFormat,
       ...rest,
     });
+  }
+
+  if (element.laneSets) {
+    const lanes = preparedElement.lanes = [];
+    for (const laneSet of element.laneSets) {
+      for (const lane of laneSet.lanes) {
+        lanes.push(this._mapActivityBehaviour(lane, extendContext));
+      }
+    }
   }
 
   if (element.resources) {
@@ -910,8 +916,9 @@ function spreadRef({id, $type: type, name}) {
   return {id, type, name};
 }
 
+exports.Serializer = Serializer;
 exports.TypeResolver = TypeResolver;
-exports.default = context;
+exports.default = Serializer;
 exports.deserialize = deserialize;
-exports.map = mapModdleContext;
+exports.map = map;
 exports.resolveTypes = resolveTypes;

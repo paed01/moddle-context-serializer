@@ -1,15 +1,12 @@
 {
   "name": "moddle-context-serializer",
-  "version": "3.2.2",
+  "version": "4.0.0",
   "description": "Make bpmn-moddle context serializable and mapped to behaviour functions",
   "type": "module",
   "main": "main.cjs",
   "module": "index.js",
-  "typings": "index.d.ts",
-  "exports": {
-    "import": "./index.js",
-    "require": "./main.cjs"
-  },
+  "browser": "main.cjs",
+  "types": "index.d.ts",
   "sideEffects": false,
   "scripts": {
     "test": "mocha",
@@ -30,9 +27,10 @@
   },
   "license": "MIT",
   "files": [
+    "index.js",
     "index.d.ts",
     "main.cjs",
-    "index.js"
+    "moddle-context-serializer.cjs"
   ],
   "keywords": [
     "bpmn",
@@ -53,7 +51,7 @@
     "camunda-bpmn-moddle": "^7.0.1",
     "camunda-bpmn-moddle-6": "npm:camunda-bpmn-moddle@6",
     "chai": "^4.3.7",
-    "eslint": "^8.36.0",
+    "eslint": "^8.38.0",
     "mocha": "^10.2.0",
     "rollup": "^3.20.2"
   }

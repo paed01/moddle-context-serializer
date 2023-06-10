@@ -44,4 +44,5 @@ export default {
   TimerEventDefinition() {},
   Transaction() {},
   UserTask() {},
+  Lane() {},
 };

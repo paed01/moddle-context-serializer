@@ -1,6 +1,10 @@
 Changelog
 =========
 
+# 4.0.0
+
+- serialize process `Lane` behaviour
+
 # 3.2.2
 
 - ts: fix declaration exports and extendFn accepted return

@@ -1,10 +1,8 @@
-export default context;
-
 const refKeyPattern = /^(?!\$).+?Ref$/;
 
-export {TypeResolver, resolveTypes, mapModdleContext as map, deserialize};
+export default Serializer;
 
-function TypeResolver(types, extender) {
+export function TypeResolver(types, extender) {
   const {
     BpmnError,
     Definition,
@@ -23,7 +21,7 @@ function TypeResolver(types, extender) {
   return function resolve(entity) {
     const {type, behaviour} = entity;
 
-    entity.Behaviour = getBehaviourFromType(type);
+    entity.Behaviour = getBehaviourFromType(typeMapper, types, type);
     if (!behaviour) return;
 
     if (behaviour.implementation) {
@@ -40,6 +38,12 @@ function TypeResolver(types, extender) {
       }
     }
 
+    if (behaviour.lanes) {
+      for (const lane of behaviour.lanes) {
+        resolve(lane);
+      }
+    }
+
     if (behaviour.ioSpecification) {
       resolve(behaviour.ioSpecification);
     }
@@ -48,32 +52,32 @@ function TypeResolver(types, extender) {
       behaviour.properties.Behaviour = types.Properties;
     }
   };
-
-  function getBehaviourFromType(type) {
-    let activityType = typeMapper[type];
-    if (!activityType && type) {
-      const nonPrefixedType = type.split(':').slice(1).join(':');
-      activityType = types[nonPrefixedType];
-    }
-
-    if (!activityType) {
-      throw new Error(`Unknown activity type ${type}`);
-    }
-
-    return activityType;
-  }
 }
 
-function mapModdleContext(moddleContext, extendFn) {
+function getBehaviourFromType(typeMapper, types, type) {
+  let activityType = typeMapper[type];
+  if (!activityType && type) {
+    const nonPrefixedType = type.split(':').slice(1).join(':');
+    activityType = types[nonPrefixedType];
+  }
+
+  if (!activityType) {
+    throw new Error(`Unknown activity type ${type}`);
+  }
+
+  return activityType;
+}
+
+export function map(moddleContext, extendFn) {
   return new Mapper(moddleContext, extendFn).map();
 }
 
-function context(moddleContext, typeResolver, extendFn) {
+export function Serializer(moddleContext, typeResolver, extendFn) {
   const mapped = new Mapper(moddleContext, extendFn).map();
   return new ContextApi(resolveTypes(mapped, typeResolver));
 }
 
-function deserialize(deserializedContext, typeResolver) {
+export function deserialize(deserializedContext, typeResolver) {
   return new ContextApi(resolveTypes(deserializedContext, typeResolver));
 }
 
@@ -214,7 +218,7 @@ ContextApi.prototype.getTimersByElementId = function getTimersByElementId(elemen
   return this.elements.timers.filter(({parent}) => parent.id === elementId);
 };
 
-function resolveTypes(mappedContext, typeResolver) {
+export function resolveTypes(mappedContext, typeResolver) {
   const {
     activities,
     associations,
@@ -245,7 +249,7 @@ function Mapper(moddleContext, extendFn) {
   this.timers = [];
 }
 
-Mapper.prototype.map = function map() {
+Mapper.prototype.map = function MapperConstructor() {
   const moddleContext = this.moddleContext;
   const rootElement = this._root = moddleContext.rootElement ? moddleContext.rootElement : moddleContext.rootHandler.element;
   const definition = {
@@ -484,16 +488,7 @@ Mapper.prototype._prepareElements = function prepareElements(parent, elements) {
       case 'bpmn:SubProcess':
       case 'bpmn:Transaction':
       case 'bpmn:Process': {
-        const bp = {
-          id,
-          type,
-          name,
-          parent: {
-            id: parent.id,
-            type: parent.type,
-          },
-          behaviour: this._prepareElementBehaviour(element),
-        };
+        const bp = this._prepareActivity(element, parent, element);
         if (type === 'bpmn:Process') result.processes.push(bp);
         else result.activities.push(bp);
 
@@ -622,6 +617,15 @@ Mapper.prototype._prepareElementBehaviour = function prepareElementBehaviour(ele
       scriptFormat,
       ...rest,
     });
+  }
+
+  if (element.laneSets) {
+    const lanes = preparedElement.lanes = [];
+    for (const laneSet of element.laneSets) {
+      for (const lane of laneSet.lanes) {
+        lanes.push(this._mapActivityBehaviour(lane, extendContext));
+      }
+    }
   }
 
   if (element.resources) {
