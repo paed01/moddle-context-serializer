@@ -666,7 +666,15 @@ Mapper.prototype._mapActivityBehaviour = function mapActivityBehaviour(ed, exten
 
   switch (type) {
     case 'bpmn:ConditionalEventDefinition': {
-      behaviour.expression = behaviour.condition && behaviour.condition.body;
+      if (behaviour.condition && behaviour.condition.language) {
+        extendContext.addScript(id || type, {
+          scriptFormat: behaviour.condition.language,
+          ...behaviour.condition,
+        });
+        behaviour.script = {language: behaviour.condition.language, body: behaviour.condition.body};
+      } else {
+        behaviour.expression = behaviour.condition && behaviour.condition.body;
+      }
       break;
     }
     case 'bpmn:InputOutputSpecification': {

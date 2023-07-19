@@ -1,6 +1,10 @@
 Changelog
 =========
 
+# 4.1.0
+
+- serialize `ConditionEventDefinition` script behaviour
+
 # 4.0.0
 
 - serialize process `Lane` behaviour

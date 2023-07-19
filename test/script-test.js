@@ -218,4 +218,162 @@ describe('scripts', () => {
       expect(scripts.length).to.equal(1);
     });
   });
+
+  describe('conditional event definition', () => {
+    const realSource = factory.resource('conditional-event.bpmn');
+
+    it('condition script is mapped to behaviour and is registered', async () => {
+      const moddleContext = await testHelpers.moddleContext(realSource);
+
+      const serializer = Serializer(moddleContext, typeResolver);
+      const scripts = serializer.getScripts();
+      expect(scripts.length).to.equal(1);
+
+      const script = scripts[0];
+      expect(script).to.have.property('parent').that.deep.equal({
+        type: 'bpmn:BoundaryEvent',
+        id: 'script-cond',
+      });
+      expect(script).to.have.property('script').that.deep.equal({
+        body: 'next(null, environment.variables.var2);',
+        scriptFormat: 'js',
+      });
+
+      const elm = serializer.getActivityById(script.parent.id);
+
+      expect(elm.behaviour.eventDefinitions).to.have.length(1);
+      expect(script, 'script name mapped to ed id').to.have.property('name', 'ConditionalEventDefinition_083udna');
+
+      expect(elm.behaviour.eventDefinitions[0])
+        .to.have.property('behaviour')
+        .that.have.property('script')
+        .that.deep.equal({
+          language: 'js',
+          body: 'next(null, environment.variables.var2);',
+        });
+    });
+
+    it('deserialized condition script has the expected content', async () => {
+      const moddleContext = await testHelpers.moddleContext(realSource);
+
+      const serializer = Serializer(moddleContext, typeResolver);
+
+      const deserialized = deserialize(JSON.parse(serializer.serialize()), typeResolver);
+
+      const scripts = deserialized.getScripts();
+      expect(scripts.length).to.equal(1);
+
+      const script = scripts[0];
+      expect(script).to.deep.equal({
+        name: 'ConditionalEventDefinition_083udna',
+        parent: {
+          type: 'bpmn:BoundaryEvent',
+          id: 'script-cond',
+        },
+        script: {
+          body: 'next(null, environment.variables.var2);',
+          scriptFormat: 'js',
+        },
+      });
+
+      const elm = deserialized.getActivityById(script.parent.id);
+
+      expect(elm.behaviour.eventDefinitions).to.have.length(1);
+      expect(script, 'script name mapped to ed id').to.have.property('name', 'ConditionalEventDefinition_083udna');
+
+      expect(elm.behaviour.eventDefinitions[0])
+        .to.have.property('behaviour')
+        .that.have.property('script')
+        .that.deep.equal({
+          language: 'js',
+          body: 'next(null, environment.variables.var2);',
+        });
+    });
+
+    it('event definition without id registers script with type', async () => {
+      const source = `
+      <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <process id="no-typens">
+          <boundaryEvent id="unbound">
+            <conditionalEventDefinition>
+              <condition xsi:type="tFormalExpression" language="js">next(null, environment.variables.var2);</condition>
+            </conditionalEventDefinition>
+          </boundaryEvent>
+        </process>
+      </definitions>`;
+
+      const moddleContext = await testHelpers.moddleContext(source);
+
+      const serializer = Serializer(moddleContext, typeResolver);
+      const scripts = serializer.getScripts();
+      expect(scripts.length).to.equal(1);
+
+      const script = scripts[0];
+      expect(script).to.have.property('parent').that.deep.equal({
+        type: 'bpmn:BoundaryEvent',
+        id: 'unbound',
+      });
+      expect(script).to.have.property('script').that.deep.equal({
+        body: 'next(null, environment.variables.var2);',
+        scriptFormat: 'js',
+      });
+
+      const elm = serializer.getActivityById(script.parent.id);
+
+      expect(elm.behaviour.eventDefinitions).to.have.length(1);
+      expect(script, 'script name mapped to event definition type').to.have.property('name', 'bpmn:ConditionalEventDefinition');
+
+      expect(elm.behaviour.eventDefinitions[0])
+        .to.have.property('behaviour')
+        .that.have.property('script')
+        .that.deep.equal({
+          language: 'js',
+          body: 'next(null, environment.variables.var2);',
+        });
+    });
+
+    it('muliple event definitions without id registers script with type', async () => {
+      const source = `
+      <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <process id="no-typens">
+          <boundaryEvent id="unbound">
+            <conditionalEventDefinition>
+              <condition xsi:type="tFormalExpression" language="js">next(null, environment.variables.var1);</condition>
+            </conditionalEventDefinition>
+            <conditionalEventDefinition>
+              <condition xsi:type="tFormalExpression" language="js">next(null, environment.variables.var2);</condition>
+            </conditionalEventDefinition>
+          </boundaryEvent>
+        </process>
+      </definitions>`;
+
+      const moddleContext = await testHelpers.moddleContext(source);
+
+      const serializer = Serializer(moddleContext, typeResolver);
+      const scripts = serializer.getScripts();
+      expect(scripts.length).to.equal(2);
+
+      const script1 = scripts[0];
+      expect(script1).to.have.property('parent').that.deep.equal({
+        type: 'bpmn:BoundaryEvent',
+        id: 'unbound',
+      });
+      expect(script1).to.have.property('script').that.deep.equal({
+        body: 'next(null, environment.variables.var1);',
+        scriptFormat: 'js',
+      });
+
+      const script2 = scripts[1];
+      expect(script2).to.have.property('parent').that.deep.equal({
+        type: 'bpmn:BoundaryEvent',
+        id: 'unbound',
+      });
+      expect(script2).to.have.property('script').that.deep.equal({
+        body: 'next(null, environment.variables.var2);',
+        scriptFormat: 'js',
+      });
+    });
+  });
 });

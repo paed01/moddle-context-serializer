@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0qwdvxz" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.13.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.19.0">
+  <bpmn:process id="cond-process" isExecutable="true" camunda:historyTimeToLive="PT1H">
+    <bpmn:startEvent id="start">
+      <bpmn:outgoing>to-msg</bpmn:outgoing>
+      <bpmn:outgoing>to-usr</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="to-msg" sourceRef="start" targetRef="msg" />
+    <bpmn:endEvent id="end">
+      <bpmn:incoming>from-usr</bpmn:incoming>
+      <bpmn:incoming>from-msg</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="from-usr" sourceRef="usr" targetRef="end" />
+    <bpmn:boundaryEvent id="script-cond" attachedToRef="usr">
+      <bpmn:conditionalEventDefinition id="ConditionalEventDefinition_083udna" camunda:variableName="var2" camunda:variableEvents="change">
+        <bpmn:condition xsi:type="bpmn:tFormalExpression" language="js">next(null, environment.variables.var2);</bpmn:condition>
+      </bpmn:conditionalEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="from-msg" sourceRef="msg" targetRef="end" />
+    <bpmn:sequenceFlow id="to-usr" sourceRef="start" targetRef="usr" />
+    <bpmn:receiveTask id="msg">
+      <bpmn:incoming>to-msg</bpmn:incoming>
+      <bpmn:outgoing>from-msg</bpmn:outgoing>
+    </bpmn:receiveTask>
+    <bpmn:userTask id="usr">
+      <bpmn:incoming>to-usr</bpmn:incoming>
+      <bpmn:outgoing>from-usr</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="expr-cond" cancelActivity="false" attachedToRef="msg">
+      <bpmn:conditionalEventDefinition id="ConditionalEventDefinition_1ifxx22" camunda:variableName="var1" camunda:variableEvents="update">
+        <bpmn:condition xsi:type="bpmn:tFormalExpression">${environment.variables.var1}</bpmn:condition>
+      </bpmn:conditionalEventDefinition>
+    </bpmn:boundaryEvent>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="cond-process">
+      <bpmndi:BPMNShape id="Event_00tgjaf_di" bpmnElement="end">
+        <dc:Bounds x="592" y="172" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="start">
+        <dc:Bounds x="112" y="182" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0bnwc3h_di" bpmnElement="msg">
+        <dc:Bounds x="290" y="77" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0yjioh1_di" bpmnElement="usr">
+        <dc:Bounds x="290" y="230" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1f2fib4_di" bpmnElement="script-cond">
+        <dc:Bounds x="322" y="292" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0c9ryqc_di" bpmnElement="expr-cond">
+        <dc:Bounds x="322" y="139" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0unsqug_di" bpmnElement="from-usr">
+        <di:waypoint x="390" y="270" />
+        <di:waypoint x="481" y="270" />
+        <di:waypoint x="481" y="190" />
+        <di:waypoint x="592" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1xg1sf5_di" bpmnElement="from-msg">
+        <di:waypoint x="390" y="117" />
+        <di:waypoint x="481" y="117" />
+        <di:waypoint x="481" y="190" />
+        <di:waypoint x="592" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1erv38n_di" bpmnElement="to-msg">
+        <di:waypoint x="148" y="200" />
+        <di:waypoint x="209" y="200" />
+        <di:waypoint x="209" y="117" />
+        <di:waypoint x="290" y="117" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0mabpj0_di" bpmnElement="to-usr">
+        <di:waypoint x="148" y="200" />
+        <di:waypoint x="209" y="200" />
+        <di:waypoint x="209" y="270" />
+        <di:waypoint x="290" y="270" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
