@@ -13,12 +13,12 @@ The tests are the documentation. Hence, please study [test](/test/serializer-tes
 
 A basic example:
 ```js
-import {default as Serializer, TypeResolver} from 'moddle-context-serializer';
+import { Serializer, TypeResolver } from 'moddle-context-serializer';
+import BpmnModdle from 'bpmn-moddle';
 import * as bpmnElementsBehaviour from 'bpmn-elements';
 
 import EscalationEventDefinition from './mytypes/EscalationEventDefinition';
 
-import BpmnModdle from 'bpmn-moddle';
 
 export async function getSerializedContext(source) {
   const bpmnModdle = new BpmnModdle();

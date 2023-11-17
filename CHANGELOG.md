@@ -1,6 +1,16 @@
 Changelog
 =========
 
+# 4.1.1
+
+The commonjs release.
+
+```js
+const serializer = require('moddle-context-serialiser')`
+```
+
+- use the newly discovered rollup destination footer option to set commonjs module.exports
+
 # 4.1.0
 
 - serialize `ConditionEventDefinition` script behaviour

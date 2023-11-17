@@ -930,3 +930,4 @@ exports.default = Serializer;
 exports.deserialize = deserialize;
 exports.map = map;
 exports.resolveTypes = resolveTypes;
+module.exports = Object.assign(exports.default, exports);
