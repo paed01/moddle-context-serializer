@@ -76,8 +76,8 @@ Get all definition activities or pass `scopeId` to get scoped activities. Where 
 Returns an ExtendContext instance:
 - `scripts`: list of known scripts
 - `timers`: list of known timers
-- `addScript(name, script)`: function to add a script to the global context, can be retrieved by `getScripts([elementType])` or `getScriptsByElementId(elementId)`
-- `addTimer(name, timer)`: function to add a timer to the global context, can be retrieved by `getScripts([elementType])` or `getScriptsByElementId(elementId)`
+- `addScript(name, script)`: function to add a script to the global context, can be retrieved by [`getScripts`](#getscriptselementtype) or [`getScriptsByElementId`](#getscriptsbyelementidelementid)
+- `addTimer(name, timer)`: function to add a timer to the global context, can be retrieved by [`getTimers`](#gettimerselementtype) or [`getTimersByElementId`](#gettimersbyelementidelementid)
 
 #### addScript(name, script)
 
@@ -98,7 +98,7 @@ Arguments:
 Add known timer.
 
 Arguments:
-- `name`: name of script
+- `name`: name of timer
 - `timer`: timer object
   - `parent`: parent element as an object with `id` and `type`
   - `id`: optional id as string that makes it easy to distinguish
