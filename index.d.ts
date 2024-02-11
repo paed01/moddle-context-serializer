@@ -74,18 +74,23 @@ declare module 'moddle-context-serializer' {
   }
 
   export interface SerializableContext {
-    id: string;
+    /** definition id if any */
+    id?: string;
+    /** definition type, usually bpmn:Definition */
     type: string;
-    name: string;
+    /** definition name, if any */
+    name?: string;
+    /** all elements */
     elements: SerializableElement[];
+    /** serialize the entire shebang to a JSON formatted string */
     serialize(): string;
-    getProcessById(processId: string): SerializableElement;
+    getProcessById(processId: string): SerializableElement | undefined;
     getProcesses(): SerializableElement[];
     getExecutableProcesses(): SerializableElement[];
-    getInboundSequenceFlows(activityId: string): SerializableElement;
-    getOutboundSequenceFlows(activityId: string): SerializableElement;
-    getMessageFlows(scopeId?: string): SerializableElement;
-    getSequenceFlows(scopeId?: string): SerializableElement;
+    getInboundSequenceFlows(activityId: string): SerializableElement[];
+    getOutboundSequenceFlows(activityId: string): SerializableElement[];
+    getMessageFlows(scopeId?: string): SerializableElement[];
+    getSequenceFlows(scopeId?: string): SerializableElement[];
     getSequenceFlowById(flowId: string): SerializableElement | undefined;
     getActivities(scopeId?: string): SerializableElement[];
     getDataObjects(scopeId?: string): any[];
@@ -94,8 +99,8 @@ declare module 'moddle-context-serializer' {
     getDataStoreReferenceById(dataStoreId: any): any;
     getDataStores(): any[];
     getDataStoreById(dataStoreId: string): any;
-    getActivityById(activityId: string): SerializableElement;
-    getAssociations(scopeId?: string): SerializableElement;
+    getActivityById(activityId: string): SerializableElement | undefined;
+    getAssociations(scopeId?: string): SerializableElement[];
     getAssociationById(associationId: string): SerializableElement | undefined;
     getExtendContext(): ExtendContext;
     getInboundAssociations(activityId: string): SerializableElement[];

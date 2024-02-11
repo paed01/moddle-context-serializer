@@ -1,6 +1,10 @@
 Changelog
 =========
 
+# 4.1.2
+
+- fix some return type inconsistencies
+
 # 4.1.1
 
 The commonjs release.
