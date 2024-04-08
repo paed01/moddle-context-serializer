@@ -1,5 +1,4 @@
-API
-===
+# API
 
 - [`default`](#default-export)
 - [`deserialize`](#deserializedeserializedcontext-typeresolver)
@@ -13,11 +12,13 @@ Function to make serializable context.
 ### `Serializer(moddleContext, typeResolver[, extendFn])`
 
 Arguments:
+
 - `moddleContext`: context from [`bpmn-moddle`](https://www.npmjs.com/package/bpmn-moddle)
 - `typeResolver`: type resolver function that will receive the mapped element and returns a behaviour function, or use the builtin [TypeResolver](##typeresolvertypes-extender)
 - [`extendFn`](#extendfnmappedbehaviour-helpercontext): optional function to manipulate activity behaviour
 
 Result:
+
 - `id`: Definition id
 - `type`: Definition type
 - `name`: Definition name
@@ -54,6 +55,7 @@ Result:
 Function to manipulate activity behaviour after it is mapped.
 
 Arguments:
+
 - `mappedBehaviour`: the activity behaviour mapped by the serializer
   - `id`: element id
   - `type`: element type
@@ -74,6 +76,7 @@ Get all definition activities or pass `scopeId` to get scoped activities. Where 
 ### `getExtendContext()`
 
 Returns an ExtendContext instance:
+
 - `scripts`: list of known scripts
 - `timers`: list of known timers
 - `addScript(name, script)`: function to add a script to the global context, can be retrieved by [`getScripts`](#getscriptselementtype) or [`getScriptsByElementId`](#getscriptsbyelementidelementid)
@@ -84,6 +87,7 @@ Returns an ExtendContext instance:
 Add known script.
 
 Arguments:
+
 - `name`: name of script
 - `script`: script object
   - `parent`: parent element as an object with `id` and `type`
@@ -98,6 +102,7 @@ Arguments:
 Add known timer.
 
 Arguments:
+
 - `name`: name of timer
 - `timer`: timer object
   - `parent`: parent element as an object with `id` and `type`
@@ -110,6 +115,7 @@ Arguments:
 Get all scripts or just for element of type. Can be used to generate a script resource with all scripts if running in strict mode.
 
 Returns list if scripts with items:
+
 - `name`: name of script
 - `parent`: object with parent element props:
   - `id`: parent element id
@@ -129,6 +135,7 @@ Get scripts for element with id.
 Get all timers or just for element of type.
 
 Returns:
+
 - list if scripts with items:
   - `name`: name of timer
   - `parent`: object with parent element props:
@@ -149,6 +156,7 @@ Get timers for element with id.
 Deserialize serialized content.
 
 Arguments:
+
 - `deserializedContext`: serialized object
 - `typeResolver`: instance of a type resolver, e.g. [TypeResolver](##typeresolvertypes-extender)
 
@@ -157,6 +165,7 @@ Arguments:
 Do the moddle-context map.
 
 Arguments:
+
 - `moddleContext`: context from `bpmn-moddle`
 
 ## `TypeResolver(types[, extender])`
@@ -164,6 +173,7 @@ Arguments:
 Builtin key value mapping to behaviour function.
 
 Arguments:
+
 - `types`: object with type as key and value with behaviour function
 - [`extender`](#extender): optional function that will receive default type mapping by reference
 
@@ -174,6 +184,7 @@ Returns function that will receive mapped element and expects the function to re
 The default behaviour is to map moddle context `$type` property, stripped from the `bpmn:` prefix, and see if there is a corresponding property in the `typeMapping` object.
 
 For instance:
+
 - `bpmn:BoundaryEvent`: `types.BoundaryEvent`
 - `bpmn:DataObject`: `types.DataObject`
 - `bpmn:EndEvent`: `types.EndEvent`

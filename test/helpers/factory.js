@@ -1,29 +1,15 @@
 import BpmnModdle from 'bpmn-moddle';
 import fs from 'fs';
 import path from 'path';
-import {fileURLToPath} from 'url';
+import { fileURLToPath } from 'url';
 
 const dirname = fileURLToPath(new URL('.', import.meta.url));
 
-const eventActivities = [
-  'bpmn:IntermediateCatchEvent',
-  'bpmn:StartEvent',
-  'bpmn:EndEvent',
-];
+const eventActivities = ['bpmn:IntermediateCatchEvent', 'bpmn:StartEvent', 'bpmn:EndEvent'];
 
-const gateways = [
-  'bpmn:ExclusiveGateway',
-  'bpmn:InclusiveGateway',
-];
+const gateways = ['bpmn:ExclusiveGateway', 'bpmn:InclusiveGateway'];
 
-const activities = [
-  'bpmn:Task',
-  'bpmn:ScriptTask',
-  'bpmn:ServiceTask',
-  'bpmn:UserTask',
-  'bpmn:SubProcess',
-  'bpmn:ParallelGateway',
-];
+const activities = ['bpmn:Task', 'bpmn:ScriptTask', 'bpmn:ServiceTask', 'bpmn:UserTask', 'bpmn:SubProcess', 'bpmn:ParallelGateway'];
 
 const moddle = new BpmnModdle();
 
@@ -133,19 +119,19 @@ async function create(activityType) {
   <bpmn2:definitions id="task-definitions" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" targetNamespace="http://bpmn.io/schema/bpmn">
   </bpmn2:definitions>'`;
 
-  const {definitions} = await fromXML(source);
+  const { definitions } = await fromXML(source);
 
   const flowElements = [
-    moddle.create('bpmn:StartEvent', {id: 'start'}),
+    moddle.create('bpmn:StartEvent', { id: 'start' }),
     moddle.create(activityType, { id: 'activity' }),
-    moddle.create('bpmn:EndEvent', {id: 'end1'}),
+    moddle.create('bpmn:EndEvent', { id: 'end1' }),
   ];
 
   const [start, activity, end] = flowElements;
 
   const flows = [
-    moddle.create('bpmn:SequenceFlow', {id: 'flow1', sourceRef: start, targetRef: activity}),
-    moddle.create('bpmn:SequenceFlow', {id: 'flow2', sourceRef: activity, targetRef: end}),
+    moddle.create('bpmn:SequenceFlow', { id: 'flow1', sourceRef: start, targetRef: activity }),
+    moddle.create('bpmn:SequenceFlow', { id: 'flow2', sourceRef: activity, targetRef: end }),
   ];
   const [, flow2, flow3] = flows;
 

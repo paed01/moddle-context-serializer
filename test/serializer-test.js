@@ -2,7 +2,7 @@ import factory from './helpers/factory.js';
 import fs from 'fs';
 import testHelpers from './helpers/testHelpers.js';
 import types from './helpers/types.js';
-import {default as Serializer, TypeResolver, deserialize, map} from '../index.js';
+import { default as Serializer, TypeResolver, deserialize, map } from '../index.js';
 
 const lanesSource = factory.resource('lanes.bpmn');
 const subProcessSource = factory.resource('sub-process.bpmn');
@@ -44,13 +44,13 @@ describe('moddle context serializer', () => {
       serializer = Serializer(lanesModdleContext, typeResolver);
     });
 
-    it('holds definition id, type, and name', async () => {
+    it('holds definition id, type, and name', () => {
       expect(serializer).to.have.property('id', 'Definitions_1');
       expect(serializer).to.have.property('type', 'bpmn:Definitions');
       expect(serializer).to.have.property('name', 'Lanes');
     });
 
-    it('returns the expected api', async () => {
+    it('returns the expected api', () => {
       expect(serializer).to.have.property('getActivities').that.is.a('function');
       expect(serializer).to.have.property('getActivityById').that.is.a('function');
       expect(serializer).to.have.property('getAssociations').that.is.a('function');
@@ -127,7 +127,7 @@ describe('moddle context serializer', () => {
   });
 
   describe('deserialize(deserializedContext, typeResolver)', () => {
-    it('holds definition id, type, and name', async () => {
+    it('holds definition id, type, and name', () => {
       const serializer = Serializer(lanesModdleContext, typeResolver);
       const deserialized = deserialize(JSON.parse(serializer.serialize()), typeResolver);
       expect(deserialized).to.have.property('id', 'Definitions_1');
@@ -135,7 +135,7 @@ describe('moddle context serializer', () => {
       expect(deserialized).to.have.property('name', 'Lanes');
     });
 
-    it('(backward compability) holds definition id, type, and name', async () => {
+    it('(backward compability) holds definition id, type, and name', () => {
       const serializer = Serializer(lanesModdleContextFromCallBack, typeResolver);
       const deserialized = deserialize(JSON.parse(serializer.serialize()), typeResolver);
       expect(deserialized).to.have.property('id', 'Definitions_1');
@@ -143,7 +143,7 @@ describe('moddle context serializer', () => {
       expect(deserialized).to.have.property('name', 'Lanes');
     });
 
-    it('has the expected api', async () => {
+    it('has the expected api', () => {
       const serializer = Serializer(subProcessModdleContext, typeResolver);
       const deserialized = deserialize(JSON.parse(serializer.serialize()), typeResolver);
 
@@ -162,7 +162,7 @@ describe('moddle context serializer', () => {
       expect(deserialized).to.have.property('serialize').that.is.a('function');
     });
 
-    it('has entities with Behaviour', async () => {
+    it('has entities with Behaviour', () => {
       let serializer = Serializer(eventDefinitionModdleContext, typeResolver);
       let deserialized = deserialize(JSON.parse(serializer.serialize()), typeResolver);
 
@@ -207,7 +207,7 @@ describe('moddle context serializer', () => {
   });
 
   describe('getProcesses()', () => {
-    it('returns processes', async () => {
+    it('returns processes', () => {
       const serializer = Serializer(lanesModdleContext, typeResolver);
       const processes = serializer.getProcesses();
 
@@ -216,14 +216,14 @@ describe('moddle context serializer', () => {
       processes.forEach(assertEntity);
     });
 
-    it('returns processes only', async () => {
+    it('returns processes only', () => {
       const serializer = Serializer(subProcessModdleContext, typeResolver);
       const processes = serializer.getProcesses();
 
       expect(processes).to.have.length(1);
     });
 
-    it('isExecutable is available in behaviour', async () => {
+    it('isExecutable is available in behaviour', () => {
       const serializer = Serializer(lanesModdleContext, typeResolver);
       const processes = serializer.getProcesses();
 
@@ -233,7 +233,7 @@ describe('moddle context serializer', () => {
       expect(processes[1]).to.have.property('behaviour').with.property('isExecutable', false);
     });
 
-    it('(backward compability) isExecutable is available in behaviour', async () => {
+    it('(backward compability) isExecutable is available in behaviour', () => {
       const serializer = Serializer(lanesModdleContextFromCallBack, typeResolver);
       const processes = serializer.getProcesses();
 
@@ -243,7 +243,7 @@ describe('moddle context serializer', () => {
       expect(processes[1]).to.have.property('behaviour').with.property('isExecutable', false);
     });
 
-    it('returns only processes', async () => {
+    it('returns only processes', () => {
       const serializer = Serializer(subProcessModdleContext, typeResolver);
       const processes = serializer.getProcesses();
 
@@ -254,7 +254,7 @@ describe('moddle context serializer', () => {
   });
 
   describe('getExecutableProcesses()', () => {
-    it('returns executable processes', async () => {
+    it('returns executable processes', () => {
       const serializer = Serializer(lanesModdleContext, typeResolver);
       const executableProcesses = serializer.getExecutableProcesses();
       const processes = serializer.getProcesses();
@@ -265,7 +265,7 @@ describe('moddle context serializer', () => {
       expect(executableProcesses[0]).to.have.property('behaviour').with.property('isExecutable', true);
     });
 
-    it('returns all executable processes', async () => {
+    it('returns all executable processes', () => {
       const serializer = Serializer(twoProcessesModdleContext, typeResolver);
       const processes = serializer.getExecutableProcesses();
 
@@ -276,20 +276,20 @@ describe('moddle context serializer', () => {
   });
 
   describe('getProcessesById(id)', () => {
-    it('returns process with id', async () => {
+    it('returns process with id', () => {
       const serializer = Serializer(lanesModdleContext, typeResolver);
       expect(serializer.getProcessById('mainProcess')).to.be.ok;
       expect(serializer.getProcessById('participantProcess')).to.be.ok;
     });
 
-    it('returns nothing if not found', async () => {
+    it('returns nothing if not found', () => {
       const serializer = Serializer(subProcessModdleContext, typeResolver);
       expect(serializer.getProcessById('subProcess')).to.not.be.ok;
     });
   });
 
   describe('getActivities([scopeId])', () => {
-    it('returns all activities', async () => {
+    it('returns all activities', () => {
       const serializer = Serializer(subProcessModdleContext, typeResolver);
 
       const activities = serializer.getActivities();
@@ -299,7 +299,7 @@ describe('moddle context serializer', () => {
       activities.forEach(assertEntity);
     });
 
-    it('with scope returns activities for given process or sub process', async () => {
+    it('with scope returns activities for given process or sub process', () => {
       const serializer = Serializer(subProcessModdleContext, typeResolver);
 
       const processActivities = serializer.getActivities('mainProcess');
@@ -341,13 +341,13 @@ describe('moddle context serializer', () => {
   });
 
   describe('getSequenceFlowById(id)', () => {
-    it('returns sequence flow with id', async () => {
+    it('returns sequence flow with id', () => {
       const serializer = Serializer(lanesModdleContext, typeResolver);
       expect(serializer.getSequenceFlowById('flow1')).to.be.ok;
       expect(serializer.getSequenceFlowById('flow-p-1')).to.be.ok;
     });
 
-    it('returns nothing if not found', async () => {
+    it('returns nothing if not found', () => {
       const serializer = Serializer(subProcessModdleContext, typeResolver);
       expect(serializer.getSequenceFlowById('subProcess')).to.not.be.ok;
     });
@@ -693,13 +693,12 @@ describe('moddle context serializer', () => {
     it('MultiInstanceLoopCharacteristics is added to task behaviour', () => {
       const activity = contextMapper.getActivityById('multiInstance');
 
-      expect(activity.behaviour)
-        .to.have.property('loopCharacteristics')
-        .with.property('Behaviour', types.MultiInstanceLoopCharacteristics);
-      expect(activity.behaviour.loopCharacteristics.behaviour)
-        .to.have.property('loopCardinality', '${environment.variables.maxCardinality}');
-      expect(activity.behaviour.loopCharacteristics.behaviour)
-        .to.have.property('completionCondition', '${environment.services.completed}');
+      expect(activity.behaviour).to.have.property('loopCharacteristics').with.property('Behaviour', types.MultiInstanceLoopCharacteristics);
+      expect(activity.behaviour.loopCharacteristics.behaviour).to.have.property(
+        'loopCardinality',
+        '${environment.variables.maxCardinality}',
+      );
+      expect(activity.behaviour.loopCharacteristics.behaviour).to.have.property('completionCondition', '${environment.services.completed}');
     });
 
     it('MultiInstanceLoopCharacteristics is deserializable', async () => {
@@ -707,27 +706,21 @@ describe('moddle context serializer', () => {
       const deserialized = deserialize(JSON.parse(serializer.serialize()), typeResolver);
       const activity = deserialized.getActivityById('multiInstance');
 
-      expect(activity.behaviour)
-        .to.have.property('loopCharacteristics')
-        .with.property('Behaviour', types.MultiInstanceLoopCharacteristics);
-      expect(activity.behaviour.loopCharacteristics.behaviour)
-        .to.have.property('loopCardinality', '${environment.variables.maxCardinality}');
-      expect(activity.behaviour.loopCharacteristics.behaviour)
-        .to.have.property('completionCondition', '${environment.services.completed}');
+      expect(activity.behaviour).to.have.property('loopCharacteristics').with.property('Behaviour', types.MultiInstanceLoopCharacteristics);
+      expect(activity.behaviour.loopCharacteristics.behaviour).to.have.property(
+        'loopCardinality',
+        '${environment.variables.maxCardinality}',
+      );
+      expect(activity.behaviour.loopCharacteristics.behaviour).to.have.property('completionCondition', '${environment.services.completed}');
     });
 
     it('StandardLoopCharacteristics is added to task behaviour', () => {
       const activity = contextMapper.getActivityById('standardLoop');
 
-      expect(activity.behaviour)
-        .to.have.property('loopCharacteristics')
-        .with.property('Behaviour', types.StandardLoopCharacteristics);
-      expect(activity.behaviour.loopCharacteristics.behaviour)
-        .to.have.property('testBefore', true);
-      expect(activity.behaviour.loopCharacteristics.behaviour)
-        .to.have.property('loopMaximum', 3);
-      expect(activity.behaviour.loopCharacteristics.behaviour)
-        .to.have.property('loopCondition', '${environment.services.completed}');
+      expect(activity.behaviour).to.have.property('loopCharacteristics').with.property('Behaviour', types.StandardLoopCharacteristics);
+      expect(activity.behaviour.loopCharacteristics.behaviour).to.have.property('testBefore', true);
+      expect(activity.behaviour.loopCharacteristics.behaviour).to.have.property('loopMaximum', 3);
+      expect(activity.behaviour.loopCharacteristics.behaviour).to.have.property('loopCondition', '${environment.services.completed}');
     });
 
     it('StandardLoopCharacteristics is deserializable', async () => {
@@ -735,15 +728,10 @@ describe('moddle context serializer', () => {
       const deserialized = deserialize(JSON.parse(serializer.serialize()), typeResolver);
       const activity = deserialized.getActivityById('standardLoop');
 
-      expect(activity.behaviour)
-        .to.have.property('loopCharacteristics')
-        .with.property('Behaviour', types.StandardLoopCharacteristics);
-      expect(activity.behaviour.loopCharacteristics.behaviour)
-        .to.have.property('testBefore', true);
-      expect(activity.behaviour.loopCharacteristics.behaviour)
-        .to.have.property('loopMaximum', 3);
-      expect(activity.behaviour.loopCharacteristics.behaviour)
-        .to.have.property('loopCondition', '${environment.services.completed}');
+      expect(activity.behaviour).to.have.property('loopCharacteristics').with.property('Behaviour', types.StandardLoopCharacteristics);
+      expect(activity.behaviour.loopCharacteristics.behaviour).to.have.property('testBefore', true);
+      expect(activity.behaviour.loopCharacteristics.behaviour).to.have.property('loopMaximum', 3);
+      expect(activity.behaviour.loopCharacteristics.behaviour).to.have.property('loopCondition', '${environment.services.completed}');
     });
   });
 
@@ -810,8 +798,8 @@ describe('moddle context serializer', () => {
       expect(error).to.have.property('type', 'bpmn:Error');
       expect(error).to.have.property('name', 'InputError');
       expect(error).to.have.property('Behaviour', types.BpmnError);
-      expect(error).to.have.property('parent').that.eql({id: 'Definitions_1', type: 'bpmn:Definitions'});
-      expect(error).to.have.property('behaviour').that.include({errorCode: '404'});
+      expect(error).to.have.property('parent').that.eql({ id: 'Definitions_1', type: 'bpmn:Definitions' });
+      expect(error).to.have.property('behaviour').that.include({ errorCode: '404' });
     });
 
     it('deserialized getActivityById(errorId) returns error', () => {
@@ -822,8 +810,8 @@ describe('moddle context serializer', () => {
       expect(error).to.have.property('type', 'bpmn:Error');
       expect(error).to.have.property('name', 'InputError');
       expect(error).to.have.property('Behaviour', types.BpmnError);
-      expect(error).to.have.property('parent').that.eql({id: 'Definitions_1', type: 'bpmn:Definitions'});
-      expect(error).to.have.property('behaviour').that.include({errorCode: '404'});
+      expect(error).to.have.property('parent').that.eql({ id: 'Definitions_1', type: 'bpmn:Definitions' });
+      expect(error).to.have.property('behaviour').that.include({ errorCode: '404' });
     });
 
     it('error reference is stored with activity', () => {
@@ -831,10 +819,7 @@ describe('moddle context serializer', () => {
       expect(activity).to.be.ok;
 
       expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
-      expect(activity.behaviour.eventDefinitions[0])
-        .to.have.property('behaviour')
-        .with.property('errorRef')
-        .with.property('id', 'Error_0');
+      expect(activity.behaviour.eventDefinitions[0]).to.have.property('behaviour').with.property('errorRef').with.property('id', 'Error_0');
     });
 
     it('deserialized error reference is stored with activity', () => {
@@ -844,17 +829,14 @@ describe('moddle context serializer', () => {
       expect(activity).to.be.ok;
 
       expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
-      expect(activity.behaviour.eventDefinitions[0])
-        .to.have.property('behaviour')
-        .with.property('errorRef')
-        .with.property('id', 'Error_0');
+      expect(activity.behaviour.eventDefinitions[0]).to.have.property('behaviour').with.property('errorRef').with.property('id', 'Error_0');
     });
   });
 
   describe('event definitions', () => {
     describe('bpmn:TimerEventDefinition', () => {
       let contextMapper;
-      before(async () => {
+      before(() => {
         contextMapper = Serializer(eventDefinitionModdleContext, typeResolver);
       });
 
@@ -863,11 +845,8 @@ describe('moddle context serializer', () => {
         expect(activity).to.be.ok;
 
         expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
-        expect(activity.behaviour.eventDefinitions[0])
-          .to.have.property('Behaviour', types.TimerEventDefinition);
-        expect(activity.behaviour.eventDefinitions[0])
-          .to.have.property('behaviour')
-          .with.property('timeDuration', 'PT0.05S');
+        expect(activity.behaviour.eventDefinitions[0]).to.have.property('Behaviour', types.TimerEventDefinition);
+        expect(activity.behaviour.eventDefinitions[0]).to.have.property('behaviour').with.property('timeDuration', 'PT0.05S');
       });
 
       it('can be deserialized', () => {
@@ -877,17 +856,14 @@ describe('moddle context serializer', () => {
         const activity = deserialized.getActivityById('timerEvent');
 
         expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
-        expect(activity.behaviour.eventDefinitions[0])
-          .to.have.property('Behaviour', types.TimerEventDefinition);
-        expect(activity.behaviour.eventDefinitions[0])
-          .to.have.property('behaviour')
-          .with.property('timeDuration', 'PT0.05S');
+        expect(activity.behaviour.eventDefinitions[0]).to.have.property('Behaviour', types.TimerEventDefinition);
+        expect(activity.behaviour.eventDefinitions[0]).to.have.property('behaviour').with.property('timeDuration', 'PT0.05S');
       });
     });
 
     describe('bpmn:ConditionalEventDefinition', () => {
       let contextMapper;
-      before(async () => {
+      before(() => {
         contextMapper = Serializer(conditionAndEscalationModdleContext, typeResolver);
       });
 
@@ -896,16 +872,14 @@ describe('moddle context serializer', () => {
         expect(activity).to.be.ok;
 
         expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
-        expect(activity.behaviour.eventDefinitions[0])
-          .to.have.property('Behaviour', types.ConditionalEventDefinition);
+        expect(activity.behaviour.eventDefinitions[0]).to.have.property('Behaviour', types.ConditionalEventDefinition);
         expect(activity.behaviour.eventDefinitions[0])
           .to.have.property('behaviour')
           .with.property('expression', '${environment.variables.conditionMet}');
-        expect(activity.behaviour.eventDefinitions[0].behaviour)
-          .to.have.property('condition').that.include({
-            $type: 'bpmn:FormalExpression',
-            body: '${environment.variables.conditionMet}',
-          });
+        expect(activity.behaviour.eventDefinitions[0].behaviour).to.have.property('condition').that.include({
+          $type: 'bpmn:FormalExpression',
+          body: '${environment.variables.conditionMet}',
+        });
       });
 
       it('can be deserialized', () => {
@@ -915,22 +889,20 @@ describe('moddle context serializer', () => {
         const activity = deserialized.getActivityById('conditionalBoundaryEvent');
 
         expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
-        expect(activity.behaviour.eventDefinitions[0])
-          .to.have.property('Behaviour', types.ConditionalEventDefinition);
+        expect(activity.behaviour.eventDefinitions[0]).to.have.property('Behaviour', types.ConditionalEventDefinition);
         expect(activity.behaviour.eventDefinitions[0])
           .to.have.property('behaviour')
           .with.property('expression', '${environment.variables.conditionMet}');
-        expect(activity.behaviour.eventDefinitions[0].behaviour)
-          .to.have.property('condition').that.include({
-            $type: 'bpmn:FormalExpression',
-            body: '${environment.variables.conditionMet}',
-          });
+        expect(activity.behaviour.eventDefinitions[0].behaviour).to.have.property('condition').that.include({
+          $type: 'bpmn:FormalExpression',
+          body: '${environment.variables.conditionMet}',
+        });
       });
     });
 
     describe('bpmn:BoundaryEvent', () => {
       let contextMapper;
-      before(async () => {
+      before(() => {
         contextMapper = Serializer(eventDefinitionModdleContext, typeResolver);
       });
 
@@ -959,7 +931,7 @@ describe('moddle context serializer', () => {
 
     describe('bpmn:ErrorEventDefinition', () => {
       let contextMapper;
-      before(async () => {
+      before(() => {
         contextMapper = Serializer(eventDefinitionModdleContext, typeResolver);
       });
 
@@ -968,16 +940,12 @@ describe('moddle context serializer', () => {
         expect(activity).to.be.ok;
 
         expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
-        expect(activity.behaviour.eventDefinitions[0])
-          .to.have.property('Behaviour', types.ErrorEventDefinition);
-        expect(activity.behaviour.eventDefinitions[0])
-          .to.have.property('behaviour')
-          .with.property('errorRef');
-        expect(activity.behaviour.eventDefinitions[0].behaviour.errorRef)
-          .to.include({
-            type: 'bpmn:Error',
-            id: 'Error_0',
-          });
+        expect(activity.behaviour.eventDefinitions[0]).to.have.property('Behaviour', types.ErrorEventDefinition);
+        expect(activity.behaviour.eventDefinitions[0]).to.have.property('behaviour').with.property('errorRef');
+        expect(activity.behaviour.eventDefinitions[0].behaviour.errorRef).to.include({
+          type: 'bpmn:Error',
+          id: 'Error_0',
+        });
       });
 
       it('can be deserialized', () => {
@@ -987,16 +955,12 @@ describe('moddle context serializer', () => {
         const activity = deserialized.getActivityById('errorEvent');
 
         expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
-        expect(activity.behaviour.eventDefinitions[0])
-          .to.have.property('Behaviour', types.ErrorEventDefinition);
-        expect(activity.behaviour.eventDefinitions[0])
-          .to.have.property('behaviour')
-          .with.property('errorRef');
-        expect(activity.behaviour.eventDefinitions[0].behaviour.errorRef)
-          .to.include({
-            type: 'bpmn:Error',
-            id: 'Error_0',
-          });
+        expect(activity.behaviour.eventDefinitions[0]).to.have.property('Behaviour', types.ErrorEventDefinition);
+        expect(activity.behaviour.eventDefinitions[0]).to.have.property('behaviour').with.property('errorRef');
+        expect(activity.behaviour.eventDefinitions[0].behaviour.errorRef).to.include({
+          type: 'bpmn:Error',
+          id: 'Error_0',
+        });
       });
     });
 
@@ -1010,7 +974,7 @@ describe('moddle context serializer', () => {
 
   describe('bpmn:Signal', () => {
     let contextMapper;
-    before(async () => {
+    before(() => {
       contextMapper = Serializer(signalEventModdleContext, typeResolver);
     });
 
@@ -1040,7 +1004,7 @@ describe('moddle context serializer', () => {
 
   describe('bpmn:Association', () => {
     let serializer;
-    before(async () => {
+    before(() => {
       serializer = Serializer(compensationContext, typeResolver);
     });
 
@@ -1119,7 +1083,7 @@ describe('moddle context serializer', () => {
       expect(task).to.be.ok;
       expect(task).to.have.property('behaviour');
       expect(task.behaviour).to.have.property('messageRef');
-      expect(task.behaviour).to.have.property('messageRef').that.eql({id: 'Message1', name: 'My message', type: 'bpmn:Message'});
+      expect(task.behaviour).to.have.property('messageRef').that.eql({ id: 'Message1', name: 'My message', type: 'bpmn:Message' });
       expect(task).to.have.property('Behaviour').that.equal(types.ReceiveTask);
     });
 
@@ -1131,7 +1095,7 @@ describe('moddle context serializer', () => {
       expect(task).to.be.ok;
       expect(task).to.have.property('behaviour');
       expect(task.behaviour).to.have.property('messageRef');
-      expect(task.behaviour).to.have.property('messageRef').that.eql({id: 'Message1', name: 'My message', type: 'bpmn:Message'});
+      expect(task.behaviour).to.have.property('messageRef').that.eql({ id: 'Message1', name: 'My message', type: 'bpmn:Message' });
       expect(task).to.have.property('Behaviour').that.equal(types.ReceiveTask);
     });
   });
@@ -1157,7 +1121,7 @@ describe('moddle context serializer', () => {
       expect(task).to.have.property('behaviour');
       expect(task.behaviour).to.have.property('Service', types.ServiceImplementation);
       expect(task.behaviour).to.have.property('messageRef');
-      expect(task.behaviour).to.have.property('messageRef').that.eql({id: 'Message1', name: 'My message', type: 'bpmn:Message'});
+      expect(task.behaviour).to.have.property('messageRef').that.eql({ id: 'Message1', name: 'My message', type: 'bpmn:Message' });
       expect(task).to.have.property('Behaviour').that.equal(types.SendTask);
     });
 
@@ -1170,14 +1134,14 @@ describe('moddle context serializer', () => {
       expect(task).to.have.property('behaviour');
       expect(task.behaviour).to.have.property('Service', types.ServiceImplementation);
       expect(task.behaviour).to.have.property('messageRef');
-      expect(task.behaviour).to.have.property('messageRef').that.eql({id: 'Message1', name: 'My message', type: 'bpmn:Message'});
+      expect(task.behaviour).to.have.property('messageRef').that.eql({ id: 'Message1', name: 'My message', type: 'bpmn:Message' });
       expect(task).to.have.property('Behaviour').that.equal(types.SendTask);
     });
   });
 
   describe('escalation', () => {
     let contextMapper;
-    before(async () => {
+    before(() => {
       contextMapper = Serializer(conditionAndEscalationModdleContext, typeResolver);
     });
 
@@ -1186,11 +1150,8 @@ describe('moddle context serializer', () => {
       expect(activity).to.be.ok;
 
       expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
-      expect(activity.behaviour.eventDefinitions[0])
-        .to.have.property('Behaviour', types.EscalationEventDefinition);
-      expect(activity.behaviour.eventDefinitions[0].behaviour)
-        .to.have.property('escalationRef')
-        .with.property('id', 'Escalation_0');
+      expect(activity.behaviour.eventDefinitions[0]).to.have.property('Behaviour', types.EscalationEventDefinition);
+      expect(activity.behaviour.eventDefinitions[0].behaviour).to.have.property('escalationRef').with.property('id', 'Escalation_0');
     });
 
     it('can be deserialized', () => {
@@ -1201,11 +1162,8 @@ describe('moddle context serializer', () => {
       expect(activity).to.be.ok;
 
       expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
-      expect(activity.behaviour.eventDefinitions[0])
-        .to.have.property('Behaviour', types.EscalationEventDefinition);
-      expect(activity.behaviour.eventDefinitions[0].behaviour)
-        .to.have.property('escalationRef')
-        .with.property('id', 'Escalation_0');
+      expect(activity.behaviour.eventDefinitions[0]).to.have.property('Behaviour', types.EscalationEventDefinition);
+      expect(activity.behaviour.eventDefinitions[0].behaviour).to.have.property('escalationRef').with.property('id', 'Escalation_0');
     });
 
     it('escalation element has escalation name and code', () => {
@@ -1237,17 +1195,14 @@ describe('moddle context serializer', () => {
 
       expect(activity.behaviour).to.have.property('isInterrupting', false);
       expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
-      expect(activity.behaviour.eventDefinitions[0])
-        .to.have.property('Behaviour', types.EscalationEventDefinition);
-      expect(activity.behaviour.eventDefinitions[0].behaviour)
-        .to.have.property('escalationRef')
-        .with.property('id', 'Escalation_0');
+      expect(activity.behaviour.eventDefinitions[0]).to.have.property('Behaviour', types.EscalationEventDefinition);
+      expect(activity.behaviour.eventDefinitions[0].behaviour).to.have.property('escalationRef').with.property('id', 'Escalation_0');
     });
   });
 
   describe('signal event', () => {
     let contextMapper;
-    before(async () => {
+    before(() => {
       contextMapper = Serializer(signalEventModdleContext, typeResolver);
     });
 
@@ -1256,11 +1211,8 @@ describe('moddle context serializer', () => {
       expect(activity).to.be.ok;
 
       expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
-      expect(activity.behaviour.eventDefinitions[0])
-        .to.have.property('Behaviour', types.SignalEventDefinition);
-      expect(activity.behaviour.eventDefinitions[0].behaviour)
-        .to.have.property('signalRef')
-        .with.property('id', 'Signal_0');
+      expect(activity.behaviour.eventDefinitions[0]).to.have.property('Behaviour', types.SignalEventDefinition);
+      expect(activity.behaviour.eventDefinitions[0].behaviour).to.have.property('signalRef').with.property('id', 'Signal_0');
     });
 
     it('can be deserialized', () => {
@@ -1271,11 +1223,8 @@ describe('moddle context serializer', () => {
       expect(activity).to.be.ok;
 
       expect(activity.behaviour).to.have.property('eventDefinitions').with.length(1);
-      expect(activity.behaviour.eventDefinitions[0])
-        .to.have.property('Behaviour', types.SignalEventDefinition);
-      expect(activity.behaviour.eventDefinitions[0].behaviour)
-        .to.have.property('signalRef')
-        .with.property('id', 'Signal_0');
+      expect(activity.behaviour.eventDefinitions[0]).to.have.property('Behaviour', types.SignalEventDefinition);
+      expect(activity.behaviour.eventDefinitions[0].behaviour).to.have.property('signalRef').with.property('id', 'Signal_0');
     });
 
     it('signal element has escalation name and code', () => {
@@ -1347,11 +1296,15 @@ describe('moddle context serializer', () => {
 
       expect(properties.values[0].behaviour).to.have.property('dataInput').with.property('association').with.property('source');
 
-      expect(properties.values[0].behaviour.dataInput.association.source).to.have.property('dataObject').with.property('id', 'DataObject_1');
+      expect(properties.values[0].behaviour.dataInput.association.source)
+        .to.have.property('dataObject')
+        .with.property('id', 'DataObject_1');
       expect(properties.values[0].behaviour.dataInput.association.source, 'no dataStore').to.not.have.property('dataStore');
 
       expect(properties.values[0].behaviour).to.have.property('dataOutput');
-      expect(properties.values[0].behaviour.dataOutput.association.target).to.have.property('dataObject').with.property('id', 'DataObject_2');
+      expect(properties.values[0].behaviour.dataOutput.association.target)
+        .to.have.property('dataObject')
+        .with.property('id', 'DataObject_2');
       expect(properties.values[0].behaviour.dataOutput.association.target, 'no dataStore').to.not.have.property('dataStore');
     });
   });
@@ -1388,8 +1341,13 @@ describe('moddle context serializer', () => {
       expect(properties).to.have.property('Behaviour', types.Properties);
       expect(properties.values[0]).to.have.property('id');
       expect(properties.values[0]).to.have.property('type');
-      expect(properties.values[0].behaviour, 'dataInput association').to.have.property('dataInput').with.property('association').with.property('source');
-      expect(properties.values[0].behaviour.dataInput.association.source, 'dataStoreReference').to.have.property('dataStore').with.property('id', 'DataStoreReference_1');
+      expect(properties.values[0].behaviour, 'dataInput association')
+        .to.have.property('dataInput')
+        .with.property('association')
+        .with.property('source');
+      expect(properties.values[0].behaviour.dataInput.association.source, 'dataStoreReference')
+        .to.have.property('dataStore')
+        .with.property('id', 'DataStoreReference_1');
     });
 
     it('activity with bpmn:Property associated with dataStoreReference and dataStore', async () => {
@@ -1424,7 +1382,10 @@ describe('moddle context serializer', () => {
       expect(properties).to.have.property('Behaviour', types.Properties);
       expect(properties.values[0]).to.have.property('id');
       expect(properties.values[0]).to.have.property('type');
-      expect(properties.values[0].behaviour, 'dataInput association').to.have.property('dataInput').with.property('association').with.property('source');
+      expect(properties.values[0].behaviour, 'dataInput association')
+        .to.have.property('dataInput')
+        .with.property('association')
+        .with.property('source');
       const inputSource = properties.values[0].behaviour.dataInput.association.source;
       expect(inputSource, 'dataStore').to.have.property('dataStore').with.property('id', 'datastore');
       expect(inputSource.dataStore).to.have.property('isUnlimited', false);
@@ -1463,7 +1424,10 @@ describe('moddle context serializer', () => {
       expect(properties).to.have.property('Behaviour', types.Properties);
       expect(properties.values[0]).to.have.property('id');
       expect(properties.values[0]).to.have.property('type');
-      expect(properties.values[0].behaviour, 'dataInput association').to.have.property('dataInput').with.property('association').with.property('source');
+      expect(properties.values[0].behaviour, 'dataInput association')
+        .to.have.property('dataInput')
+        .with.property('association')
+        .with.property('source');
       const inputSource = properties.values[0].behaviour.dataInput.association.source;
       expect(inputSource, 'dataStore').to.have.property('dataStore').with.property('id', 'datastore');
       expect(inputSource.dataStore).to.have.property('isUnlimited', false);
@@ -1502,8 +1466,13 @@ describe('moddle context serializer', () => {
       expect(properties).to.have.property('Behaviour', types.Properties);
       expect(properties.values[0]).to.have.property('id');
       expect(properties.values[0]).to.have.property('type');
-      expect(properties.values[0].behaviour, 'dataOutput association').to.have.property('dataOutput').with.property('association').with.property('source');
-      expect(properties.values[0].behaviour.dataOutput.association.target, 'dataStoreReference').to.have.property('dataStore').with.property('id', 'DataStoreReference_1');
+      expect(properties.values[0].behaviour, 'dataOutput association')
+        .to.have.property('dataOutput')
+        .with.property('association')
+        .with.property('source');
+      expect(properties.values[0].behaviour.dataOutput.association.target, 'dataStoreReference')
+        .to.have.property('dataStore')
+        .with.property('id', 'DataStoreReference_1');
     });
 
     it('activity with bpmn:InputOutputSpecification returns reference to dataStoreReference', async () => {
@@ -1584,29 +1553,35 @@ describe('moddle context serializer', () => {
 
       let deserialized = deserialize(JSON.parse(serialized), typeResolver);
       expect(deserialized.getDataStoreReferences()).to.have.length(3);
-      expect(deserialized.getDataStores()).to.have.length(1).and.deep.equal([{
-        id: 'datastore',
-        type: 'bpmn:DataStore',
-        Behaviour: types.DataStore,
-        behaviour: {
-          $type: 'bpmn:DataStore',
-          capacity: 100,
-          id: 'datastore',
-          isUnlimited: false,
-        },
-        parent: {
-          id: 'Definitions_1',
-          type: 'bpmn:Definitions',
-        },
-        references: [{
-          behaviour: {
-            $type: 'bpmn:DataStoreReference',
-            id: 'DataStoreReference_2',
+      expect(deserialized.getDataStores())
+        .to.have.length(1)
+        .and.deep.equal([
+          {
+            id: 'datastore',
+            type: 'bpmn:DataStore',
+            Behaviour: types.DataStore,
+            behaviour: {
+              $type: 'bpmn:DataStore',
+              capacity: 100,
+              id: 'datastore',
+              isUnlimited: false,
+            },
+            parent: {
+              id: 'Definitions_1',
+              type: 'bpmn:Definitions',
+            },
+            references: [
+              {
+                behaviour: {
+                  $type: 'bpmn:DataStoreReference',
+                  id: 'DataStoreReference_2',
+                },
+                id: 'DataStoreReference_2',
+                type: 'bpmn:DataStoreReference',
+              },
+            ],
           },
-          id: 'DataStoreReference_2',
-          type: 'bpmn:DataStoreReference',
-        }],
-      }]);
+        ]);
       expect(deserialized.getDataStoreById('datastore')).to.have.property('id', 'datastore');
 
       serialized = deserialized.serialize();
@@ -1757,31 +1732,37 @@ describe('moddle context serializer', () => {
       const serializer = Serializer(moddleContext, typeResolver);
       expect(serializer.getDataStoreReferenceById('DataStoreReference_2')).to.be.undefined;
 
-      expect(serializer.getDataStores()).to.have.length(1).and.deep.equal([{
-        id: 'datastore',
-        type: 'bpmn:DataStore',
-        name: 'My data',
-        Behaviour: types.DataStore,
-        behaviour: {
-          $type: 'bpmn:DataStore',
-          name: 'My data',
-          capacity: 100,
-          id: 'datastore',
-          isUnlimited: false,
-        },
-        parent: {
-          id: 'Definitions_1',
-          type: 'bpmn:Definitions',
-        },
-        references: [{
-          behaviour: {
-            $type: 'bpmn:DataStoreReference',
-            id: 'DataStoreReference_1',
+      expect(serializer.getDataStores())
+        .to.have.length(1)
+        .and.deep.equal([
+          {
+            id: 'datastore',
+            type: 'bpmn:DataStore',
+            name: 'My data',
+            Behaviour: types.DataStore,
+            behaviour: {
+              $type: 'bpmn:DataStore',
+              name: 'My data',
+              capacity: 100,
+              id: 'datastore',
+              isUnlimited: false,
+            },
+            parent: {
+              id: 'Definitions_1',
+              type: 'bpmn:Definitions',
+            },
+            references: [
+              {
+                behaviour: {
+                  $type: 'bpmn:DataStoreReference',
+                  id: 'DataStoreReference_1',
+                },
+                id: 'DataStoreReference_1',
+                type: 'bpmn:DataStoreReference',
+              },
+            ],
           },
-          id: 'DataStoreReference_1',
-          type: 'bpmn:DataStoreReference',
-        }],
-      }]);
+        ]);
 
       expect(serializer.getDataStoreById('datastore')).to.have.property('id', 'datastore');
       expect(serializer.getDataStoreById('DataStoreReference_1')).to.be.undefined;
@@ -1864,7 +1845,7 @@ describe('moddle context serializer', () => {
         </process>
       </definitions>`;
 
-      const moddleOptions = {camunda: testHelpers.getCamundaExtension()};
+      const moddleOptions = { camunda: testHelpers.getCamundaExtension() };
       const context = Serializer(await testHelpers.moddleContext(source, moddleOptions), typeResolver);
       const task = context.getActivityById('task');
       expect(task.behaviour).to.have.property('assignee', 'pal');
@@ -1917,43 +1898,48 @@ describe('moddle context serializer', () => {
     });
 
     it('participants are stored in elements', () => {
-      expect(serializer.elements.participants).to.deep.equal([{
-        id: 'lane1',
-        type: 'bpmn:Participant',
-        name: 'Main',
-        processId: 'mainProcess',
-        parent: {
-          id: 'Collaboration_0',
-          type: 'bpmn:Collaboration',
+      expect(serializer.elements.participants).to.deep.equal([
+        {
+          id: 'lane1',
+          type: 'bpmn:Participant',
+          name: 'Main',
+          processId: 'mainProcess',
+          parent: {
+            id: 'Collaboration_0',
+            type: 'bpmn:Collaboration',
+          },
         },
-      }, {
-        id: 'part2',
-        type: 'bpmn:Participant',
-        name: 'Participant',
-        processId: 'participantProcess',
-        parent: {
-          id: 'Collaboration_0',
-          type: 'bpmn:Collaboration',
+        {
+          id: 'part2',
+          type: 'bpmn:Participant',
+          name: 'Participant',
+          processId: 'participantProcess',
+          parent: {
+            id: 'Collaboration_0',
+            type: 'bpmn:Collaboration',
+          },
         },
-      }, {
-        id: 'part3',
-        type: 'bpmn:Participant',
-        name: 'Peer 1',
-        processId: 'mainProcess',
-        parent: {
-          id: 'Collaboration_1',
-          type: 'bpmn:Collaboration',
+        {
+          id: 'part3',
+          type: 'bpmn:Participant',
+          name: 'Peer 1',
+          processId: 'mainProcess',
+          parent: {
+            id: 'Collaboration_1',
+            type: 'bpmn:Collaboration',
+          },
         },
-      }, {
-        id: 'part4',
-        type: 'bpmn:Participant',
-        name: 'Peer 2',
-        processId: 'participantProcess',
-        parent: {
-          id: 'Collaboration_1',
-          type: 'bpmn:Collaboration',
+        {
+          id: 'part4',
+          type: 'bpmn:Participant',
+          name: 'Peer 2',
+          processId: 'participantProcess',
+          parent: {
+            id: 'Collaboration_1',
+            type: 'bpmn:Collaboration',
+          },
         },
-      }]);
+      ]);
     });
 
     it('participants are deserialized', () => {
@@ -1996,13 +1982,13 @@ describe('type resolver', () => {
   it('throws if type is not found', () => {
     const resolver = TypeResolver({});
     expect(() => {
-      resolver({type: 'bpmn:Unknown'});
+      resolver({ type: 'bpmn:Unknown' });
     }).to.throw(/Unknown activity/i);
   });
 });
 
 function assertEntity(activity) {
-  const {type, behaviour} = activity;
+  const { type, behaviour } = activity;
 
   expect(activity, type).to.have.property('id').that.is.ok;
   expect(activity, type).to.have.property('type').that.is.ok;
@@ -2013,7 +1999,10 @@ function assertEntity(activity) {
 
   expect(activity).to.have.property('behaviour').that.is.ok;
   if (behaviour.loopCharacteristics) {
-    expect(behaviour.loopCharacteristics, `${type}.loopCharacteristics`).to.have.property('Behaviour', types.MultiInstanceLoopCharacteristics);
+    expect(behaviour.loopCharacteristics, `${type}.loopCharacteristics`).to.have.property(
+      'Behaviour',
+      types.MultiInstanceLoopCharacteristics,
+    );
   }
   if (behaviour.ioSpecification) {
     expect(behaviour.ioSpecification, `${type}.ioSpecification`).to.have.property('Behaviour', types.InputOutputSpecification);

@@ -1,28 +1,32 @@
 import testHelpers from './helpers/testHelpers.js';
 import types from './helpers/types.js';
 
-import {default as Serializer, TypeResolver} from '../index.js';
+import { default as Serializer, TypeResolver } from '../index.js';
 
 const typeResolver = TypeResolver(types);
 
 describe('edge-cases (mainly for coverage)', () => {
-  it('empty moddle context throws', async () => {
+  it('empty moddle context throws', () => {
     expect(() => Serializer({}, typeResolver)).to.throw(TypeError);
   });
 
-  it('event definition null is ignored', async () => {
+  it('event definition null is ignored', () => {
     const mc = {
       rootElement: {
         $type: 'bpmn:Definition',
-        rootElements: [{
-          id: 'my-process',
-          $type: 'bpmn:Process',
-          flowElements: [{
-            id: 'start',
-            $type: 'bpmn:StartEvent',
-            eventDefinitions: [null],
-          }],
-        }],
+        rootElements: [
+          {
+            id: 'my-process',
+            $type: 'bpmn:Process',
+            flowElements: [
+              {
+                id: 'start',
+                $type: 'bpmn:StartEvent',
+                eventDefinitions: [null],
+              },
+            ],
+          },
+        ],
       },
       references: [],
     };

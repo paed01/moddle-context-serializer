@@ -2,7 +2,7 @@ import factory from './helpers/factory.js';
 import testHelpers from './helpers/testHelpers.js';
 import types from './helpers/types.js';
 
-import {default as Serializer, TypeResolver, deserialize} from '../index.js';
+import { default as Serializer, TypeResolver, deserialize } from '../index.js';
 
 const typeResolver = TypeResolver(types);
 const lanesSource = factory.resource('lane-set.bpmn');
@@ -15,7 +15,7 @@ describe('lanes', () => {
       serializer = Serializer(await testHelpers.moddleContext(lanesSource), typeResolver);
     });
 
-    it('lane set information is exposed under behaviour', async () => {
+    it('lane set information is exposed under behaviour', () => {
       const [bp] = serializer.getProcesses();
       expect(bp.behaviour).to.have.property('laneSets');
 
@@ -24,7 +24,7 @@ describe('lanes', () => {
       expect(dbp.behaviour).to.have.property('laneSets');
     });
 
-    it('lane information is added to activity', async () => {
+    it('lane information is added to activity', () => {
       let element = serializer.getActivityById('task');
       expect(element).to.have.property('lane');
 
@@ -43,7 +43,7 @@ describe('lanes', () => {
       serializer = Serializer(await testHelpers.moddleContext(swimlanesSource), typeResolver);
     });
 
-    it('lane set information is exposed under process behaviour', async () => {
+    it('lane set information is exposed under process behaviour', () => {
       const [bp] = serializer.getProcesses();
 
       expect(bp.behaviour).to.have.property('laneSets').with.length(1);
@@ -53,7 +53,7 @@ describe('lanes', () => {
       expect(dbp.behaviour).to.have.property('laneSets');
     });
 
-    it('lanes are mapped to behaviour under process', async () => {
+    it('lanes are mapped to behaviour under process', () => {
       const [bp] = serializer.getProcesses();
 
       expect(bp.behaviour).to.have.property('lanes').with.length(2);
@@ -67,7 +67,7 @@ describe('lanes', () => {
       }
     });
 
-    it('lane information is added to activity', async () => {
+    it('lane information is added to activity', () => {
       let element = serializer.getActivityById('fillform');
       expect(element).to.have.property('lane');
 

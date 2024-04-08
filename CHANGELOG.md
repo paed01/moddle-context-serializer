@@ -1,5 +1,10 @@
-Changelog
-=========
+# Changelog
+
+# 4.2.0
+
+- run tests with `bpmn-moddle@9`
+- major update of eslint
+- use prettier for formatting rules, touched basically ALL files
 
 # 4.1.2
 
@@ -57,6 +62,7 @@ const serializer = require('moddle-context-serialiser')`
 Activity data associations
 
 ## Additions:
+
 - add activity behaviour property `dataInputAssociations` holding a list of the same
 - add activity behaviour property `dataOutputAssociations` holding a list of the same
 
@@ -65,10 +71,12 @@ Activity data associations
 Handle participants add add participant information to message flows. To reduce CPU footprint the api is prototyped.
 
 ## Breaking:
+
 - returned api is prototyped
 - second argument passed to extendFn and result of `getExtendContext` is now an instance of ExtendContext. Hence, you are not able to deconstruct `addScript` and/or `addTimers` functions anymore.
 
 ## Additions:
+
 - add participant id and name to `bpmn:MessageFlow`
 - elements are exposed in new api elements property
 - expose participants in elements property
@@ -84,6 +92,7 @@ Handle participants add add participant information to message flows. To reduce 
 BPMN IO stuff
 
 ## Additions:
+
 - add support for `bpmn:property`
 - add support for `bpmn:dataStoreReference`
 
@@ -96,9 +105,11 @@ No breaking but used in production.
 Scripts and timers again.
 
 ## Additions:
+
 - Add context `getExtendContext` function to get scripts and timers and an ability to add some more
 
 ## Bugfix
+
 - deserialized context without scripts or timers breaks when trying to retreive them
 
 # 0.15.0
@@ -106,6 +117,7 @@ Scripts and timers again.
 Extract scripts and timers.
 
 ## Additions:
+
 - Extracts all known scripts into an array that can be retreived by `getScripts` or `getScriptsByElementId`
 - Extracts all known timers into an array that can be retreived by `getTimers` or `getTimersByElementId`
 
@@ -158,12 +170,14 @@ Extract scripts and timers.
 # 0.6.0
 
 ## Breaking
+
 - `getErrorById(errorId)` is no more
 - `getErrors()` is no more
 
 # 0.5.0
 
 ## Deprecated
+
 The following functions will be removed in next minor version:
 
 - `getErrorById(errorId)` is no longer needed since `getActivityById(errorId)` returns errors as well

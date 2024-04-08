@@ -5,12 +5,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 const refKeyPattern = /^(?!\$).+?Ref$/;
 
 function TypeResolver(types, extender) {
-  const {
-    BpmnError,
-    Definition,
-    Dummy,
-    ServiceImplementation,
-  } = types;
+  const { BpmnError, Definition, Dummy, ServiceImplementation } = types;
 
   const typeMapper = {};
 
@@ -21,7 +16,7 @@ function TypeResolver(types, extender) {
   if (extender) extender(typeMapper);
 
   return function resolve(entity) {
-    const {type, behaviour} = entity;
+    const { type, behaviour } = entity;
 
     entity.Behaviour = getBehaviourFromType(typeMapper, types, type);
     if (!behaviour) return;
@@ -107,7 +102,7 @@ ContextApi.prototype.serialize = function serialize() {
 };
 
 ContextApi.prototype.getProcessById = function getProcessById(processId) {
-  return this.elements.processes.find(({id}) => id === processId);
+  return this.elements.processes.find(({ id }) => id === processId);
 };
 
 ContextApi.prototype.getProcesses = function getProcesses() {
@@ -139,7 +134,7 @@ ContextApi.prototype.getSequenceFlows = function getSequenceFlows(scopeId) {
 };
 
 ContextApi.prototype.getSequenceFlowById = function getSequenceFlowById(flowId) {
-  return this.elements.sequenceFlows.find(({id}) => id === flowId);
+  return this.elements.sequenceFlows.find(({ id }) => id === flowId);
 };
 
 ContextApi.prototype.getActivities = function getActivities(scopeId) {
@@ -159,19 +154,19 @@ ContextApi.prototype.getDataStoreReferences = function getDataStoreReferences(sc
 };
 
 ContextApi.prototype.getDataObjectById = function getDataObjectById(dataObjectId) {
-  return this.elements.dataObjects.find(({id}) => id === dataObjectId);
+  return this.elements.dataObjects.find(({ id }) => id === dataObjectId);
 };
 
 ContextApi.prototype.getDataStoreReferenceById = function getDataStoreReferenceById(dataStoreId) {
-  return this.elements.dataStores.find(({id}) => id === dataStoreId);
+  return this.elements.dataStores.find(({ id }) => id === dataStoreId);
 };
 
 ContextApi.prototype.getDataStores = function getDataStores() {
-  return this.elements.dataStores.filter(({type}) => type === 'bpmn:DataStore');
+  return this.elements.dataStores.filter(({ type }) => type === 'bpmn:DataStore');
 };
 
 ContextApi.prototype.getDataStoreById = function getDataStoreById(dataStoreId) {
-  return this.elements.dataStores.find(({id, type}) => id === dataStoreId && type === 'bpmn:DataStore');
+  return this.elements.dataStores.find(({ id, type }) => id === dataStoreId && type === 'bpmn:DataStore');
 };
 
 ContextApi.prototype.getActivityById = function getActivityById(activityId) {
@@ -189,7 +184,7 @@ ContextApi.prototype.getAssociationById = function getAssociationById(associatio
 };
 
 ContextApi.prototype.getExtendContext = function getExtendContext() {
-  return new ExtendContext({scripts: this.elements.scripts, timers: this.elements.timers});
+  return new ExtendContext({ scripts: this.elements.scripts, timers: this.elements.timers });
 };
 
 ContextApi.prototype.getInboundAssociations = function getInboundAssociations(activityId) {
@@ -203,34 +198,25 @@ ContextApi.prototype.getOutboundAssociations = function getOutboundAssociations(
 ContextApi.prototype.getScripts = function getScripts(elementType) {
   const scripts = this.elements.scripts;
   if (!elementType) return scripts.slice();
-  return scripts.filter(({parent}) => parent.type === elementType);
+  return scripts.filter(({ parent }) => parent.type === elementType);
 };
 
 ContextApi.prototype.getScriptsByElementId = function getScriptsByElementId(elementId) {
-  return this.elements.scripts.filter(({parent}) => parent.id === elementId);
+  return this.elements.scripts.filter(({ parent }) => parent.id === elementId);
 };
 
 ContextApi.prototype.getTimers = function getTimers(elementType) {
   const timers = this.elements.timers;
   if (!elementType) return timers.slice();
-  return timers.filter(({parent}) => parent.type === elementType);
+  return timers.filter(({ parent }) => parent.type === elementType);
 };
 
 ContextApi.prototype.getTimersByElementId = function getTimersByElementId(elementId) {
-  return this.elements.timers.filter(({parent}) => parent.id === elementId);
+  return this.elements.timers.filter(({ parent }) => parent.id === elementId);
 };
 
 function resolveTypes(mappedContext, typeResolver) {
-  const {
-    activities,
-    associations,
-    dataObjects,
-    dataStores = [],
-    definition,
-    messageFlows,
-    processes,
-    sequenceFlows,
-  } = mappedContext;
+  const { activities, associations, dataObjects, dataStores = [], definition, messageFlows, processes, sequenceFlows } = mappedContext;
 
   definition.Behaviour = typeResolver(definition);
   processes.forEach(typeResolver);
@@ -253,7 +239,7 @@ function Mapper(moddleContext, extendFn) {
 
 Mapper.prototype.map = function MapperConstructor() {
   const moddleContext = this.moddleContext;
-  const rootElement = this._root = moddleContext.rootElement ? moddleContext.rootElement : moddleContext.rootHandler.element;
+  const rootElement = (this._root = moddleContext.rootElement ? moddleContext.rootElement : moddleContext.rootHandler.element);
   const definition = {
     id: rootElement.id,
     type: rootElement.$type,
@@ -288,10 +274,10 @@ Mapper.prototype._prepareReferences = function prepareReferences() {
     targetRefs: {},
   };
 
-  const {references, elementsById} = this.moddleContext;
+  const { references, elementsById } = this.moddleContext;
 
   for (const r of references) {
-    const {property, element} = r;
+    const { property, element } = r;
     switch (property) {
       case 'bpmn:sourceRef': {
         const flow = this._upsertRef(result.flowRefs, element.id, {
@@ -300,7 +286,7 @@ Mapper.prototype._prepareReferences = function prepareReferences() {
           sourceId: r.id,
           element: elementsById[element.id],
         });
-        const outbound = result.sourceRefs[r.id] = result.sourceRefs[r.id] || [];
+        const outbound = (result.sourceRefs[r.id] = result.sourceRefs[r.id] || []);
         outbound.push(flow);
         break;
       }
@@ -308,12 +294,12 @@ Mapper.prototype._prepareReferences = function prepareReferences() {
         const flow = this._upsertRef(result.flowRefs, element.id, {
           targetId: r.id,
         });
-        const inbound = result.targetRefs[r.id] = result.targetRefs[r.id] || [];
+        const inbound = (result.targetRefs[r.id] = result.targetRefs[r.id] || []);
         inbound.push(flow);
         break;
       }
       case 'bpmn:default':
-        this._upsertRef(result.flowRefs, r.id, {isDefault: true});
+        this._upsertRef(result.flowRefs, r.id, { isDefault: true });
         break;
       case 'bpmn:dataStoreRef':
         result.dataStoreRefs.push(r);
@@ -329,7 +315,7 @@ Mapper.prototype._prepareReferences = function prepareReferences() {
         break;
       }
       case 'bpmn:flowNodeRef':
-        result.flowNodeRefs[r.id] = {...element};
+        result.flowNodeRefs[r.id] = { ...element };
         break;
     }
 
@@ -347,7 +333,7 @@ Mapper.prototype._prepareReferences = function prepareReferences() {
 };
 
 Mapper.prototype._upsertRef = function upsertFlowRef(target, id, value) {
-  const flow = target[id] = target[id] || {};
+  const flow = (target[id] = target[id] || {});
   Object.assign(flow, value);
   return flow;
 };
@@ -369,14 +355,14 @@ Mapper.prototype._prepareElements = function prepareElements(parent, elements) {
   const references = this._references;
 
   for (const element of elements) {
-    const {id, $type: type, name} = element;
+    const { id, $type: type, name } = element;
 
     switch (type) {
       case 'bpmn:DataObjectReference':
         break;
       case 'bpmn:Collaboration': {
         if (element.messageFlows) {
-          const {messageFlows: flows} = this._prepareElements(parent, element.messageFlows);
+          const { messageFlows: flows } = this._prepareElements(parent, element.messageFlows);
           result.messageFlows = result.messageFlows.concat(flows);
         }
         if (element.participants) {
@@ -506,19 +492,19 @@ Mapper.prototype._prepareElements = function prepareElements(parent, elements) {
       }
       case 'bpmn:BoundaryEvent': {
         const attachedTo = element.attachedToRef && spreadRef(element.attachedToRef);
-        result.activities.push(this._prepareActivity(element, parent, {attachedTo}));
+        result.activities.push(this._prepareActivity(element, parent, { attachedTo }));
         break;
       }
       case 'bpmn:ScriptTask': {
-        const {scriptFormat, script, resource} = element;
-        new ExtendContext({scripts: this.scripts}).addScript(element.id, {
+        const { scriptFormat, script, resource } = element;
+        new ExtendContext({ scripts: this.scripts }).addScript(element.id, {
           parent: {
             id,
             type,
           },
           scriptFormat,
-          ...(script && {body: script}),
-          ...(resource && {resource}),
+          ...(script && { body: script }),
+          ...(resource && { resource }),
           type: 'bpmn:Script',
         });
         result.activities.push(this._prepareActivity(element, parent));
@@ -534,7 +520,7 @@ Mapper.prototype._prepareElements = function prepareElements(parent, elements) {
 };
 
 Mapper.prototype._prepareActivity = function prepareActivity(element, parent, behaviour) {
-  const {id, $type: type, name} = element;
+  const { id, $type: type, name } = element;
   const lane = this._references.flowNodeRefs[id];
 
   return {
@@ -545,26 +531,18 @@ Mapper.prototype._prepareActivity = function prepareActivity(element, parent, be
       id: parent.id,
       type: parent.type,
     },
-    ...(lane && {lane: {...lane}}),
+    ...(lane && { lane: { ...lane } }),
     behaviour: this._prepareElementBehaviour(element, behaviour),
   };
 };
 
 Mapper.prototype._prepareElementBehaviour = function prepareElementBehaviour(element, behaviour) {
-  const {
-    id,
-    $type: type,
-    eventDefinitions,
-    loopCharacteristics,
-    ioSpecification,
-    conditionExpression,
-    properties,
-  } = element;
+  const { id, $type: type, eventDefinitions, loopCharacteristics, ioSpecification, conditionExpression, properties } = element;
 
   const preparedElement = {
     ...behaviour,
     ...element,
-    ...(eventDefinitions && {eventDefinitions}),
+    ...(eventDefinitions && { eventDefinitions }),
   };
 
   const extendContext = new ExtendContext({
@@ -577,7 +555,7 @@ Mapper.prototype._prepareElementBehaviour = function prepareElementBehaviour(ele
   });
 
   if (eventDefinitions) {
-    const definitions = preparedElement.eventDefinitions = [];
+    const definitions = (preparedElement.eventDefinitions = []);
     for (const ed of eventDefinitions) {
       const edBehaviour = this._mapActivityBehaviour(ed, extendContext);
       if (edBehaviour) definitions.push(edBehaviour);
@@ -589,7 +567,7 @@ Mapper.prototype._prepareElementBehaviour = function prepareElementBehaviour(ele
   }
 
   if (properties) {
-    const props = preparedElement.properties = {type: 'properties', values: []};
+    const props = (preparedElement.properties = { type: 'properties', values: [] });
     for (const prop of properties) {
       props.values.push(this._mapActivityBehaviour(prop, extendContext));
     }
@@ -600,20 +578,20 @@ Mapper.prototype._prepareElementBehaviour = function prepareElementBehaviour(ele
   }
 
   if (element.dataInputAssociations) {
-    const associations = preparedElement.dataInputAssociations = [];
+    const associations = (preparedElement.dataInputAssociations = []);
     for (const association of element.dataInputAssociations) {
       associations.push(this._mapActivityBehaviour(association, extendContext));
     }
   }
   if (element.dataOutputAssociations) {
-    const associations = preparedElement.dataOutputAssociations = [];
+    const associations = (preparedElement.dataOutputAssociations = []);
     for (const association of element.dataOutputAssociations) {
       associations.push(this._mapActivityBehaviour(association, extendContext));
     }
   }
 
   if (conditionExpression && conditionExpression.language) {
-    const {$type: exprType, language: scriptFormat, ...rest} = conditionExpression;
+    const { $type: exprType, language: scriptFormat, ...rest } = conditionExpression;
     extendContext.addScript(id, {
       type: exprType,
       scriptFormat,
@@ -622,7 +600,7 @@ Mapper.prototype._prepareElementBehaviour = function prepareElementBehaviour(ele
   }
 
   if (element.laneSets) {
-    const lanes = preparedElement.lanes = [];
+    const lanes = (preparedElement.lanes = []);
     for (const laneSet of element.laneSets) {
       for (const lane of laneSet.lanes) {
         lanes.push(this._mapActivityBehaviour(lane, extendContext));
@@ -631,14 +609,14 @@ Mapper.prototype._prepareElementBehaviour = function prepareElementBehaviour(ele
   }
 
   if (element.resources) {
-    const resources = preparedElement.resources = [];
+    const resources = (preparedElement.resources = []);
     for (const resource of element.resources) {
-      const {$type, resourceAssignmentExpression} = resource;
+      const { $type, resourceAssignmentExpression } = resource;
 
       resources.push({
         type: $type,
         expression: resourceAssignmentExpression.expression && resourceAssignmentExpression.expression.body,
-        behaviour: {...resource},
+        behaviour: { ...resource },
       });
     }
   }
@@ -658,8 +636,8 @@ Mapper.prototype._prepareElementBehaviour = function prepareElementBehaviour(ele
 
 Mapper.prototype._mapActivityBehaviour = function mapActivityBehaviour(ed, extendContext) {
   if (!ed) return;
-  const {$type: type, id} = ed;
-  let behaviour = {...ed};
+  const { $type: type, id } = ed;
+  let behaviour = { ...ed };
 
   const keys = Object.getOwnPropertyNames(ed);
   for (const key of keys) {
@@ -673,7 +651,7 @@ Mapper.prototype._mapActivityBehaviour = function mapActivityBehaviour(ed, exten
           scriptFormat: behaviour.condition.language,
           ...behaviour.condition,
         });
-        behaviour.script = {language: behaviour.condition.language, body: behaviour.condition.body};
+        behaviour.script = { language: behaviour.condition.language, body: behaviour.condition.body };
       } else {
         behaviour.expression = behaviour.condition && behaviour.condition.body;
       }
@@ -699,7 +677,7 @@ Mapper.prototype._mapActivityBehaviour = function mapActivityBehaviour(ed, exten
     case 'bpmn:TimerEventDefinition': {
       for (const timerType of ['timeCycle', 'timeDuration', 'timeDate']) {
         if (timerType in behaviour && behaviour[timerType].body) {
-          const value = behaviour[timerType] = behaviour[timerType].body;
+          const value = (behaviour[timerType] = behaviour[timerType].body);
           extendContext.addTimer(id || timerType, {
             id,
             type,
@@ -732,12 +710,12 @@ Mapper.prototype._preparePropertyBehaviour = function preparePropertyBehaviour(p
 
   return {
     ...propertyDef,
-    ...(dataInput.association.source && {dataInput}),
-    ...(dataOutput.association.target && {dataOutput}),
+    ...(dataInput.association.source && { dataInput }),
+    ...(dataOutput.association.target && { dataOutput }),
   };
 };
 
-Mapper.prototype._prepareIoSpecificationBehaviour = function prepareIoSpecificationBehaviour({dataInputs, dataOutputs}) {
+Mapper.prototype._prepareIoSpecificationBehaviour = function prepareIoSpecificationBehaviour({ dataInputs, dataOutputs }) {
   const result = {};
 
   if (dataInputs) {
@@ -771,7 +749,7 @@ Mapper.prototype._prepareDataStoreReferences = function prepareDataStoreReferenc
     return {
       id: objectRef.element.id,
       type: objectRef.element.$type,
-      behaviour: {...objectRef.element},
+      behaviour: { ...objectRef.element },
     };
   });
 };
@@ -779,12 +757,14 @@ Mapper.prototype._prepareDataStoreReferences = function prepareDataStoreReferenc
 Mapper.prototype._getDataInputBehaviour = function getDataInputBehaviour(dataInputId) {
   const dataInputAssociations = this._references.dataInputAssociations;
   const target = dataInputAssociations.find((assoc) => assoc.property === 'bpmn:targetRef' && assoc.id === dataInputId && assoc.element);
-  const source = target && dataInputAssociations.find((assoc) => assoc.property === 'bpmn:sourceRef' && assoc.element && assoc.element.id === target.element.id);
+  const source =
+    target &&
+    dataInputAssociations.find((assoc) => assoc.property === 'bpmn:sourceRef' && assoc.element && assoc.element.id === target.element.id);
 
   return {
     association: {
-      source: source && {...source, ...this._getDataRef(source.id)},
-      target: target && {...target},
+      source: source && { ...source, ...this._getDataRef(source.id) },
+      target: target && { ...target },
     },
   };
 };
@@ -792,12 +772,14 @@ Mapper.prototype._getDataInputBehaviour = function getDataInputBehaviour(dataInp
 Mapper.prototype._getDataOutputBehaviour = function getDataOutputBehaviour(dataOutputId) {
   const dataOutputAssociations = this._references.dataOutputAssociations;
   const source = dataOutputAssociations.find((assoc) => assoc.property === 'bpmn:sourceRef' && assoc.id === dataOutputId && assoc.element);
-  const target = source && dataOutputAssociations.find((assoc) => assoc.property === 'bpmn:targetRef' && assoc.element && assoc.element.id === source.element.id);
+  const target =
+    source &&
+    dataOutputAssociations.find((assoc) => assoc.property === 'bpmn:targetRef' && assoc.element && assoc.element.id === source.element.id);
 
   return {
     association: {
-      source: source && {...source},
-      target: target && {...target, ...this._getDataRef(target.id)},
+      source: source && { ...source },
+      target: target && { ...target, ...this._getDataRef(target.id) },
     },
   };
 };
@@ -807,8 +789,8 @@ Mapper.prototype._getDataRef = function getDataRef(referenceId) {
   const dataStore = this._getDataStore(referenceId);
 
   return {
-    ...(dataObject && {dataObject}),
-    ...(dataStore && {dataStore}),
+    ...(dataObject && { dataObject }),
+    ...(dataStore && { dataStore }),
   };
 };
 
@@ -816,22 +798,22 @@ Mapper.prototype._getDataObject = function getDataObject(referenceId) {
   const dataReference = this._references.dataObjectRefs.find((dor) => dor.element && dor.element.id === referenceId);
   if (!dataReference) {
     const dataElm = this.moddleContext.elementsById[referenceId];
-    return dataElm && dataElm.$type === 'bpmn:DataObject' && {...dataElm};
+    return dataElm && dataElm.$type === 'bpmn:DataObject' && { ...dataElm };
   }
 
-  return {...this.moddleContext.elementsById[dataReference.id]};
+  return { ...this.moddleContext.elementsById[dataReference.id] };
 };
 
 Mapper.prototype._getDataStore = function getDataStore(referenceId) {
   const dataReference = this._references.dataStoreRefs.find((dor) => dor.element && dor.element.id === referenceId);
-  if (dataReference) return {...this.moddleContext.elementsById[dataReference.id]};
+  if (dataReference) return { ...this.moddleContext.elementsById[dataReference.id] };
 
   const dataElm = this.moddleContext.elementsById[referenceId];
   if (!dataElm) return;
   switch (dataElm.$type) {
     case 'bpmn:DataStore':
     case 'bpmn:DataStoreReference':
-      return {...dataElm};
+      return { ...dataElm };
   }
 };
 
@@ -842,7 +824,7 @@ Mapper.prototype._prepareDataObjectReferences = function prepareDataObjectRefere
     return {
       id: objectRef.element.id,
       type: objectRef.element.$type,
-      behaviour: {...objectRef.element},
+      behaviour: { ...objectRef.element },
     };
   });
 };
@@ -881,47 +863,47 @@ Mapper.prototype._getElementRef = function getElementRef(elementId) {
   return result;
 };
 
-function ExtendContext({scripts, timers = [], parent}) {
+function ExtendContext({ scripts, timers = [], parent }) {
   this.scripts = scripts;
   this.timers = timers;
   this._parent = parent;
 }
 
 ExtendContext.prototype.addScript = function addScript(scriptName, elm) {
-  const {id, scriptFormat, body, resource, type, parent} = elm;
+  const { id, scriptFormat, body, resource, type, parent } = elm;
   this.scripts.push({
     ...this._prepare(scriptName, parent || this._parent),
     script: {
-      ...(id && {id}),
+      ...(id && { id }),
       scriptFormat,
-      ...(body && {body}),
-      ...(resource && {resource}),
-      ...(type && {type}),
+      ...(body && { body }),
+      ...(resource && { resource }),
+      ...(type && { type }),
     },
   });
 };
 
-ExtendContext.prototype.addTimer = function addTimer(timerName, {id, timerType, type, value, parent}) {
+ExtendContext.prototype.addTimer = function addTimer(timerName, { id, timerType, type, value, parent }) {
   this.timers.push({
     ...this._prepare(timerName, parent || this._parent),
     timer: {
-      ...(id && {id}),
+      ...(id && { id }),
       timerType,
-      ...(value && {value}),
-      ...(type && {type}),
+      ...(value && { value }),
+      ...(type && { type }),
     },
   });
 };
 
-ExtendContext.prototype._prepare = function prepare(name, {id, type} = {}) {
+ExtendContext.prototype._prepare = function prepare(name, { id, type } = {}) {
   return {
     name,
-    ...(id && type && {parent: {id, type}}),
+    ...(id && type && { parent: { id, type } }),
   };
 };
 
-function spreadRef({id, $type: type, name}) {
-  return {id, type, name};
+function spreadRef({ id, $type: type, name }) {
+  return { id, type, name };
 }
 
 exports.Serializer = Serializer;

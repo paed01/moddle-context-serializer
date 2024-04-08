@@ -4,7 +4,7 @@ import BpmnModdle6 from 'bpmn-moddle-6';
 import BpmnModdle7 from 'bpmn-moddle-7';
 import testHelpers from './helpers/testHelpers.js';
 
-import {default as Serializer, TypeResolver, deserialize} from '../index.js';
+import { default as Serializer, TypeResolver, deserialize } from '../index.js';
 
 const typeResolver = TypeResolver(types);
 
@@ -66,7 +66,7 @@ describe('backward compatibility', () => {
     });
   });
 
-  describe('version without dataStores', async () => {
+  describe('version without dataStores', () => {
     it('handles missing dataStores property', async () => {
       const source = `<?xml version="1.0" encoding="UTF-8"?>
       <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"

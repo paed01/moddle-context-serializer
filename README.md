@@ -1,5 +1,4 @@
-bpmn-moddle context serializer
-==============================
+# bpmn-moddle context serializer
 
 Make bpmn-moddle context serializable and mapped to behaviour functions
 
@@ -12,13 +11,13 @@ Make bpmn-moddle context serializable and mapped to behaviour functions
 The tests are the documentation. Hence, please study [test](/test/serializer-test.js)
 
 A basic example:
+
 ```js
 import { Serializer, TypeResolver } from 'moddle-context-serializer';
 import BpmnModdle from 'bpmn-moddle';
 import * as bpmnElementsBehaviour from 'bpmn-elements';
 
 import EscalationEventDefinition from './mytypes/EscalationEventDefinition';
-
 
 export async function getSerializedContext(source) {
   const bpmnModdle = new BpmnModdle();

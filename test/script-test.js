@@ -2,7 +2,7 @@ import factory from './helpers/factory.js';
 import testHelpers from './helpers/testHelpers.js';
 import types from './helpers/types.js';
 
-import {default as Serializer, TypeResolver, deserialize} from '../index.js';
+import { default as Serializer, TypeResolver, deserialize } from '../index.js';
 
 const typeResolver = TypeResolver(types);
 const camunda = testHelpers.getCamundaExtension();
@@ -17,13 +17,13 @@ describe('scripts', () => {
       });
     });
 
-    it('getScripts() extracts known scripts', async () => {
+    it('getScripts() extracts known scripts', () => {
       const serializer = Serializer(moddleContext, typeResolver);
       const scripts = serializer.getScripts();
       expect(scripts.length).to.equal(6);
     });
 
-    it('extracts scripts with name, parent, and script format', async () => {
+    it('extracts scripts with name, parent, and script format', () => {
       const serializer = Serializer(moddleContext, typeResolver);
       const scripts = serializer.getScripts();
 
@@ -47,7 +47,7 @@ describe('scripts', () => {
       expect(scripts).to.deep.equal(deserialized.getScripts());
     });
 
-    it('flow conditions have condition type', async () => {
+    it('flow conditions have condition type', () => {
       const serializer = Serializer(moddleContext, typeResolver);
       const scripts = serializer.getScripts('bpmn:SequenceFlow');
       expect(scripts).to.have.length(3);
@@ -57,7 +57,7 @@ describe('scripts', () => {
       }
     });
 
-    it('script task with external resource has resource but lacks body', async () => {
+    it('script task with external resource has resource but lacks body', () => {
       const serializer = Serializer(moddleContext, typeResolver);
       const script = serializer.getScripts('bpmn:ScriptTask').find((s) => s.parent.id === 'script-resource');
 
@@ -65,7 +65,7 @@ describe('scripts', () => {
       expect(script.script.resource, 'resource').to.be.ok;
     });
 
-    it('flow with external resource script has resource but lacks body', async () => {
+    it('flow with external resource script has resource but lacks body', () => {
       const serializer = Serializer(moddleContext, typeResolver);
       const script = serializer.getScripts('bpmn:SequenceFlow').find((s) => s.parent.id === 'to-resource');
 
@@ -73,7 +73,7 @@ describe('scripts', () => {
       expect(script.script.resource, 'resource').to.be.ok;
     });
 
-    it('extension elements scripts are added with extension function', async () => {
+    it('extension elements scripts are added with extension function', () => {
       const serializer = Serializer(moddleContext, typeResolver, extend);
       const [, input, output] = serializer.getScriptsByElementId('script-js');
 
@@ -101,7 +101,7 @@ describe('scripts', () => {
       });
 
       function extend(element, extendContext) {
-        const {extensionElements} = element;
+        const { extensionElements } = element;
         if (!extensionElements || !extensionElements.values) return;
 
         for (const ext of extensionElements.values) {
@@ -110,7 +110,7 @@ describe('scripts', () => {
         }
 
         function addParameterScript(parm) {
-          const {$type: parmType, name, definition} = parm;
+          const { $type: parmType, name, definition } = parm;
           if (!definition || !definition.scriptFormat) return;
           extendContext.addScript(`parameter/${name}`, {
             id: `parameter_${name}`,
@@ -244,13 +244,10 @@ describe('scripts', () => {
       expect(elm.behaviour.eventDefinitions).to.have.length(1);
       expect(script, 'script name mapped to ed id').to.have.property('name', 'ConditionalEventDefinition_083udna');
 
-      expect(elm.behaviour.eventDefinitions[0])
-        .to.have.property('behaviour')
-        .that.have.property('script')
-        .that.deep.equal({
-          language: 'js',
-          body: 'next(null, environment.variables.var2);',
-        });
+      expect(elm.behaviour.eventDefinitions[0]).to.have.property('behaviour').that.have.property('script').that.deep.equal({
+        language: 'js',
+        body: 'next(null, environment.variables.var2);',
+      });
     });
 
     it('deserialized condition script has the expected content', async () => {
@@ -281,13 +278,10 @@ describe('scripts', () => {
       expect(elm.behaviour.eventDefinitions).to.have.length(1);
       expect(script, 'script name mapped to ed id').to.have.property('name', 'ConditionalEventDefinition_083udna');
 
-      expect(elm.behaviour.eventDefinitions[0])
-        .to.have.property('behaviour')
-        .that.have.property('script')
-        .that.deep.equal({
-          language: 'js',
-          body: 'next(null, environment.variables.var2);',
-        });
+      expect(elm.behaviour.eventDefinitions[0]).to.have.property('behaviour').that.have.property('script').that.deep.equal({
+        language: 'js',
+        body: 'next(null, environment.variables.var2);',
+      });
     });
 
     it('event definition without id registers script with type', async () => {
@@ -324,13 +318,10 @@ describe('scripts', () => {
       expect(elm.behaviour.eventDefinitions).to.have.length(1);
       expect(script, 'script name mapped to event definition type').to.have.property('name', 'bpmn:ConditionalEventDefinition');
 
-      expect(elm.behaviour.eventDefinitions[0])
-        .to.have.property('behaviour')
-        .that.have.property('script')
-        .that.deep.equal({
-          language: 'js',
-          body: 'next(null, environment.variables.var2);',
-        });
+      expect(elm.behaviour.eventDefinitions[0]).to.have.property('behaviour').that.have.property('script').that.deep.equal({
+        language: 'js',
+        body: 'next(null, environment.variables.var2);',
+      });
     });
 
     it('muliple event definitions without id registers script with type', async () => {

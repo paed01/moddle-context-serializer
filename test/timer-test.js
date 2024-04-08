@@ -2,7 +2,7 @@ import factory from './helpers/factory.js';
 import testHelpers from './helpers/testHelpers.js';
 import types from './helpers/types.js';
 
-import {default as Serializer, TypeResolver, deserialize} from '../index.js';
+import { default as Serializer, TypeResolver, deserialize } from '../index.js';
 
 const typeResolver = TypeResolver(types);
 const camunda = testHelpers.getCamundaExtension();
@@ -17,13 +17,13 @@ describe('timers', () => {
       });
     });
 
-    it('getTimers() extracts known timers', async () => {
+    it('getTimers() extracts known timers', () => {
       const serializer = Serializer(moddleContext, typeResolver);
       const timers = serializer.getTimers();
       expect(timers.length).to.equal(3);
     });
 
-    it('extracts timers with name, parent, and script format', async () => {
+    it('extracts timers with name, parent, and script format', () => {
       const serializer = Serializer(moddleContext, typeResolver);
       const timers = serializer.getTimers();
 
@@ -46,7 +46,7 @@ describe('timers', () => {
       expect(timers).to.deep.equal(deserialized.getTimers());
     });
 
-    it('start event timer have timer name, type, and parent', async () => {
+    it('start event timer have timer name, type, and parent', () => {
       const serializer = Serializer(moddleContext, typeResolver);
       const [timer] = serializer.getTimers('bpmn:StartEvent');
       expect(timer).to.have.property('name');
@@ -58,7 +58,7 @@ describe('timers', () => {
       expect(timer.timer).to.have.property('value', 'R3/PT10H');
     });
 
-    it('bound event timer have timer name, duration, and parent', async () => {
+    it('bound event timer have timer name, duration, and parent', () => {
       const serializer = Serializer(moddleContext, typeResolver);
       const [timer] = serializer.getTimers('bpmn:BoundaryEvent');
       expect(timer).to.have.property('name');
@@ -70,7 +70,7 @@ describe('timers', () => {
       expect(timer.timer).to.have.property('value', 'PT1M');
     });
 
-    it('catch event timer have timer name, date, and parent', async () => {
+    it('catch event timer have timer name, date, and parent', () => {
       const serializer = Serializer(moddleContext, typeResolver);
       const [timer] = serializer.getTimers('bpmn:IntermediateCatchEvent');
       expect(timer).to.have.property('name');
@@ -82,7 +82,7 @@ describe('timers', () => {
       expect(timer.timer).to.have.property('value', '${date}');
     });
 
-    it('user task with due date can be added to timers with extend function', async () => {
+    it('user task with due date can be added to timers with extend function', () => {
       const serializer = Serializer(moddleContext, typeResolver, extend);
       const [timer, ...rest] = serializer.getTimersByElementId('user-due');
 
