@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/paed01/moddle-context-serializer"
+    "url": "git://github.com/paed01/moddle-context-serializer.git"
   },
   "author": {
     "name": "Pål Edman",
