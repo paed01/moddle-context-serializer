@@ -645,11 +645,12 @@ Mapper.prototype._mapActivityBehaviour = function mapActivityBehaviour(ed, exten
   switch (type) {
     case 'bpmn:ConditionalEventDefinition': {
       if (behaviour.condition && behaviour.condition.language) {
+        const { language, body, resource } = behaviour.condition;
         extendContext.addScript(id || type, {
-          scriptFormat: behaviour.condition.language,
+          scriptFormat: language,
           ...behaviour.condition,
         });
-        behaviour.script = { language: behaviour.condition.language, body: behaviour.condition.body };
+        behaviour.script = { language, ...(body && { body }), ...(resource && { resource }) };
       } else {
         behaviour.expression = behaviour.condition && behaviour.condition.body;
       }

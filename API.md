@@ -222,9 +222,9 @@ Some default type mapping exist:
 Pass a function to extend mapping:
 
 ```js
-import Escalation from './Escalation';
-import IntermediateThrowEvent from './IntermediateThrowEvent';
-import EscalationEventDefinition from './EscalationEventDefinition';
+import Escalation from './Escalation.js';
+import IntermediateThrowEvent from './IntermediateThrowEvent.js';
+import EscalationEventDefinition from './EscalationEventDefinition.js';
 
 const typeResolver = TypeResolver(types, (typeMapping) => {
   typeMapping['bpmn:Escalation'] = Escalation;

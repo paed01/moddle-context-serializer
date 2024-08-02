@@ -6,6 +6,7 @@ const camundaExtensions = {};
 export default {
   moddleContext,
   getCamundaExtension,
+  getJsExtension,
 };
 
 function moddleContext(source, options) {
@@ -18,5 +19,10 @@ function getCamundaExtension(version = 'camunda-bpmn-moddle') {
   if (!content) {
     content = camundaExtensions[version] = fs.readFileSync(`./node_modules/${version}/resources/camunda.json`);
   }
+  return JSON.parse(content);
+}
+
+function getJsExtension() {
+  const content = fs.readFileSync('./test/resources/js-bpmn-moddle.json');
   return JSON.parse(content);
 }

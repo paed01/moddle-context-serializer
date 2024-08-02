@@ -17,7 +17,7 @@ import { Serializer, TypeResolver } from 'moddle-context-serializer';
 import BpmnModdle from 'bpmn-moddle';
 import * as bpmnElementsBehaviour from 'bpmn-elements';
 
-import EscalationEventDefinition from './mytypes/EscalationEventDefinition';
+import EscalationEventDefinition from './mytypes/EscalationEventDefinition.js';
 
 export async function getSerializedContext(source) {
   const bpmnModdle = new BpmnModdle();

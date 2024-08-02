@@ -6,6 +6,7 @@ import { default as Serializer, TypeResolver, deserialize } from '../index.js';
 
 const typeResolver = TypeResolver(types);
 const camunda = testHelpers.getCamundaExtension();
+const jsExtension = testHelpers.getJsExtension();
 
 describe('scripts', () => {
   describe('a process with inline, extension elements with scripts, extension external resource, and flow condition scripts, and a flow expression', () => {
@@ -281,6 +282,46 @@ describe('scripts', () => {
       expect(elm.behaviour.eventDefinitions[0]).to.have.property('behaviour').that.have.property('script').that.deep.equal({
         language: 'js',
         body: 'next(null, environment.variables.var2);',
+      });
+    });
+
+    it('event definition with extension resource script is registered', async () => {
+      const source = `
+      <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <process id="bp">
+          <intermediateCatchEvent id="event">
+            <conditionalEventDefinition>
+              <condition xsi:type="tFormalExpression" language="js" js:resource="./external.js" />
+            </conditionalEventDefinition>
+          </intermediateCatchEvent>
+        </process>
+      </definitions>`;
+
+      const moddleContext = await testHelpers.moddleContext(source, { js: jsExtension });
+
+      const serializer = Serializer(moddleContext, typeResolver);
+      const scripts = serializer.getScripts();
+      expect(scripts.length).to.equal(1);
+
+      const script = scripts[0];
+      expect(script).to.have.property('parent').that.deep.equal({
+        type: 'bpmn:IntermediateCatchEvent',
+        id: 'event',
+      });
+      expect(script).to.have.property('script').that.deep.equal({
+        resource: './external.js',
+        scriptFormat: 'js',
+      });
+
+      const elm = serializer.getActivityById(script.parent.id);
+
+      expect(elm.behaviour.eventDefinitions).to.have.length(1);
+      expect(script, 'script name mapped to event definition type').to.have.property('name', 'bpmn:ConditionalEventDefinition');
+
+      expect(elm.behaviour.eventDefinitions[0]).to.have.property('behaviour').that.have.property('script').that.deep.equal({
+        language: 'js',
+        resource: './external.js',
       });
     });
 
