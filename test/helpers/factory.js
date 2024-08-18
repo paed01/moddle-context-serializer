@@ -1,7 +1,8 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import BpmnModdle from 'bpmn-moddle';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
 const dirname = fileURLToPath(new URL('.', import.meta.url));
 

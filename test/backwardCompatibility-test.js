@@ -1,7 +1,7 @@
-import factory from './helpers/factory.js';
-import types from './helpers/types.js';
 import BpmnModdle6 from 'bpmn-moddle-6';
 import BpmnModdle7 from 'bpmn-moddle-7';
+import factory from './helpers/factory.js';
+import types from './helpers/types.js';
 import testHelpers from './helpers/testHelpers.js';
 
 import { default as Serializer, TypeResolver, deserialize } from '../index.js';

@@ -1,5 +1,9 @@
+import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
+
 import BpmnModdle from 'bpmn-moddle';
-import fs from 'fs';
+
+const nodeRequire = createRequire(fileURLToPath(import.meta.url));
 
 const camundaExtensions = {};
 
@@ -17,12 +21,11 @@ function moddleContext(source, options) {
 function getCamundaExtension(version = 'camunda-bpmn-moddle') {
   let content = camundaExtensions[version];
   if (!content) {
-    content = camundaExtensions[version] = fs.readFileSync(`./node_modules/${version}/resources/camunda.json`);
+    content = camundaExtensions[version] = nodeRequire(`${version}/resources/camunda.json`);
   }
-  return JSON.parse(content);
+  return content;
 }
 
 function getJsExtension() {
-  const content = fs.readFileSync('./test/resources/js-bpmn-moddle.json');
-  return JSON.parse(content);
+  return nodeRequire('../resources/js-bpmn-moddle.json');
 }
