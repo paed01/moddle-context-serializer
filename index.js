@@ -265,11 +265,9 @@ Mapper.prototype._prepareReferences = function prepareReferences() {
     dataObjectRefs: [],
     dataOutputAssociations: [],
     dataStoreRefs: [],
-    flowNodeRefs: {},
-    flowRefs: {},
-    processRefs: {},
-    sourceRefs: {},
-    targetRefs: {},
+    flowNodeRefs: new Map(),
+    flowRefs: new Map(),
+    processRefs: new Map(),
   };
 
   const { references, elementsById } = this.moddleContext;
@@ -278,26 +276,22 @@ Mapper.prototype._prepareReferences = function prepareReferences() {
     const { property, element } = r;
     switch (property) {
       case 'bpmn:sourceRef': {
-        const flow = this._upsertRef(result.flowRefs, element.id, {
+        this._upsertFlowRef(result.flowRefs, element.id, {
           id: element.id,
           $type: element.$type,
           sourceId: r.id,
           element: elementsById[element.id],
         });
-        const outbound = (result.sourceRefs[r.id] = result.sourceRefs[r.id] || []);
-        outbound.push(flow);
         break;
       }
       case 'bpmn:targetRef': {
-        const flow = this._upsertRef(result.flowRefs, element.id, {
+        this._upsertFlowRef(result.flowRefs, element.id, {
           targetId: r.id,
         });
-        const inbound = (result.targetRefs[r.id] = result.targetRefs[r.id] || []);
-        inbound.push(flow);
         break;
       }
       case 'bpmn:default':
-        this._upsertRef(result.flowRefs, r.id, { isDefault: true });
+        this._upsertFlowRef(result.flowRefs, r.id, { isDefault: true });
         break;
       case 'bpmn:dataStoreRef':
         result.dataStoreRefs.push(r);
@@ -306,14 +300,14 @@ Mapper.prototype._prepareReferences = function prepareReferences() {
         result.dataObjectRefs.push(r);
         break;
       case 'bpmn:processRef': {
-        result.processRefs[element.id] = {
+        result.processRefs.set(element.id, {
           id: r.id,
           $type: element.$type,
-        };
+        });
         break;
       }
       case 'bpmn:flowNodeRef':
-        result.flowNodeRefs[r.id] = { ...element };
+        result.flowNodeRefs.set(r.id, { ...element });
         break;
     }
 
@@ -330,10 +324,18 @@ Mapper.prototype._prepareReferences = function prepareReferences() {
   return result;
 };
 
-Mapper.prototype._upsertRef = function upsertFlowRef(target, id, value) {
-  const flow = (target[id] = target[id] || {});
-  Object.assign(flow, value);
-  return flow;
+/**
+ * Upsert flow ref
+ * @param {Map<string, any>} target
+ * @param {string} id element id
+ * @param {any} value flow node element ref
+ */
+Mapper.prototype._upsertFlowRef = function upsertFlowRef(target, id, value) {
+  if (!target.has(id)) {
+    target.set(id, value);
+  } else {
+    Object.assign(target.get(id), value);
+  }
 };
 
 Mapper.prototype._prepareElements = function prepareElements(parent, elements) {
@@ -365,7 +367,7 @@ Mapper.prototype._prepareElements = function prepareElements(parent, elements) {
         }
         if (element.participants) {
           for (const p of element.participants) {
-            const processRef = references.processRefs[p.id];
+            const processRef = references.processRefs.get(p.id);
             result.participants.push({
               id: p.id,
               type: p.$type,
@@ -422,7 +424,7 @@ Mapper.prototype._prepareElements = function prepareElements(parent, elements) {
         break;
       }
       case 'bpmn:MessageFlow': {
-        const flowRef = references.flowRefs[element.id];
+        const flowRef = references.flowRefs.get(element.id);
         result.messageFlows.push({
           ...flowRef,
           id,
@@ -438,7 +440,7 @@ Mapper.prototype._prepareElements = function prepareElements(parent, elements) {
         break;
       }
       case 'bpmn:Association': {
-        const flowRef = references.flowRefs[element.id];
+        const flowRef = references.flowRefs.get(element.id);
         result.associations.push({
           id,
           name,
@@ -454,7 +456,7 @@ Mapper.prototype._prepareElements = function prepareElements(parent, elements) {
         break;
       }
       case 'bpmn:SequenceFlow': {
-        const flowRef = references.flowRefs[element.id];
+        const flowRef = references.flowRefs.get(element.id);
 
         result.sequenceFlows.push({
           id,
@@ -519,7 +521,7 @@ Mapper.prototype._prepareElements = function prepareElements(parent, elements) {
 
 Mapper.prototype._prepareActivity = function prepareActivity(element, parent, behaviour) {
   const { id, $type: type, name } = element;
-  const lane = this._references.flowNodeRefs[id];
+  const lane = this._references.flowNodeRefs.get(id);
 
   return {
     id,
@@ -644,7 +646,7 @@ Mapper.prototype._mapActivityBehaviour = function mapActivityBehaviour(ed, exten
 
   switch (type) {
     case 'bpmn:ConditionalEventDefinition': {
-      if (behaviour.condition && behaviour.condition.language) {
+      if (behaviour.condition?.language) {
         const { language, body, resource } = behaviour.condition;
         extendContext.addScript(id || type, {
           scriptFormat: language,
@@ -843,7 +845,7 @@ Mapper.prototype._getElementRef = function getElementRef(elementId) {
 
   switch (targetElement.$type) {
     case 'bpmn:Participant': {
-      result.processId = this._references.processRefs[elementId].id;
+      result.processId = this._references.processRefs.get(elementId).id;
       result.participantId = targetElement.id;
       result.participantName = targetElement.name;
       break;
