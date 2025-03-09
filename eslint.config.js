@@ -80,9 +80,6 @@ export default [
   {
     files: ['test/**/*.js'],
     languageOptions: {
-      parserOptions: {
-        ecmaVersion: 2020,
-      },
       globals: {
         ...globals.node,
         ...globals.mocha,
@@ -104,6 +101,6 @@ export default [
     },
   },
   {
-    ignores: ['coverage/**/*', 'node_modules/**/*', 'tmp/*', 'main.cjs'],
+    ignores: ['coverage/**/*', 'node_modules/**/*', 'tmp/*', 'lib/main.cjs'],
   },
 ];

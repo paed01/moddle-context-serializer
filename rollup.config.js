@@ -1,7 +1,7 @@
 import commonjs from '@rollup/plugin-commonjs';
 
 export default {
-  input: './index.js',
+  input: './src/index.js',
   plugins: [
     commonjs({
       sourceMap: false,
@@ -9,7 +9,7 @@ export default {
   ],
   output: [
     {
-      file: 'main.cjs',
+      file: './lib/main.cjs',
       format: 'cjs',
       exports: 'named',
       footer: 'module.exports = Object.assign(exports.default, exports);',

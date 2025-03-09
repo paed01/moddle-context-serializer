@@ -1,4 +1,5 @@
 node_modules/
 coverage/
 tmp/
-main.cjs
+lib/main.cjs
+tsconfig.json

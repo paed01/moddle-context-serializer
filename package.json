@@ -4,9 +4,16 @@
   "description": "Make bpmn-moddle context serializable and mapped to behaviour functions",
   "type": "module",
   "main": "main.cjs",
-  "module": "index.js",
-  "browser": "main.cjs",
-  "types": "index.d.ts",
+  "module": "./src/index.js",
+  "browser": "./lib/main.cjs",
+  "types": "./types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "require": "./lib/main.cjs",
+      "import": "./src/index.js"
+    }
+  },
   "sideEffects": false,
   "scripts": {
     "test": "mocha",
