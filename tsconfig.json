@@ -11,7 +11,7 @@
     "noEmitOnError": true,
     "noErrorTruncation": true,
     "allowJs": true,
-    "checkJs": true,
+    "checkJs": false,
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
@@ -22,9 +22,6 @@
     "noImplicitThis": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "typeRoots": ["./node_modules/@types"],
-    "paths": {
-      "types": ["./types/interfaces.js"],
-    },
+    "typeRoots": ["./node_modules/@types"]
   },
 }

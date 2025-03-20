@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.3.0
+
+- clean up unused code and use Maps where appropriate for minor performance improvement
+- move stuff around
+
 ## 4.2.1
 
 - serialize `ConditionEventDefinition` script resource
