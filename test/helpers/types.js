@@ -1,4 +1,5 @@
 export default {
+  AdHocSubProcess() {},
   Association() {},
   BoundaryEvent() {},
   BpmnError() {},

@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.4.0
+
+- add support for AdHocSubprocess
+
 ## 4.3.0
 
 - clean up unused code and use Maps where appropriate for minor performance improvement

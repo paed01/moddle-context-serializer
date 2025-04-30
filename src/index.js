@@ -473,6 +473,7 @@ Mapper.prototype._prepareElements = function prepareElements(parent, elements) {
         });
         break;
       }
+      case 'bpmn:AdHocSubProcess':
       case 'bpmn:SubProcess':
       case 'bpmn:Transaction':
       case 'bpmn:Process': {
