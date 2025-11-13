@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.4.1
+
+- package proof of provenance release
+
 ## 4.4.0
 
 - add support for AdHocSubprocess
