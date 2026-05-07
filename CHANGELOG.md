@@ -1,33 +1,33 @@
 # Changelog
 
-## 4.4.1
+## v4.4.1 - 2025-04-30
 
 - package proof of provenance release
 
-## 4.4.0
+## v4.4.0 - 2025-04-30
 
 - add support for AdHocSubprocess
 
-## 4.3.0
+## v4.3.0
 
 - clean up unused code and use Maps where appropriate for minor performance improvement
 - move stuff around
 
-## 4.2.1
+## v4.2.1
 
 - serialize `ConditionEventDefinition` script resource
 
-## 4.2.0
+## v4.2.0
 
 - run tests with `bpmn-moddle@9`
 - major update of eslint
 - use prettier for formatting rules, touched basically ALL files
 
-## 4.1.2
+## v4.1.2
 
 - fix some return type inconsistencies
 
-## 4.1.1
+## v4.1.1
 
 The commonjs release.
 
@@ -37,11 +37,11 @@ const serializer = require('moddle-context-serialiser')`
 
 - use the newly discovered rollup destination footer option to set commonjs module.exports
 
-## 4.1.0
+## v4.1.0
 
 - serialize `ConditionEventDefinition` script behaviour
 
-## 4.0.0
+## v4.0.0
 
 - serialize process `Lane` behaviour
 

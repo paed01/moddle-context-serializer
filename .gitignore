@@ -33,3 +33,10 @@ coverage*
 package-lock.json
 .nyc_output
 *.log
+
+# Types
+*.d.ts.map
+
+# Claude Code
+CLAUDE.md
+.claude

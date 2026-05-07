@@ -2,7 +2,7 @@ import factory from './helpers/factory.js';
 import testHelpers from './helpers/testHelpers.js';
 import types from './helpers/types.js';
 
-import { default as Serializer, TypeResolver } from '../src/index.js';
+import { default as Serializer, TypeResolver } from 'moddle-context-serializer';
 
 const typeResolver = TypeResolver(types);
 const adhocSource = factory.resource('ad-hoc-subprocess.bpmn');
