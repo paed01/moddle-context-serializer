@@ -11,9 +11,9 @@
     "noEmitOnError": true,
     "noErrorTruncation": true,
     "allowJs": true,
-    "checkJs": false,
-    "module": "esnext",
-    "moduleResolution": "node",
+    "checkJs": true,
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
@@ -22,6 +22,9 @@
     "noImplicitThis": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "typeRoots": ["./node_modules/@types"]
-  },
+    "typeRoots": ["./node_modules/@types"],
+    "paths": {
+      "types": ["./types/interfaces.d.ts"]
+    }
+  }
 }
