@@ -1,5 +1,13 @@
 # Changelog
 
+## v5.0.0 - 2026-05-08
+
+- ship a richer `.d.ts` bundle covering `SerializableContext`, `MappedContext`, `MappedActivity`, `MappedProcess`, mapped flow / association / message-flow / data-object / data-store / participant types, and a `MappedBehaviour<T>` helper
+- export `SerializableContext` by name (was an internal `ContextApi`)
+- ts: rename type aliases `resolver` → `ResolverFn`, `extendFn` → `ExtendFn`
+- bump dev `bpmn-moddle` and `@types/bpmn-moddle` to v10; peer dep stays `>=6`
+- internal mapper helpers no longer appear in the type bundle
+
 ## v4.4.1 - 2025-04-30
 
 - package proof of provenance release

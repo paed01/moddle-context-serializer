@@ -8,6 +8,7 @@ const typeResolver = TypeResolver(types);
 const largeSource = factory.resource('nested-joins.bpmn');
 
 describe('performance', () => {
+  /** @type {import('bpmn-moddle').BPMNModel} */
   let largeContext;
   before(async () => {
     largeContext = await testHelpers.moddleContext(largeSource);

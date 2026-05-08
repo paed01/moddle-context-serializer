@@ -26,7 +26,7 @@ describe('moddle context serializer', () => {
     conditionalFlows;
   before(async () => {
     lanesModdleContext = await testHelpers.moddleContext(lanesSource);
-    lanesModdleContextFromCallBack = JSON.parse(fs.readFileSync('./test/resources/lanes-old-callback-context.json'));
+    lanesModdleContextFromCallBack = JSON.parse(fs.readFileSync('./test/resources/lanes-old-callback-context.json', 'utf8'));
     subProcessModdleContext = await testHelpers.moddleContext(subProcessSource);
     eventDefinitionModdleContext = await testHelpers.moddleContext(eventDefinitionSource);
     conditionAndEscalationModdleContext = await testHelpers.moddleContext(conditionAndEscalationSource);
@@ -39,6 +39,7 @@ describe('moddle context serializer', () => {
   });
 
   describe('TypeResolver(types[, extender])', () => {
+    /** @type {import('moddle-context-serializer').SerializableContext} */
     let serializer;
     before(() => {
       serializer = Serializer(lanesModdleContext, typeResolver);
@@ -320,6 +321,7 @@ describe('moddle context serializer', () => {
   });
 
   describe('getSequenceFlows([scopeId])', () => {
+    /** @type {import('moddle-context-serializer').SerializableContext} */
     let serializer;
     before(() => {
       serializer = Serializer(lanesModdleContext, typeResolver);
@@ -354,6 +356,7 @@ describe('moddle context serializer', () => {
   });
 
   describe('getOutboundSequenceFlows(activityId)', () => {
+    /** @type {import('moddle-context-serializer').SerializableContext} */
     let serializer;
     before(async () => {
       serializer = Serializer(await testHelpers.moddleContext(factory.valid()), typeResolver);
@@ -401,6 +404,7 @@ describe('moddle context serializer', () => {
   });
 
   describe('getInboundSequenceFlows()', () => {
+    /** @type {import('moddle-context-serializer').SerializableContext} */
     let contextMapper;
     before(async () => {
       contextMapper = Serializer(await testHelpers.moddleContext(factory.valid()), typeResolver);
@@ -435,6 +439,7 @@ describe('moddle context serializer', () => {
   });
 
   describe('getMessageFlows()', () => {
+    /** @type {import('moddle-context-serializer').SerializableContext} */
     let laneSerializer;
     before(() => {
       laneSerializer = Serializer(lanesModdleContext, typeResolver);
@@ -563,6 +568,7 @@ describe('moddle context serializer', () => {
   });
 
   describe('getAssociations(scopeId)', () => {
+    /** @type {import('moddle-context-serializer').SerializableContext} */
     let serializer;
     before(() => {
       serializer = Serializer(compensationContext, typeResolver);
@@ -593,6 +599,7 @@ describe('moddle context serializer', () => {
   });
 
   describe('getExtendContext()', () => {
+    /** @type {import('moddle-context-serializer').SerializableContext} */
     let serializer;
     before(() => {
       serializer = Serializer(compensationContext, typeResolver);
@@ -633,6 +640,7 @@ describe('moddle context serializer', () => {
       </process>
     </definitions>`;
 
+    /** @type {import('moddle-context-serializer').SerializableContext} */
     let contextMapper;
     before(async () => {
       const moddleContext = await testHelpers.moddleContext(source);
@@ -684,6 +692,7 @@ describe('moddle context serializer', () => {
       </process>
     </definitions>`;
 
+    /** @type {import('moddle-context-serializer').SerializableContext} */
     let contextMapper;
     before(async () => {
       const moddleContext = await testHelpers.moddleContext(source);
@@ -737,6 +746,7 @@ describe('moddle context serializer', () => {
 
   ['subProcess', 'transaction'].forEach((type) => {
     describe(type, () => {
+      /** @type {import('moddle-context-serializer').SerializableContext} */
       let contextMapper;
       before(async () => {
         const source = `<?xml version="1.0" encoding="UTF-8"?>
@@ -785,6 +795,7 @@ describe('moddle context serializer', () => {
   });
 
   describe('bpmn:Error', () => {
+    /** @type {import('moddle-context-serializer').SerializableContext} */
     let serializer;
     before(async () => {
       const moddleContext = await testHelpers.moddleContext(factory.resource('bound-error.bpmn'));
@@ -835,6 +846,7 @@ describe('moddle context serializer', () => {
 
   describe('event definitions', () => {
     describe('bpmn:TimerEventDefinition', () => {
+      /** @type {import('moddle-context-serializer').SerializableContext} */
       let contextMapper;
       before(() => {
         contextMapper = Serializer(eventDefinitionModdleContext, typeResolver);
@@ -862,6 +874,7 @@ describe('moddle context serializer', () => {
     });
 
     describe('bpmn:ConditionalEventDefinition', () => {
+      /** @type {import('moddle-context-serializer').SerializableContext} */
       let contextMapper;
       before(() => {
         contextMapper = Serializer(conditionAndEscalationModdleContext, typeResolver);
@@ -901,6 +914,7 @@ describe('moddle context serializer', () => {
     });
 
     describe('bpmn:BoundaryEvent', () => {
+      /** @type {import('moddle-context-serializer').SerializableContext} */
       let contextMapper;
       before(() => {
         contextMapper = Serializer(eventDefinitionModdleContext, typeResolver);
@@ -930,6 +944,7 @@ describe('moddle context serializer', () => {
     });
 
     describe('bpmn:ErrorEventDefinition', () => {
+      /** @type {import('moddle-context-serializer').SerializableContext} */
       let contextMapper;
       before(() => {
         contextMapper = Serializer(eventDefinitionModdleContext, typeResolver);
@@ -973,6 +988,7 @@ describe('moddle context serializer', () => {
   });
 
   describe('bpmn:Signal', () => {
+    /** @type {import('moddle-context-serializer').SerializableContext} */
     let contextMapper;
     before(() => {
       contextMapper = Serializer(signalEventModdleContext, typeResolver);
@@ -1003,6 +1019,7 @@ describe('moddle context serializer', () => {
   });
 
   describe('bpmn:Association', () => {
+    /** @type {import('moddle-context-serializer').SerializableContext} */
     let serializer;
     before(() => {
       serializer = Serializer(compensationContext, typeResolver);
@@ -1064,6 +1081,7 @@ describe('moddle context serializer', () => {
   });
 
   describe('bpmn:ReceiveTask', () => {
+    /** @type {import('moddle-context-serializer').SerializableContext} */
     let contextMapper;
     before(async () => {
       const source = `
@@ -1101,6 +1119,7 @@ describe('moddle context serializer', () => {
   });
 
   describe('bpmn:SendTask', () => {
+    /** @type {import('moddle-context-serializer').SerializableContext} */
     let contextMapper;
     before(async () => {
       const source = `
@@ -1140,6 +1159,7 @@ describe('moddle context serializer', () => {
   });
 
   describe('escalation', () => {
+    /** @type {import('moddle-context-serializer').SerializableContext} */
     let contextMapper;
     before(() => {
       contextMapper = Serializer(conditionAndEscalationModdleContext, typeResolver);
@@ -1201,6 +1221,7 @@ describe('moddle context serializer', () => {
   });
 
   describe('signal event', () => {
+    /** @type {import('moddle-context-serializer').SerializableContext} */
     let contextMapper;
     before(() => {
       contextMapper = Serializer(signalEventModdleContext, typeResolver);
@@ -1371,7 +1392,7 @@ describe('moddle context serializer', () => {
       </definitions>`;
 
       const moddleContext = await testHelpers.moddleContext(source);
-      expect(moddleContext.warnings, moddleContext.warnings).to.be.empty;
+      expect(moddleContext.warnings, JSON.stringify(moddleContext.warnings)).to.be.empty;
 
       const serialized = Serializer(moddleContext, typeResolver);
 
@@ -1413,7 +1434,7 @@ describe('moddle context serializer', () => {
       </definitions>`;
 
       const moddleContext = await testHelpers.moddleContext(source);
-      expect(moddleContext.warnings, moddleContext.warnings).to.be.empty;
+      expect(moddleContext.warnings, JSON.stringify(moddleContext.warnings)).to.be.empty;
 
       const serialized = Serializer(moddleContext, typeResolver);
 
@@ -1853,6 +1874,7 @@ describe('moddle context serializer', () => {
   });
 
   describe('bpmn:MessageFlow', () => {
+    /** @type {import('moddle-context-serializer').SerializableContext} */
     let serializer;
     before(() => {
       serializer = Serializer(messageFlowModdleContext, typeResolver);
@@ -1874,6 +1896,7 @@ describe('moddle context serializer', () => {
   });
 
   describe('bpmn:Collaboration', () => {
+    /** @type {import('moddle-context-serializer').SerializableContext} */
     let serializer;
     before(async () => {
       const source = `

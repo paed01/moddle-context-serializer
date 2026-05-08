@@ -1,10 +1,25 @@
-import type { BaseElement, BPMNModel } from 'bpmn-moddle';
+import type {
+  Association,
+  BaseElement,
+  BPMNModel,
+  DataObject,
+  DataObjectReference,
+  DataStore,
+  DataStoreReference,
+  Definitions as ModdleDefinitions,
+  FlowNode,
+  Lane,
+  MessageFlow,
+  Participant as ModdleParticipant,
+  Process as ModdleProcess,
+  SequenceFlow,
+} from 'bpmn-moddle';
 
 export type { BPMNModel };
 
 export interface Parent {
   id?: string;
-  type: string;
+  type?: string;
   [x: string]: any;
 }
 
@@ -39,36 +54,163 @@ export interface Timer {
   timer: TimerElement;
 }
 
-export interface SerializableElement {
+export interface SerializableElement<TBehaviour = Record<string, any>> {
   id?: string;
   type?: string;
   parent?: Parent;
-  behaviour: Record<string, any>;
+  behaviour: TBehaviour;
   Behaviour?: CallableFunction;
   [key: string]: any;
 }
 
-export interface Definition {
-  id: string;
+export interface Definition extends Pick<ModdleDefinitions, 'id' | 'name' | 'targetNamespace'> {
   type: string;
-  name: string;
-  targetNamespace: string;
   exporter: string;
   exporterVersion: string;
   Behaviour?: CallableFunction;
 }
 
+export interface MappedDataObject extends SerializableElement<DataObject> {
+  references: Array<{ id: string; type: string; behaviour: DataObjectReference }>;
+}
+
+export type MappedDataStore = SerializableElement<DataStore | DataStoreReference> & {
+  references?: Array<{ id: string; type: string; behaviour: DataStoreReference }>;
+};
+
+export interface MappedParticipant {
+  id: string;
+  type: string;
+  name?: string;
+  processId?: string;
+  parent: Parent;
+}
+
+export interface MappedSequenceFlow extends SerializableElement<SequenceFlow> {
+  sourceId: string;
+  targetId: string;
+  isDefault?: boolean;
+}
+
+export interface MappedAssociation extends SerializableElement<Association> {
+  sourceId: string;
+  targetId: string;
+}
+
+export interface MessageFlowEndpoint {
+  processId?: string;
+  participantId?: string;
+  participantName?: string;
+  id?: string;
+}
+
+export interface MappedMessageFlow extends SerializableElement<MessageFlow> {
+  sourceId?: string;
+  targetId?: string;
+  source: MessageFlowEndpoint;
+  target: MessageFlowEndpoint;
+}
+
+export interface MappedEventDefinition {
+  id?: string;
+  type: string;
+  behaviour: Record<string, any>;
+}
+
+export interface MappedLoopCharacteristics {
+  id?: string;
+  type: string;
+  behaviour: Record<string, any>;
+}
+
+export interface MappedProperty {
+  id?: string;
+  type: string;
+  behaviour: Record<string, any>;
+}
+
+export interface MappedDataAssociation {
+  id?: string;
+  type: string;
+  behaviour: Record<string, any>;
+}
+
+export interface MappedLane {
+  id?: string;
+  type: string;
+  behaviour: Record<string, any>;
+}
+
+export interface MappedIoSpecification {
+  id?: string;
+  type: string;
+  behaviour: {
+    dataInputs?: Array<{ id: string; type: string; behaviour: Record<string, any> }>;
+    dataOutputs?: Array<{ id: string; type: string; behaviour: Record<string, any> }>;
+  };
+}
+
+export interface MappedResource {
+  type: string;
+  expression?: string;
+  behaviour: Record<string, any>;
+}
+
+export interface MappedMessageRef {
+  id: string;
+  type: string;
+  name?: string;
+}
+
+export type MappedBehaviour<T extends object = {}> = Omit<
+  T,
+  | 'eventDefinitions'
+  | 'loopCharacteristics'
+  | 'ioSpecification'
+  | 'properties'
+  | 'laneSets'
+  | 'lanes'
+  | 'resources'
+  | 'dataInputAssociations'
+  | 'dataOutputAssociations'
+  | 'messageRef'
+> & {
+  eventDefinitions?: MappedEventDefinition[];
+  loopCharacteristics?: MappedLoopCharacteristics;
+  ioSpecification?: MappedIoSpecification;
+  properties?: { type: 'properties'; values: MappedProperty[] };
+  lanes?: MappedLane[];
+  resources?: MappedResource[];
+  dataInputAssociations?: MappedDataAssociation[];
+  dataOutputAssociations?: MappedDataAssociation[];
+  messageRef?: MappedMessageRef;
+};
+
+export interface MappedActivityBehaviour extends MappedBehaviour<FlowNode> {
+  attachedTo?: { id: string; type: string; name?: string };
+  scriptFormat?: string;
+  script?: string;
+  isForCompensation?: boolean;
+  default?: any;
+  conditionExpression?: Record<string, any>;
+  [key: string]: any;
+}
+
+export type MappedActivity = SerializableElement<MappedActivityBehaviour>;
+
+export type MappedProcess = SerializableElement<MappedBehaviour<ModdleProcess>>;
+
 export interface MappedContext {
   scripts: Script[];
   timers: Timer[];
-  activities: SerializableElement[];
-  associations: SerializableElement[];
-  dataObjects: any[];
-  dataStores: any[];
-  messageFlows: SerializableElement[];
-  participants: any[];
-  processes: SerializableElement[];
-  sequenceFlows: SerializableElement[];
+  activities: MappedActivity[];
+  associations: MappedAssociation[];
+  dataObjects: MappedDataObject[];
+  dataStores: MappedDataStore[];
+  messageFlows: MappedMessageFlow[];
+  participants: MappedParticipant[];
+  processes: MappedProcess[];
+  sequenceFlows: MappedSequenceFlow[];
   definition: Definition;
 }
 
@@ -94,12 +236,18 @@ export interface FlowRef {
   element?: any;
 }
 
+export interface ModdleReference {
+  id: string;
+  property: string;
+  element: BaseElement;
+}
+
 export interface References {
-  dataInputAssociations: any[];
-  dataObjectRefs: any[];
-  dataOutputAssociations: any[];
-  dataStoreRefs: any[];
-  flowNodeRefs: Map<string, any>;
+  dataInputAssociations: ModdleReference[];
+  dataObjectRefs: ModdleReference[];
+  dataOutputAssociations: ModdleReference[];
+  dataStoreRefs: ModdleReference[];
+  flowNodeRefs: Map<string, Lane>;
   flowRefs: Map<string, FlowRef>;
   processRefs: Map<string, { id: string; $type: string }>;
 }

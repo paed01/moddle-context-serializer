@@ -1,5 +1,6 @@
 import BpmnModdle6 from 'bpmn-moddle-6';
 import BpmnModdle7 from 'bpmn-moddle-7';
+import BpmnModdle9 from 'bpmn-moddle-9';
 import factory from './helpers/factory.js';
 import types from './helpers/types.js';
 import testHelpers from './helpers/testHelpers.js';
@@ -35,6 +36,22 @@ describe('backward compatibility', () => {
     before('load context', async () => {
       const source = factory.userTask();
       const bpmnModdle = new BpmnModdle7();
+      moddleContext = await bpmnModdle.fromXML(source);
+    });
+
+    it('returns processes', () => {
+      const serializer = Serializer(moddleContext, typeResolver);
+      const processes = serializer.getProcesses();
+
+      expect(processes).to.have.length(1);
+    });
+  });
+
+  describe('bpmn-moddle@9', () => {
+    let moddleContext;
+    before('load context', async () => {
+      const source = factory.userTask();
+      const bpmnModdle = new BpmnModdle9();
       moddleContext = await bpmnModdle.fromXML(source);
     });
 

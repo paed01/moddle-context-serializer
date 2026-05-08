@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import BpmnModdle from 'bpmn-moddle';
+import { BpmnModdle } from 'bpmn-moddle';
 
 const dirname = fileURLToPath(new URL('.', import.meta.url));
 
@@ -111,7 +111,7 @@ function multipleInbound() {
 }
 
 function resource(name) {
-  return fs.readFileSync(path.join(dirname, '..', 'resources', name));
+  return fs.readFileSync(path.join(dirname, '..', 'resources', name), 'utf8');
 }
 
 async function create(activityType) {

@@ -9,6 +9,7 @@ const adhocSource = factory.resource('ad-hoc-subprocess.bpmn');
 
 describe('Ad-hoc subprocess', () => {
   describe('child elements', () => {
+    /** @type {import('moddle-context-serializer').SerializableContext} */
     let serializer;
     before(async () => {
       const moddleContext = await testHelpers.moddleContext(adhocSource);

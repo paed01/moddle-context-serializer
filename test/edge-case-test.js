@@ -7,7 +7,7 @@ const typeResolver = TypeResolver(types);
 
 describe('edge-cases (mainly for coverage)', () => {
   it('empty moddle context throws', () => {
-    expect(() => Serializer({}, typeResolver)).to.throw(TypeError);
+    expect(() => Serializer(/** @type {any} */ ({}), typeResolver)).to.throw(TypeError);
   });
 
   it('event definition null is ignored', () => {
@@ -31,7 +31,7 @@ describe('edge-cases (mainly for coverage)', () => {
       references: [],
     };
 
-    const context = Serializer(mc, typeResolver);
+    const context = Serializer(/** @type {any} */ (mc), typeResolver);
     expect(context.getActivityById('start').behaviour).to.have.property('eventDefinitions').that.is.empty;
   });
 
