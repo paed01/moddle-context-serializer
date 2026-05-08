@@ -9,6 +9,7 @@ const camunda = testHelpers.getCamundaExtension();
 
 describe('timers', () => {
   describe('a process with start cycle, bound timeout, and catch date, and user task with extension due date', () => {
+    /** @type {import('bpmn-moddle').BPMNModel} */
     let moddleContext;
     before('load with extension', async () => {
       const source = factory.resource('timers.bpmn');

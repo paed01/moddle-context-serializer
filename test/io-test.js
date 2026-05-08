@@ -9,6 +9,7 @@ const camunda = testHelpers.getCamundaExtension();
 
 describe('io', () => {
   describe('dataStoreReference', () => {
+    /** @type {import('bpmn-moddle').BPMNModel} */
     let moddleContext;
 
     it('activity with data association returns ioSpecification with reference to dataStoreReference', async () => {

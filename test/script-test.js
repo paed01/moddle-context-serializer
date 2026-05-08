@@ -10,6 +10,7 @@ const jsExtension = testHelpers.getJsExtension();
 
 describe('scripts', () => {
   describe('a process with inline, extension elements with scripts, extension external resource, and flow condition scripts, and a flow expression', () => {
+    /** @type {import('bpmn-moddle').BPMNModel} */
     let moddleContext;
     before('load with extension', async () => {
       const source = factory.resource('scripts.bpmn');
@@ -29,13 +30,13 @@ describe('scripts', () => {
       const scripts = serializer.getScripts();
 
       for (const script of scripts) {
-        expect(script, script.id).to.have.property('name');
-        expect(script, script.id).to.have.property('parent');
-        expect(script.parent, script.id).to.have.property('id');
-        expect(script.parent, script.id).to.have.property('type');
-        expect(script, script.id).to.have.property('script').that.is.an('object');
-        expect(script.script, script.id).to.have.property('scriptFormat');
-        expect(script.script, script.id).to.have.property('type').that.is.ok;
+        expect(script, script.name).to.have.property('name');
+        expect(script, script.name).to.have.property('parent');
+        expect(script.parent, script.name).to.have.property('id');
+        expect(script.parent, script.name).to.have.property('type');
+        expect(script, script.name).to.have.property('script').that.is.an('object');
+        expect(script.script, script.name).to.have.property('scriptFormat');
+        expect(script.script, script.name).to.have.property('type').that.is.ok;
       }
     });
 
@@ -54,7 +55,7 @@ describe('scripts', () => {
       expect(scripts).to.have.length(3);
 
       for (const script of scripts) {
-        expect(script.script, script.id).to.have.property('type').that.is.ok;
+        expect(script.script, script.name).to.have.property('type').that.is.ok;
       }
     });
 

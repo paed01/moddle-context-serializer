@@ -10,6 +10,7 @@ const swimlanesSource = factory.resource('swimlanes.bpmn');
 
 describe('lanes', () => {
   describe('lanes set', () => {
+    /** @type {import('moddle-context-serializer').SerializableContext} */
     let serializer;
     before(async () => {
       serializer = Serializer(await testHelpers.moddleContext(lanesSource), typeResolver);
@@ -38,6 +39,7 @@ describe('lanes', () => {
   });
 
   describe('swimlanes (same as lane sets)', () => {
+    /** @type {import('moddle-context-serializer').SerializableContext} */
     let serializer;
     before(async () => {
       serializer = Serializer(await testHelpers.moddleContext(swimlanesSource), typeResolver);
