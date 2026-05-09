@@ -89,8 +89,7 @@ export function TypeResolver(types, extender) {
 function getBehaviourFromType(typeMapper, types, type) {
   let activityType = typeMapper[type];
   if (!activityType && type) {
-    const nonPrefixedType = type.split(':').slice(1).join(':');
-    activityType = types[nonPrefixedType];
+    activityType = types[type.slice(type.indexOf(':') + 1)];
   }
 
   if (!activityType) {
@@ -740,7 +739,7 @@ Mapper.prototype._prepareActivity = function prepareActivity(element, parent, be
   const { id, $type: type, name } = element;
   const lane = this._references.flowNodeRefs.get(id);
 
-  return {
+  const result = {
     id,
     type,
     name,
@@ -748,9 +747,10 @@ Mapper.prototype._prepareActivity = function prepareActivity(element, parent, be
       id: parent.id,
       type: parent.type,
     },
-    ...(lane && { lane: { ...lane } }),
+    lane: lane ? { ...lane } : undefined,
     behaviour: this._prepareElementBehaviour(element, behaviour),
   };
+  return result;
 };
 
 /**
@@ -762,11 +762,7 @@ Mapper.prototype._prepareActivity = function prepareActivity(element, parent, be
 Mapper.prototype._prepareElementBehaviour = function prepareElementBehaviour(element, behaviour) {
   const { id, $type: type, eventDefinitions, loopCharacteristics, ioSpecification, conditionExpression, properties } = element;
 
-  const preparedElement = {
-    ...behaviour,
-    ...element,
-    ...(eventDefinitions && { eventDefinitions }),
-  };
+  const preparedElement = behaviour && behaviour !== element ? { ...behaviour, ...element } : { ...element };
 
   const extendContext = new ExtendContext({
     scripts: this.scripts,
