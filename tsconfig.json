@@ -3,8 +3,8 @@
   "compilerOptions": {
     "noEmit": true,
     "rootDir": "src",
-    "lib": ["es2022"],
-    "target": "es2022",
+    "lib": ["es2020"],
+    "target": "es2020",
     "noErrorTruncation": true,
     "allowJs": true,
     "checkJs": true,
@@ -17,8 +17,9 @@
     "noImplicitThis": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "types": ["node"],
     "paths": {
-      "types": ["./types/interfaces.d.ts"]
+      "types": ["./types/interfaces.js"]
     }
   }
 }

@@ -1,5 +1,16 @@
 # Changelog
 
+## v6.0.0 - 2026-06-06
+
+- **breaking:** drop the `default` export of `Serializer`. Use the named export instead: `import { Serializer } from 'moddle-context-serializer'` (already shown in `README.md`). CJS consumers must destructure: `const { Serializer } = require('moddle-context-serializer')` — `require(...)` no longer returns the `Serializer` function directly.
+- types: the named `Serializer` now appears in `types/index.d.ts` with its real signature (was previously emitted only as the default `Serializer_1`)
+- **breaking (types only):** drop named type exports for the 11 types that are deducible from the public API: `MappedContext`, `MappedActivity`, `MappedProcess`, `MappedSequenceFlow`, `MappedAssociation`, `MappedMessageFlow`, `MappedDataObject`, `MappedDataStore`, `Script`, `Timer`, `Definition`. They still appear in function signatures (e.g. `getProcessById(...): MappedProcess | undefined`); derive them via `ReturnType<>`:
+  ```ts
+  type MappedContext = ReturnType<typeof Serializer>['elements'];
+  type MappedActivity = ReturnType<ReturnType<typeof Serializer>['getActivities']>[number];
+  ```
+  This removes the `_1` alias noise from the bundled `.d.ts` for these types. The kept building-block exports — `MappedParticipant`, `Parent`, `SerializableElement`, `MappedBehaviour`, `ResolverFn`, `ExtendFn` — are not deducible and remain importable by name.
+
 ## v5.0.0 - 2026-05-08
 
 - ship a richer `.d.ts` bundle covering `SerializableContext`, `MappedContext`, `MappedActivity`, `MappedProcess`, mapped flow / association / message-flow / data-object / data-store / participant types, and a `MappedBehaviour<T>` helper

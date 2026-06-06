@@ -2,7 +2,7 @@ import factory from './helpers/factory.js';
 import testHelpers from './helpers/testHelpers.js';
 import types from './helpers/types.js';
 
-import { default as Serializer, TypeResolver, deserialize } from 'moddle-context-serializer';
+import { Serializer, TypeResolver, deserialize } from 'moddle-context-serializer';
 
 const typeResolver = TypeResolver(types);
 const camunda = testHelpers.getCamundaExtension();
@@ -100,6 +100,7 @@ describe('timers', () => {
 
       expect(rest).to.have.length(0);
 
+      /** @type {import('moddle-context-serializer').ExtendFn} */
       function extend(element, extendContext) {
         if (!element.dueDate) return;
         extendContext.addTimer(`${element.id}/dueDate`, {

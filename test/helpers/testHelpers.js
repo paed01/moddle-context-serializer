@@ -13,6 +13,11 @@ export default {
   getJsExtension,
 };
 
+/**
+ * Get moddle context
+ * @param {string|Buffer} source BPMN source
+ * @param {import('bpmn-moddle').Option} options
+ */
 function moddleContext(source, options) {
   const bpmnModdle = new BpmnModdle(options);
   return bpmnModdle.fromXML(Buffer.isBuffer(source) ? source.toString() : source.trim());

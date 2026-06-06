@@ -1,265 +1,152 @@
 declare module 'moddle-context-serializer' {
-	import type { Association, BaseElement, BPMNModel, DataObject, DataObjectReference, DataStore, DataStoreReference, Definitions as ModdleDefinitions, FlowNode, MessageFlow, Process as ModdleProcess, SequenceFlow } from 'bpmn-moddle';
-	/**
-	 * Build a default behaviour resolver from a type registry.
-	 *
-	 * @param types - type-name to behaviour-function map (without `bpmn:` prefix)
-	 * @param extender - receives the internal mapper for overrides/additions
-	 * */
-	export function TypeResolver(types: Record<string, any>, extender?: TypeResolverExtender): ResolverFn_1;
-	/**
-	 * Map a moddle context into the normalized {@link import('types').MappedContext} shape
-	 * without resolving behaviour types. Useful when you want to introspect or modify the
-	 * structure before wiring up behaviours.
-	 *
-	 * */
-	export function map(moddleContext: BPMNModel, extendFn?: ExtendFn_1): MappedContext_1;
-	/**
-	 * Build a serializable, behaviour-mapped context from a `bpmn-moddle` parse result.
-	 *
-	 * */
-	export default function Serializer_1(moddleContext: BPMNModel, typeResolver: ResolverFn_1, extendFn?: ExtendFn_1): SerializableContext;
-	/**
-	 * Hydrate a previously-serialized context (output of {@link SerializableContext.serialize})
-	 * back into a queryable, behaviour-mapped context.
-	 *
-	 * @param deserializedContext - the parsed JSON produced by `serialize()`
-	 * */
-	export function deserialize(deserializedContext: any, typeResolver: ResolverFn_1): SerializableContext;
-
-	export function SerializableContext(elements: MappedContext_1): void;
-	export class SerializableContext {
-		
-		constructor(elements: MappedContext_1);
-		id: string;
-		type: string;
-		name: string;
-		elements: MappedContext_1;
-		
-		serialize(): string;
-		
-		getProcessById(processId: string): MappedProcess_1 | undefined;
-		
-		getProcesses(): MappedProcess_1[];
-		
-		getExecutableProcesses(): MappedProcess_1[];
-		
-		getInboundSequenceFlows(activityId: string): MappedSequenceFlow_1[];
-		
-		getOutboundSequenceFlows(activityId: string): MappedSequenceFlow_1[];
-		
-		getMessageFlows(scopeId?: string): MappedMessageFlow_1[];
-		/**
-		 * Get sequence flows
-		 * @param scopeId filter sequence flows by process or sub-process
-		 * */
-		getSequenceFlows(scopeId?: string): MappedSequenceFlow_1[];
-		
-		getSequenceFlowById(flowId: string): MappedSequenceFlow_1 | undefined;
-		
-		getActivities(scopeId?: string): MappedActivity_1[];
-		
-		getDataObjects(scopeId?: string): MappedDataObject_1[];
-		
-		getDataStoreReferences(scopeId?: string): MappedDataStore_1[];
-		
-		getDataObjectById(dataObjectId: string): MappedDataObject_1 | undefined;
-		
-		getDataStoreReferenceById(dataStoreId: string): MappedDataStore_1 | undefined;
-		
-		getDataStores(): MappedDataStore_1[];
-		
-		getDataStoreById(dataStoreId: string): MappedDataStore_1 | undefined;
-		
-		getActivityById(activityId: string): MappedActivity_1 | undefined;
-		
-		getAssociations(scopeId?: string): MappedAssociation_1[];
-		
-		getAssociationById(associationId: string): MappedAssociation_1 | undefined;
-		
-		getExtendContext(): ExtendContext;
-		
-		getInboundAssociations(activityId: string): MappedAssociation_1[];
-		
-		getOutboundAssociations(activityId: string): MappedAssociation_1[];
-		
-		getScripts(elementType?: string): Script_1[];
-		
-		getScriptsByElementId(elementId: string): Script_1[];
-		
-		getTimers(elementType?: string): Timer_1[];
-		
-		getTimersByElementId(elementId: string): Timer_1[];
-	}
-	/**
-	 * Walk a mapped context and run the resolver against every element that may carry behaviour.
-	 * The resolver is expected to mutate each entity by attaching a `Behaviour` property.
-	 *
-	 * */
-	export function resolveTypes(mappedContext: MappedContext_1, typeResolver: ResolverFn_1): MappedContext_1;
-	export type MappedContext = MappedContext_1;
-	export type MappedActivity = MappedActivity_1;
-	export type MappedProcess = MappedProcess_1;
-	export type MappedSequenceFlow = MappedSequenceFlow_1;
-	export type MappedAssociation = MappedAssociation_1;
-	export type MappedMessageFlow = MappedMessageFlow_1;
-	export type MappedDataObject = MappedDataObject_1;
-	export type MappedDataStore = MappedDataStore_1;
-	export type MappedParticipant = MappedParticipant_1;
-	export type MappedBehaviour = MappedBehaviour_1<any>;
-	export type SerializableElement = SerializableElement_1;
-	export type Parent = Parent_1;
-	export type Script = Script_1;
-	export type Timer = Timer_1;
-	export type Definition = Definition_1;
-	export type ResolverFn = ResolverFn_1;
-	export type ExtendFn = ExtendFn_1;
-  interface Parent_1 {
+	import type { Association as ModdleAssociation, BaseElement as ModdleBaseElement, DataObject as ModdleDataObject, DataObjectReference as ModdleDataObjectReference, DataStore as ModdleDataStore, DataStoreReference as ModdleDataStoreReference, Definitions as ModdleDefinitions, Lane as ModdleLane, MessageFlow as ModdleMessageFlow, MultiInstanceLoopCharacteristics as ModdleMultiInstanceLoopCharacteristics, Participant as ModdleParticipant, Process as ModdleProcess, SequenceFlow as ModdleSequenceFlow, StandardLoopCharacteristics as ModdleStandardLoopCharacteristics, EventDefinition as ModdleEventDefinition, FlowNode } from 'bpmn-moddle';
+  export interface IElement {
 	id?: string;
 	type?: string;
 	[x: string]: any;
   }
 
-  interface ScriptElement {
+  export interface SerializableElement<TBehaviour = Record<string, any>> extends IElement {
+	name?: string;
+	parent?: Parent;
+	behaviour: TBehaviour;
+	Behaviour?: CallableFunction | NewableFunction;
+	[key: string]: any;
+  }
+
+  export interface Parent {
+	id?: string;
+	type?: string;
+	[x: string]: any;
+  }
+
+  // --- Element types ---
+
+  export interface ScriptElement {
 	id?: string;
 	type?: string;
 	scriptFormat?: string;
 	body?: string;
 	resource?: string;
-	parent?: Parent_1;
+	parent?: Parent;
 	[x: string]: any;
   }
 
-  interface TimerElement {
+  export interface TimerElement {
 	id?: string;
 	type?: string;
 	timerType?: string;
 	value?: string;
-	parent?: Parent_1;
+	parent?: Parent;
 	[x: string]: any;
   }
 
-  interface Script_1 {
+  export interface Script {
 	name: string;
-	parent?: Parent_1;
+	parent?: Parent;
 	script: ScriptElement;
   }
 
-  interface Timer_1 {
+  export interface Timer {
 	name: string;
-	parent?: Parent_1;
+	parent?: Parent;
 	timer: TimerElement;
   }
 
-  interface SerializableElement_1<TBehaviour = Record<string, any>> {
-	id?: string;
-	type?: string;
-	parent?: Parent_1;
-	behaviour: TBehaviour;
-	Behaviour?: CallableFunction;
-	[key: string]: any;
-  }
-
-  interface Definition_1 extends Pick<ModdleDefinitions, 'id' | 'name' | 'targetNamespace'> {
+  export interface Definition extends Pick<ModdleDefinitions, 'id' | 'name' | 'targetNamespace'> {
 	type: string;
 	exporter: string;
 	exporterVersion: string;
-	Behaviour?: CallableFunction;
+	Behaviour?: CallableFunction | NewableFunction;
   }
 
-  interface MappedDataObject_1 extends SerializableElement_1<DataObject> {
-	references: Array<{ id: string; type: string; behaviour: DataObjectReference }>;
+  export interface DataObject extends SerializableElement<ModdleDataObject> {
+	references: Array<{ id: string; type: string; behaviour: ModdleDataObjectReference }>;
   }
 
-  type MappedDataStore_1 = SerializableElement_1<DataStore | DataStoreReference> & {
-	references?: Array<{ id: string; type: string; behaviour: DataStoreReference }>;
+  export type DataStore = SerializableElement<ModdleDataStore | ModdleDataStoreReference> & {
+	references?: Array<{ id: string; type: string; behaviour: ModdleDataStoreReference }>;
   };
 
-  interface MappedParticipant_1 {
+  export interface Participant extends Partial<Partial<ModdleParticipant>> {
 	id: string;
 	type: string;
 	name?: string;
 	processId?: string;
-	parent: Parent_1;
+	parent: Parent;
   }
 
-  interface MappedSequenceFlow_1 extends SerializableElement_1<SequenceFlow> {
+  export interface SequenceFlow extends SerializableElement<Partial<ModdleSequenceFlow>> {
 	sourceId: string;
 	targetId: string;
 	isDefault?: boolean;
   }
 
-  interface MappedAssociation_1 extends SerializableElement_1<Association> {
+  export interface Association extends SerializableElement<Partial<ModdleAssociation>> {
 	sourceId: string;
 	targetId: string;
   }
 
-  interface MessageFlowEndpoint {
+  export interface MessageFlowEndpoint {
 	processId?: string;
 	participantId?: string;
 	participantName?: string;
 	id?: string;
   }
 
-  interface MappedMessageFlow_1 extends SerializableElement_1<MessageFlow> {
+  export interface MessageFlow extends SerializableElement<ModdleMessageFlow> {
 	sourceId?: string;
 	targetId?: string;
 	source: MessageFlowEndpoint;
 	target: MessageFlowEndpoint;
   }
 
-  interface MappedEventDefinition {
-	id?: string;
-	type: string;
-	behaviour: Record<string, any>;
+  export interface EventDefinition extends SerializableElement<ModdleEventDefinition> {}
+
+  export interface LoopCharacteristicsBehaviour extends Partial<
+	Omit<
+	  ModdleMultiInstanceLoopCharacteristics & ModdleStandardLoopCharacteristics,
+	  | 'loopCardinality'
+	  | 'completionCondition'
+	  | 'loopCondition'
+	  | 'loopMaximum'
+	  | 'loopDataInputRef'
+	  | 'loopDataOutputRef'
+	  | 'oneBehaviorEventRef'
+	  | 'noneBehaviorEventRef'
+	>
+  > {
+	loopCardinality?: string;
+	completionCondition?: string;
+	loopCondition?: string;
+	loopMaximum?: number;
+	loopDataInputRef?: MessageRef;
+	loopDataOutputRef?: MessageRef;
+	oneBehaviorEventRef?: MessageRef;
+	noneBehaviorEventRef?: MessageRef;
   }
 
-  interface MappedLoopCharacteristics {
-	id?: string;
-	type: string;
-	behaviour: Record<string, any>;
-  }
+  export type LoopCharacteristics = SerializableElement<LoopCharacteristicsBehaviour>;
 
-  interface MappedProperty {
-	id?: string;
-	type: string;
-	behaviour: Record<string, any>;
-  }
-
-  interface MappedDataAssociation {
-	id?: string;
-	type: string;
-	behaviour: Record<string, any>;
-  }
-
-  interface MappedLane {
-	id?: string;
-	type: string;
-	behaviour: Record<string, any>;
-  }
-
-  interface MappedIoSpecification {
-	id?: string;
-	type: string;
+  export interface IoSpecification extends IElement {
 	behaviour: {
-	  dataInputs?: Array<{ id: string; type: string; behaviour: Record<string, any> }>;
-	  dataOutputs?: Array<{ id: string; type: string; behaviour: Record<string, any> }>;
+	  dataInputs?: IElement[];
+	  dataOutputs?: IElement[];
 	};
   }
 
-  interface MappedResource {
-	type: string;
+  export interface Resource extends IElement {
 	expression?: string;
 	behaviour: Record<string, any>;
   }
 
-  interface MappedMessageRef {
+  export interface MessageRef {
 	id: string;
 	type: string;
 	name?: string;
   }
 
-  type MappedBehaviour_1<T extends object = {}> = Omit<
+  export type MappedBehaviour<T extends object = {}> = Omit<
 	T,
 	| 'eventDefinitions'
 	| 'loopCharacteristics'
@@ -272,57 +159,211 @@ declare module 'moddle-context-serializer' {
 	| 'dataOutputAssociations'
 	| 'messageRef'
   > & {
-	eventDefinitions?: MappedEventDefinition[];
-	loopCharacteristics?: MappedLoopCharacteristics;
-	ioSpecification?: MappedIoSpecification;
-	properties?: { type: 'properties'; values: MappedProperty[] };
-	lanes?: MappedLane[];
-	resources?: MappedResource[];
-	dataInputAssociations?: MappedDataAssociation[];
-	dataOutputAssociations?: MappedDataAssociation[];
-	messageRef?: MappedMessageRef;
+	eventDefinitions?: EventDefinition[];
+	loopCharacteristics?: LoopCharacteristics;
+	ioSpecification?: IoSpecification;
+	properties?: { type: 'properties'; values: IElement[] };
+	lanes?: IElement[];
+	resources?: Resource[];
+	dataInputAssociations?: IElement[];
+	dataOutputAssociations?: IElement[];
+	messageRef?: MessageRef;
   };
 
-  interface MappedActivityBehaviour extends MappedBehaviour_1<FlowNode> {
+  export interface ActivityBehaviour extends MappedBehaviour<FlowNode> {
 	attachedTo?: { id: string; type: string; name?: string };
 	scriptFormat?: string;
 	script?: string;
 	isForCompensation?: boolean;
-	default?: any;
+	default?: SequenceFlow;
 	conditionExpression?: Record<string, any>;
 	[key: string]: any;
   }
 
-  type MappedActivity_1 = SerializableElement_1<MappedActivityBehaviour>;
+  export type Activity = SerializableElement<ActivityBehaviour>;
 
-  type MappedProcess_1 = SerializableElement_1<MappedBehaviour_1<ModdleProcess>>;
+  export type Process = SerializableElement<MappedBehaviour<ModdleProcess>>;
 
-  interface MappedContext_1 {
-	scripts: Script_1[];
-	timers: Timer_1[];
-	activities: MappedActivity_1[];
-	associations: MappedAssociation_1[];
-	dataObjects: MappedDataObject_1[];
-	dataStores: MappedDataStore_1[];
-	messageFlows: MappedMessageFlow_1[];
-	participants: MappedParticipant_1[];
-	processes: MappedProcess_1[];
-	sequenceFlows: MappedSequenceFlow_1[];
-	definition: Definition_1;
+  export interface MappedContext {
+	scripts: Script[];
+	timers: Timer[];
+	activities: Activity[];
+	associations: Association[];
+	dataObjects: DataObject[];
+	dataStores: DataStore[];
+	messageFlows: MessageFlow[];
+	participants: Participant[];
+	processes: Process[];
+	sequenceFlows: SequenceFlow[];
+	definition: Definition;
   }
 
-  interface ExtendContext {
-	scripts: Script_1[];
-	timers: Timer_1[];
-	addScript(scriptName: string, elm: ScriptElement): void;
-	addTimer(timerName: string, elm: TimerElement): void;
+  export type ResolverFn = (entity: any) => SerializableElement;
+
+  export type ExtendFn = (
+	elementBehaviour: ModdleBaseElement,
+	context: ExtendContext,
+  ) => Record<string, any> | undefined | void;
+
+  export type TypeResolverExtender = (typeMapping: Record<string, any>) => void;
+
+  export interface FlowRef {
+	id?: string;
+	$type?: string;
+	sourceId?: string;
+	targetId?: string;
+	isDefault?: boolean;
+	element?: any;
   }
 
-  type ResolverFn_1 = (entity: any) => any;
+  export interface ModdleReference {
+	id: string;
+	property: string;
+	element: ModdleBaseElement;
+  }
 
-  type ExtendFn_1 = (elementBehaviour: BaseElement, context: ExtendContext) => Record<string, any> | undefined | void;
+  export interface References {
+	dataInputAssociations: ModdleReference[];
+	dataObjectRefs: ModdleReference[];
+	dataOutputAssociations: ModdleReference[];
+	dataStoreRefs: ModdleReference[];
+	flowNodeRefs: Map<string, ModdleLane>;
+	flowRefs: Map<string, FlowRef>;
+	processRefs: Map<string, { id: string; $type: string }>;
+  }
+	/**
+	 * Build a default behaviour resolver from a type registry.
+	 *
+	 * @param types - type-name to behaviour-function map (without `bpmn:` prefix)
+	 * @param extender - receives the internal mapper for overrides/additions
+	 */
+	export function TypeResolver(types: Record<string, CallableFunction | NewableFunction>, extender?: TypeResolverExtender): (entity: any) => SerializableElement<Record<string, any>>;
+	/**
+	 * Map a moddle context into the normalized {@link import('types').MappedContext} shape
+	 * without resolving behaviour types. Useful when you want to introspect or modify the
+	 * structure before wiring up behaviours.
+	 *
+	 * */
+	export function map(moddleContext: import("bpmn-moddle").BPMNModel, extendFn?: ExtendFn): MappedContext;
+	/**
+	 * Build a serializable, behaviour-mapped context from a `bpmn-moddle` parse result.
+	 *
+	 * 
+	 */
+	export function Serializer(moddleContext: import("bpmn-moddle").BPMNModel, typeResolver: ResolverFn, extendFn?: ExtendFn): SerializableContext;
+	/**
+	 * Hydrate a previously-serialized context (output of {@link SerializableContext['serialize']})
+	 * back into a queryable, behaviour-mapped context.
+	 *
+	 * @param deserializedContext - the parsed JSON produced by `serialize()`
+	 * */
+	export function deserialize(deserializedContext: any, typeResolver: ResolverFn): SerializableContext;
 
-  type TypeResolverExtender = (typeMapping: Record<string, any>) => void;
+	export function SerializableContext(elements: MappedContext): void;
+	export class SerializableContext {
+		
+		constructor(elements: MappedContext);
+		/** definition id if any */
+		id: string;
+		/** definition type, usually bpmn:Definition */
+		type: string;
+		/** definition name, if any */
+		name: string;
+		/** all elements */
+		elements: MappedContext;
+		/**
+		 * Serialize the entire definition
+		 */
+		serialize(): string;
+		
+		getProcessById(processId: string): Process;
+		getProcesses(): Process[];
+		/**
+		 * Get processes marked as executable
+		 */
+		getExecutableProcesses(): Process[];
+		
+		getInboundSequenceFlows(activityId: string): SequenceFlow[];
+		
+		getOutboundSequenceFlows(activityId: string): SequenceFlow[];
+		
+		getMessageFlows(scopeId?: string): MessageFlow[];
+		/**
+		 * Get sequence flows
+		 * @param scopeId filter sequence flows by process or sub-process
+		 */
+		getSequenceFlows(scopeId?: string): SequenceFlow[];
+		
+		getSequenceFlowById(flowId: string): SequenceFlow;
+		
+		getActivities(scopeId?: string): Activity[];
+		
+		getDataObjects(scopeId?: string): DataObject[];
+		
+		getDataStoreReferences(scopeId?: string): DataStore[];
+		
+		getDataObjectById(dataObjectId: string): DataObject;
+		
+		getDataStoreReferenceById(dataStoreId: string): DataStore;
+		
+		getDataStores(): DataStore[];
+		
+		getDataStoreById(dataStoreId: string): DataStore;
+		
+		getActivityById(activityId: string): Activity;
+		
+		getAssociations(scopeId?: string): Association[];
+		
+		getAssociationById(associationId: string): Association;
+		getExtendContext(): ExtendContext;
+		
+		getInboundAssociations(activityId: string): Association[];
+		
+		getOutboundAssociations(activityId: string): Association[];
+		
+		getScripts(elementType?: string): Script[];
+		
+		getScriptsByElementId(elementId: string): Script[];
+		
+		getTimers(elementType?: string): Timer[];
+		
+		getTimersByElementId(elementId: string): Timer[];
+	}
+	/**
+	 * Walk a mapped context and run the resolver against every element that may carry behaviour.
+	 * The resolver is expected to mutate each entity by attaching a `Behaviour` property.
+	 *
+	 * */
+	export function resolveTypes(mappedContext: MappedContext, typeResolver: ResolverFn): MappedContext;
+
+	export function ExtendContext({ scripts, timers, parent }: {
+		scripts: Script[];
+		timers?: Timer[];
+		parent?: Parent;
+	}): void;
+	export class ExtendContext {
+		
+		constructor({ scripts, timers, parent }: {
+			scripts: Script[];
+			timers?: Timer[];
+			parent?: Parent;
+		});
+		scripts: Script[];
+		timers: Timer[];
+		_parent: Parent;
+		
+		addScript(scriptName: string, { id, scriptFormat, body, resource, type, parent }: ScriptElement): void;
+		
+		addTimer(timerName: string, { id, timerType, type, value, parent }: TimerElement): void;
+		
+		_prepare(name: string, { id, type }?: {
+			id?: string;
+			type?: string;
+		}): {
+			name: string;
+			parent?: Parent;
+		};
+	}
 
 	export {};
 }

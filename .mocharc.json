@@ -1,6 +1,6 @@
 {
   "recursive": true,
   "reporter": "spec",
-  "require": ["./test/helpers/setup.js"],
+  "require": ["./test/helpers/setup.js", "chai/register-expect.js"],
   "timeout": 1000
 }

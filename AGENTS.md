@@ -8,7 +8,7 @@ Requires Node 20 (see `.nvmrc`). Mocha 11 pulls in an ESM-only `yargs` that fail
 
 - `npm test` — runs mocha (recursive across `test/`); `posttest` then runs lint, builds the CJS bundle, and validates the README/API examples via `texample`.
 - `npm run lint` — eslint (cached) + prettier check. Run before publishing or when CI is failing.
-- `npm run dist` — rollup builds `src/index.js` into `lib/main.cjs`. The rollup footer (`module.exports = Object.assign(exports.default, exports);`) is what makes the CJS bundle's default export _also_ expose the named exports — don't remove it.
+- `npm run dist` — rollup builds `src/index.js` into `lib/main.cjs` as plain named exports (`exports: 'named'`). There is no default export; CJS consumers destructure (`const { Serializer } = require('moddle-context-serializer')`).
 - `npm run cov:html` / `npm run test:lcov` — coverage variants via c8.
 - Single test file: `npx mocha test/serializer-test.js`. Single test: append `--grep "<pattern>"`. Default mocha timeout is 1000ms (see `.mocharc.json`).
 

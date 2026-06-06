@@ -2,7 +2,7 @@ import factory from './helpers/factory.js';
 import testHelpers from './helpers/testHelpers.js';
 import types from './helpers/types.js';
 
-import { default as Serializer, TypeResolver, deserialize } from 'moddle-context-serializer';
+import { Serializer, TypeResolver, deserialize } from 'moddle-context-serializer';
 
 const typeResolver = TypeResolver(types);
 const camunda = testHelpers.getCamundaExtension();
@@ -134,14 +134,15 @@ describe('io', () => {
       </process>
     </definitions>`;
 
-    let contextMapper;
+    /** @type {import('moddle-context-serializer').SerializableContext} */
+    let serializer;
     before(async () => {
       const moddleContext = await testHelpers.moddleContext(source);
-      contextMapper = Serializer(moddleContext, typeResolver);
+      serializer = Serializer(moddleContext, typeResolver);
     });
 
     it('getDataObjects() returns dataObjects', () => {
-      const dataObjects = contextMapper.getDataObjects();
+      const dataObjects = serializer.getDataObjects();
       expect(dataObjects).to.have.length(4);
 
       dataObjects.forEach((dataObject) => {
@@ -153,7 +154,7 @@ describe('io', () => {
     });
 
     it('getDataObjects(scopeId) returns dataObjects for scope', () => {
-      const dataObjects = contextMapper.getDataObjects('theProcess');
+      const dataObjects = serializer.getDataObjects('theProcess');
       expect(dataObjects).to.have.length(3);
 
       dataObjects.forEach((dataObject) => {
@@ -165,13 +166,13 @@ describe('io', () => {
     });
 
     it('getDataObjectById() returns dataObject', () => {
-      const dataObject = contextMapper.getDataObjectById('global');
+      const dataObject = serializer.getDataObjectById('global');
       expect(dataObject).to.have.property('id', 'global');
       expect(dataObject).to.have.property('Behaviour', types.DataObject);
     });
 
     it('activity with InputOutputSpecification returns ioSpecification with reference to dataObject', () => {
-      const activity = contextMapper.getActivityById('userTask');
+      const activity = serializer.getActivityById('userTask');
       const ioSpecification = activity.behaviour.ioSpecification;
       expect(ioSpecification).to.be.ok;
       expect(ioSpecification).to.have.property('Behaviour', types.InputOutputSpecification);
@@ -202,7 +203,7 @@ describe('io', () => {
     });
 
     it('activity with IoSpecification input- outputSets returns ioSpecification with reference to dataObject', () => {
-      const activity = contextMapper.getActivityById('userTaskTo');
+      const activity = serializer.getActivityById('userTaskTo');
       const ioSpecification = activity.behaviour.ioSpecification;
 
       expect(ioSpecification).to.be.ok;
@@ -267,9 +268,9 @@ describe('io', () => {
       </definitions>`;
 
       const mc = await testHelpers.moddleContext(source2);
-      const serializer = Serializer(mc, typeResolver);
+      const ioSerializer = Serializer(mc, typeResolver);
 
-      const task1 = serializer.getActivityById('userTask');
+      const task1 = ioSerializer.getActivityById('userTask');
       const ioSpecification1 = task1.behaviour.ioSpecification;
       expect(ioSpecification1).to.be.ok;
       expect(ioSpecification1).to.have.property('Behaviour', types.InputOutputSpecification);
@@ -281,7 +282,7 @@ describe('io', () => {
 
       expect(ioSpecification1.behaviour).to.not.have.property('dataOutputs');
 
-      const task2 = serializer.getActivityById('userTaskTo');
+      const task2 = ioSerializer.getActivityById('userTaskTo');
       const ioSpecification2 = task2.behaviour.ioSpecification;
       expect(ioSpecification2).to.be.ok;
       expect(ioSpecification2).to.have.property('Behaviour', types.InputOutputSpecification);

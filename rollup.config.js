@@ -12,7 +12,6 @@ export default {
       file: './lib/main.cjs',
       format: 'cjs',
       exports: 'named',
-      footer: 'module.exports = Object.assign(exports.default, exports);',
     },
   ],
 };

@@ -79,6 +79,17 @@ export default [
     },
   },
   {
+    files: ['scripts/**/*.js'],
+    languageOptions: {
+      parserOptions: {
+        ecmaVersion: 2025,
+      },
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
+  {
     files: ['test/**/*.js'],
     languageOptions: {
       globals: {

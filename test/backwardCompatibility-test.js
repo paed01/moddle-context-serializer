@@ -5,7 +5,7 @@ import factory from './helpers/factory.js';
 import types from './helpers/types.js';
 import testHelpers from './helpers/testHelpers.js';
 
-import { default as Serializer, TypeResolver, deserialize } from 'moddle-context-serializer';
+import { Serializer, TypeResolver, deserialize } from 'moddle-context-serializer';
 
 const typeResolver = TypeResolver(types);
 
