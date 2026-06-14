@@ -1,5 +1,9 @@
 # Changelog
 
+## v6.0.1 - 2026-06-14
+
+- dts-buddy sneaked into dependencies, now it's back where it belongs
+
 ## v6.0.0 - 2026-06-06
 
 - **breaking:** drop the `default` export of `Serializer`. Use the named export instead: `import { Serializer } from 'moddle-context-serializer'` (already shown in `README.md`). CJS consumers must destructure: `const { Serializer } = require('moddle-context-serializer')` — `require(...)` no longer returns the `Serializer` function directly.

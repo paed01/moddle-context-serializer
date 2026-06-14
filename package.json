@@ -1,6 +1,6 @@
 {
   "name": "moddle-context-serializer",
-  "version": "6.0.0",
+  "version": "6.0.1",
   "description": "Make bpmn-moddle context serializable and mapped to behaviour functions",
   "type": "module",
   "main": "./lib/main.cjs",
@@ -57,7 +57,7 @@
     "@types/bpmn-moddle": "^10.0.0",
     "@types/chai": "^5.2.3",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^25.6.2",
+    "@types/node": "^20.19.43",
     "bpmn-elements": "^17.0.0",
     "bpmn-moddle": "^10.0.0",
     "bpmn-moddle-6": "npm:bpmn-moddle@6",
@@ -67,6 +67,7 @@
     "camunda-bpmn-moddle": "^7.0.1",
     "camunda-bpmn-moddle-6": "npm:camunda-bpmn-moddle@6",
     "chai": "^6.2.0",
+    "dts-buddy": "^0.8.0",
     "eslint": "^10.3.0",
     "globals": "^17.6.0",
     "mocha": "^11.0.1",
@@ -81,8 +82,5 @@
     "mocha": {
       "yargs": "^18.0.0"
     }
-  },
-  "dependencies": {
-    "dts-buddy": "^0.8.0"
   }
 }
