@@ -23,11 +23,13 @@ export interface IElement {
   [x: string]: any;
 }
 
+export type BehaviourFunction = new (...args: any[]) => any;
+
 export interface SerializableElement<TBehaviour = Record<string, any>> extends IElement {
   name?: string;
   parent?: Parent;
   behaviour: TBehaviour;
-  Behaviour?: CallableFunction | NewableFunction;
+  Behaviour?: BehaviourFunction;
   [key: string]: any;
 }
 
@@ -74,7 +76,7 @@ export interface Definition extends Pick<ModdleDefinitions, 'id' | 'name' | 'tar
   type: string;
   exporter: string;
   exporterVersion: string;
-  Behaviour?: CallableFunction | NewableFunction;
+  Behaviour?: BehaviourFunction;
 }
 
 export interface DataObject extends SerializableElement<ModdleDataObject> {
@@ -118,7 +120,19 @@ export interface MessageFlow extends SerializableElement<ModdleMessageFlow> {
   target: MessageFlowEndpoint;
 }
 
-export interface EventDefinition extends SerializableElement<ModdleEventDefinition> {}
+export interface EventDefinitionBehaviour extends ModdleEventDefinition {
+  name?: string;
+  errorRef?: MessageRef;
+  escalationRef?: MessageRef;
+  messageRef?: MessageRef;
+  signalRef?: MessageRef;
+  timeCycle?: string;
+  timeDuration?: string;
+  timeDate?: string;
+  [x: string]: any;
+}
+
+export interface EventDefinition extends SerializableElement<EventDefinitionBehaviour> {}
 
 export interface LoopCharacteristicsBehaviour extends Partial<
   Omit<
@@ -144,6 +158,12 @@ export interface LoopCharacteristicsBehaviour extends Partial<
 }
 
 export type LoopCharacteristics = SerializableElement<LoopCharacteristicsBehaviour>;
+
+export interface PropertiesElement {
+  type: 'properties';
+  values: IElement[];
+  Behaviour?: BehaviourFunction;
+}
 
 export interface IoSpecification extends IElement {
   behaviour: {
@@ -179,7 +199,7 @@ export type MappedBehaviour<T extends object = {}> = Omit<
   eventDefinitions?: EventDefinition[];
   loopCharacteristics?: LoopCharacteristics;
   ioSpecification?: IoSpecification;
-  properties?: { type: 'properties'; values: IElement[] };
+  properties?: PropertiesElement;
   lanes?: IElement[];
   resources?: Resource[];
   dataInputAssociations?: IElement[];
@@ -218,7 +238,7 @@ export interface MappedContext {
 export type ResolverFn = (entity: any) => SerializableElement;
 
 export type ExtendFn = (
-  elementBehaviour: ModdleBaseElement,
+  elementBehaviour: ModdleBaseElement & Record<string, any>,
   context: import('../src/index.js').ExtendContext,
 ) => Record<string, any> | undefined | void;
 

@@ -10,6 +10,10 @@ import type {
   MessageRef,
   ResolverFn,
   ExtendFn,
+  BehaviourFunction,
+  PropertiesElement,
+  EventDefinition,
+  Definition,
 } from 'moddle-context-serializer';
 
 type _MappedContext = ReturnType<typeof Serializer>['elements'];
@@ -49,6 +53,21 @@ type _AssertString<T extends string | undefined> = T;
 type _AssertNumber<T extends number | undefined> = T;
 type _AssertMessageRef<T extends MessageRef | undefined> = T;
 type _AssertLoopOrUndefined<T extends LoopCharacteristics | undefined> = T;
+
+// Behaviour is constructable without casts: new element.Behaviour(...)
+type _ElementBehaviourInstance = InstanceType<NonNullable<SerializableElement['Behaviour']>>;
+type _DefinitionBehaviourInstance = InstanceType<NonNullable<Definition['Behaviour']>>;
+type _BehaviourFunctionInstance = InstanceType<BehaviourFunction>;
+
+// properties def carries the Behaviour attached by the type resolver
+declare const _propertiesElement: PropertiesElement;
+type _MappedProperties = NonNullable<MappedBehaviour['properties']>;
+type _AssertPropertiesBehaviour<T extends BehaviourFunction | undefined> = T;
+type _CheckPropertiesBehaviour = _AssertPropertiesBehaviour<_MappedProperties['Behaviour']>;
+type _CheckPropertiesElementBehaviour = _AssertPropertiesBehaviour<PropertiesElement['Behaviour']>;
+
+// event definition behaviour exposes name
+type _CheckEventDefinitionName = _AssertString<EventDefinition['behaviour']['name']>;
 
 type _CheckLoopCardinality = _AssertString<_LoopCardinality>;
 type _CheckLoopCompletion = _AssertString<_LoopCompletion>;

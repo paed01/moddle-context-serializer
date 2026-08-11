@@ -59,7 +59,7 @@ export function TypeResolver(types, extender) {
  * @param {Record<string, CallableFunction | NewableFunction>} typeMapper
  * @param {Record<string, CallableFunction | NewableFunction>} types
  * @param {string} type
- * @returns {CallableFunction | NewableFunction}
+ * @returns {import('types').BehaviourFunction}
  */
 function getBehaviourFromType(typeMapper, types, type) {
   let activityType = typeMapper[type];
@@ -71,7 +71,7 @@ function getBehaviourFromType(typeMapper, types, type) {
     throw new Error(`Unknown activity type ${type}`);
   }
 
-  return activityType;
+  return /** @type {import('types').BehaviourFunction} */ (activityType);
 }
 
 /**
@@ -726,8 +726,9 @@ Mapper.prototype._prepareElementBehaviour = function prepareElementBehaviour(ele
   }
 
   if (properties) {
-    /** @type {{ type: string; values: any[] }} */
-    const props = (preparedElement.properties = { type: 'properties', values: [] });
+    /** @type {import('types').PropertiesElement} */
+    const props = { type: 'properties', values: [] };
+    preparedElement.properties = props;
     for (const prop of properties) {
       props.values.push(this._mapActivityBehaviour(prop, extendContext));
     }

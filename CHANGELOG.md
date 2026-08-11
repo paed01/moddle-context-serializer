@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+## v6.0.2 - 2026-08-11
+
+- typecheck tests through `test/tsconfig.json` and declare test globals in `test/global.d.ts`, mirroring the bpmn-elements layout; `tsconfig.check.json` is gone and `npm run lint` now runs typecheck
+- types: `SerializableElement.Behaviour` (and `Definition.Behaviour`) is now the constructable `BehaviourFunction` (`new (...args: any[]) => any`) instead of `CallableFunction | NewableFunction`, so consumers can `new element.Behaviour(...)` without casting
+- types: new `PropertiesElement` interface — the mapped `properties` def now declares the `Behaviour` attached by the type resolver
+- types: new `EventDefinitionBehaviour` interface — event definition `behaviour` now declares `name`, flattened refs (`errorRef`, `messageRef`, `signalRef`, `escalationRef`), timer values (`timeCycle`, `timeDuration`, `timeDate`), and allows extension attributes
+- types: `ExtendFn` element behaviour accepts arbitrary extension attributes (`ModdleBaseElement & Record<string, any>`)
+
 ## v6.0.1 - 2026-06-14
 
 - dts-buddy sneaked into dependencies, now it's back where it belongs

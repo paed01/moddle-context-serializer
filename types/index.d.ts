@@ -6,11 +6,13 @@ declare module 'moddle-context-serializer' {
 	[x: string]: any;
   }
 
+  export type BehaviourFunction = new (...args: any[]) => any;
+
   export interface SerializableElement<TBehaviour = Record<string, any>> extends IElement {
 	name?: string;
 	parent?: Parent;
 	behaviour: TBehaviour;
-	Behaviour?: CallableFunction | NewableFunction;
+	Behaviour?: BehaviourFunction;
 	[key: string]: any;
   }
 
@@ -57,7 +59,7 @@ declare module 'moddle-context-serializer' {
 	type: string;
 	exporter: string;
 	exporterVersion: string;
-	Behaviour?: CallableFunction | NewableFunction;
+	Behaviour?: BehaviourFunction;
   }
 
   export interface DataObject extends SerializableElement<ModdleDataObject> {
@@ -101,7 +103,19 @@ declare module 'moddle-context-serializer' {
 	target: MessageFlowEndpoint;
   }
 
-  export interface EventDefinition extends SerializableElement<ModdleEventDefinition> {}
+  export interface EventDefinitionBehaviour extends ModdleEventDefinition {
+	name?: string;
+	errorRef?: MessageRef;
+	escalationRef?: MessageRef;
+	messageRef?: MessageRef;
+	signalRef?: MessageRef;
+	timeCycle?: string;
+	timeDuration?: string;
+	timeDate?: string;
+	[x: string]: any;
+  }
+
+  export interface EventDefinition extends SerializableElement<EventDefinitionBehaviour> {}
 
   export interface LoopCharacteristicsBehaviour extends Partial<
 	Omit<
@@ -127,6 +141,12 @@ declare module 'moddle-context-serializer' {
   }
 
   export type LoopCharacteristics = SerializableElement<LoopCharacteristicsBehaviour>;
+
+  export interface PropertiesElement {
+	type: 'properties';
+	values: IElement[];
+	Behaviour?: BehaviourFunction;
+  }
 
   export interface IoSpecification extends IElement {
 	behaviour: {
@@ -162,7 +182,7 @@ declare module 'moddle-context-serializer' {
 	eventDefinitions?: EventDefinition[];
 	loopCharacteristics?: LoopCharacteristics;
 	ioSpecification?: IoSpecification;
-	properties?: { type: 'properties'; values: IElement[] };
+	properties?: PropertiesElement;
 	lanes?: IElement[];
 	resources?: Resource[];
 	dataInputAssociations?: IElement[];
@@ -201,7 +221,7 @@ declare module 'moddle-context-serializer' {
   export type ResolverFn = (entity: any) => SerializableElement;
 
   export type ExtendFn = (
-	elementBehaviour: ModdleBaseElement,
+	elementBehaviour: ModdleBaseElement & Record<string, any>,
 	context: ExtendContext,
   ) => Record<string, any> | undefined | void;
 

@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.json",
+  "include": ["**/*"],
+  "exclude": ["backwardCompatibility-test.js"],
+  "compilerOptions": {
+    "rootDir": "..",
+    "noImplicitAny": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "types": ["node", "chai", "mocha"]
+  }
+}
