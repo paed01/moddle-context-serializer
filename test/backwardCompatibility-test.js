@@ -63,25 +63,27 @@ describe('backward compatibility', () => {
     });
   });
 
-  describe('camunda-bpmn-moddle@6', () => {
-    let moddleContext, moddleContext6;
-    before('load context', async () => {
-      const source = factory.resource('scripts.bpmn');
-      moddleContext = await testHelpers.moddleContext(source, {
-        camunda: testHelpers.getCamundaExtension(),
+  for (const camundaVersion of [6, 7]) {
+    describe(`camunda-bpmn-moddle@${camundaVersion}`, () => {
+      let moddleContext, moddleContextOld;
+      before('load context', async () => {
+        const source = factory.resource('scripts.bpmn');
+        moddleContext = await testHelpers.moddleContext(source, {
+          camunda: testHelpers.getCamundaExtension(),
+        });
+        moddleContextOld = await testHelpers.moddleContext(source, {
+          camunda: testHelpers.getCamundaExtension(`camunda-bpmn-moddle-${camundaVersion}`),
+        });
       });
-      moddleContext6 = await testHelpers.moddleContext(source, {
-        camunda: testHelpers.getCamundaExtension('camunda-bpmn-moddle-6'),
+
+      it('returns the same serialized context as latest version', () => {
+        const serializer = Serializer(moddleContext, typeResolver);
+        const serializerOld = Serializer(moddleContextOld, typeResolver);
+
+        expect(serializer.serialize()).to.equal(serializerOld.serialize());
       });
     });
-
-    it('returns the same serialized context as latest version', () => {
-      const serializer = Serializer(moddleContext, typeResolver);
-      const serializer6 = Serializer(moddleContext6, typeResolver);
-
-      expect(serializer.serialize()).to.equal(serializer6.serialize());
-    });
-  });
+  }
 
   describe('version without dataStores', () => {
     it('handles missing dataStores property', async () => {
