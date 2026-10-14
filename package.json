@@ -23,7 +23,8 @@
     "lint": "eslint . --cache && prettier . -c --cache && npm run typecheck",
     "typecheck": "tsc --noEmit && tsc --noEmit -p test",
     "build:types": "node ./scripts/bundle-types.js",
-    "dist": "rollup -c && npm run build:types",
+    "toc": "toc -c ./API.md",
+    "dist": "rollup -c && npm run toc && npm run build:types",
     "prepack": "npm run dist"
   },
   "repository": {
@@ -52,6 +53,7 @@
     "bpmn-moddle": ">=6"
   },
   "devDependencies": {
+    "@0dep/toc": "^2.2.0",
     "@eslint/js": "^10.0.1",
     "@rollup/plugin-commonjs": "^29.0.0",
     "@types/bpmn-moddle": "^10.0.0",
