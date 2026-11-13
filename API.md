@@ -31,7 +31,7 @@ There is no default export. Everything is imported by name:
 import { Serializer, deserialize, map, TypeResolver, SerializableContext, resolveTypes, ExtendContext } from 'moddle-context-serializer';
 ```
 
-CJS consumers destructure the same names from `require('moddle-context-serializer')`.
+The package ships as ES modules only. A CommonJS host can still destructure the same names from `require('moddle-context-serializer')`, node loads the ES module natively (unflagged since node 22.12).
 
 - [`Serializer(moddleContext, typeResolver[, extendFn])`](#serializermoddlecontext-typeresolver-extendfn): map a `bpmn-moddle` context and attach behaviours
 - [`deserialize(deserializedContext, typeResolver)`](#deserializedeserializedcontext-typeresolver): hydrate a previously serialized context

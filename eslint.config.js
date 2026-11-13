@@ -113,6 +113,6 @@ export default [
     },
   },
   {
-    ignores: ['coverage/**/*', 'node_modules/**/*', 'tmp/*', 'lib/main.cjs'],
+    ignores: ['coverage/**/*', 'node_modules/**/*', 'tmp/*'],
   },
 ];

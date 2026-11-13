@@ -1,7 +1,6 @@
 node_modules/
 coverage/
 tmp/
-lib/main.cjs
 tsconfig.json
 types/index.d.ts
 types/index.d.ts.map

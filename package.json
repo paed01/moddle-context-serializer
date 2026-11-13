@@ -1,43 +1,44 @@
 {
   "name": "moddle-context-serializer",
-  "version": "6.0.2",
+  "version": "7.0.0",
   "description": "Make bpmn-moddle context serializable and mapped to behaviour functions",
   "type": "module",
-  "main": "./lib/main.cjs",
+  "main": "./src/index.js",
   "module": "./src/index.js",
-  "browser": "./lib/main.cjs",
+  "browser": "./src/index.js",
   "types": "./types/index.d.ts",
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
-      "require": "./lib/main.cjs",
-      "import": "./src/index.js"
+      "default": "./src/index.js"
     }
   },
   "sideEffects": false,
   "scripts": {
     "test": "mocha",
-    "posttest": "npm run lint && npm run dist && texample ./README.md,API.md",
+    "posttest": "npm run lint && npm run toc && npm run build:types && texample ./README.md ./API.md",
     "test:lcov": "c8 -r lcov mocha && npm run lint && npm run build:types",
     "cov:html": "c8 -r html -r text mocha",
     "lint": "eslint . --cache && prettier . -c --cache && npm run typecheck",
     "typecheck": "tsc --noEmit && tsc --noEmit -p test",
     "build:types": "node ./scripts/bundle-types.js",
-    "toc": "toc -c ./API.md",
-    "dist": "rollup -c && npm run toc && npm run build:types",
-    "prepack": "npm run dist"
+    "toc": "toc -c ./README.md ./API.md",
+    "prepack": "npm run toc && npm run build:types"
   },
   "repository": {
     "type": "git",
     "url": "git://github.com/paed01/moddle-context-serializer.git"
   },
+  "homepage": "https://0dep.se/run/",
   "author": {
     "name": "Pål Edman",
-    "url": "https://github.com/paed01"
+    "url": "https://0dep.se/about/"
   },
   "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
   "files": [
-    "lib",
     "src",
     "types/index.d.ts",
     "types/index.d.ts.map"
@@ -45,6 +46,11 @@
   "keywords": [
     "bpmn",
     "bpmn 2",
+    "bpmn-moddle",
+    "moddle",
+    "bpmn-engine",
+    "workflow",
+    "serializer",
     "serializable",
     "deserializable",
     "isomorphic"
@@ -55,13 +61,12 @@
   "devDependencies": {
     "@0dep/toc": "^2.2.0",
     "@eslint/js": "^10.0.1",
-    "@rollup/plugin-commonjs": "^29.0.0",
     "@types/bpmn-moddle": "^10.0.0",
     "@types/chai": "^5.2.3",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^20.19.43",
+    "@types/node": "^22.20.5",
     "bpmn-elements": "^18.1.1",
-    "bpmn-moddle": "^10.0.0",
+    "bpmn-moddle": "^10.3.1",
     "bpmn-moddle-6": "npm:bpmn-moddle@6",
     "bpmn-moddle-7": "npm:bpmn-moddle@7",
     "bpmn-moddle-9": "npm:bpmn-moddle@9",
@@ -75,7 +80,6 @@
     "globals": "^17.6.0",
     "mocha": "^12.0.3",
     "prettier": "^3.2.5",
-    "rollup": "^4.19.2",
-    "texample": "^1.0.2"
+    "texample": "^2.0.0"
   }
 }

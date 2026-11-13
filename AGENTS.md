@@ -4,15 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-Requires Node 20 (see `.nvmrc`). Mocha 11 pulls in an ESM-only `yargs` that fails on Node 18 with `ERR_REQUIRE_ESM`. If your shell doesn't auto-switch on `cd`, run `fnm use` (or `nvm use`) before `npm test`.
+Develop on Node 24 (see `.nvmrc`). Node 22 is the lowest supported version: it is declared as package `engines` and the `.github/workflows/build.yaml` matrix runs 22, 24 and 26. If your shell doesn't auto-switch on `cd`, run `fnm use` (or `nvm use`) before `npm test`.
 
-- `npm test` — runs mocha (recursive across `test/`); `posttest` then runs lint, builds the CJS bundle, and validates the README/API examples via `texample`.
-- `npm run lint` — eslint (cached) + prettier check. Run before publishing or when CI is failing.
-- `npm run dist` — rollup builds `src/index.js` into `lib/main.cjs` as plain named exports (`exports: 'named'`). There is no default export; CJS consumers destructure (`const { Serializer } = require('moddle-context-serializer')`).
+- `npm test` — runs mocha (recursive across `test/`); `posttest` then runs lint, regenerates the `README.md` and `API.md` TOCs, rebuilds `types/index.d.ts`, and runs `texample` over the README/API examples.
+- `npm run toc` — `@0dep/toc` rewrites the list between the `<!-- toc -->` markers in `README.md` and `API.md` and fails on a link to an anchor that has no heading. Never hand-edit between the markers.
+- `npm run lint` — eslint (cached) + prettier check + typecheck. Run before publishing or when CI is failing.
+- `npm run build:types` — bundles the public declarations into `types/index.d.ts` (also runs on `prepack`). There is no transpile or bundle step: the package ships `src/` as ES modules only, and CommonJS hosts load it through Node's `require(esm)`. There is no default export; CJS consumers destructure (`const { Serializer } = require('moddle-context-serializer')`).
 - `npm run cov:html` / `npm run test:lcov` — coverage variants via c8.
 - Single test file: `npx mocha test/serializer-test.js`. Single test: append `--grep "<pattern>"`. Default mocha timeout is 1000ms (see `.mocharc.json`).
 
-The `posttest` chain runs `dist` then `texample`, so the README/API code blocks are executed against the _built_ bundle. If you change the public API surface, update both `README.md` and `API.md` examples or `texample` will fail the test run.
+`texample` only evaluates code blocks fenced as ` ```javascript `, resolving `moddle-context-serializer` to `src/index.js`. The README "Example" block and the two "Scripts and timers" snippets are fenced that way, so `npm test` fails if one throws; their `// output` comments are not asserted, re-run `npx texample ./README.md` and compare when touching them. The scripts and timers snippets read `test/resources/scripts.bpmn` and `test/resources/timers.bpmn`, so a change to those resources shows up in the README output. Blocks fenced as ` ```js ` (the README extender example with its placeholder import, everything in `API.md`) are not executed, so if you change the public API surface, update those by hand.
 
 ## Architecture
 
@@ -43,7 +44,7 @@ This project is TDD and coverage is a USP. Write a failing test first, then impl
 
 - `test/helpers/testHelpers.js` exposes `moddleContext(xml)` which wraps `BpmnModdle.fromXML`. Most tests parse inline XML or files from `test/resources/*.bpmn`.
 - `test/helpers/types.js` is a stub type registry — every entry is an empty function. Tests assert _that_ mapping happens (correct `Behaviour` attached), not behaviour execution.
-- `test/backwardCompatibility-test.js` runs the same flow against `bpmn-moddle@6` (callback API), `@7`, and current `@9`. The package declares `bpmn-moddle >=6` as a peer dep, so don't break the v6 callback-context handling in `Mapper.map()` (`moddleContext.rootHandler.element` fallback).
+- `test/backwardCompatibility-test.js` runs the same flow against `bpmn-moddle@6` (callback API), `@7`, and `@9`; the rest of the suite runs on current `@10`. The package declares `bpmn-moddle >=6` as a peer dep, so don't break the v6 callback-context handling in `Mapper.map()` (`moddleContext.rootHandler.element` fallback).
 - `test/edge-case-test.js` and `test/performance-test.js` are the canaries for refactors of `_prepareReferences` / `_prepareElements` — the Map-based ref index in 4.3.0 was a perf change; keep an eye on those if touching that path.
 
 ## Types
@@ -58,8 +59,9 @@ This project is TDD and coverage is a USP. Write a failing test first, then impl
 
 ## Build & publishing
 
-- `type: module` in `package.json`; ESM is `src/index.js`, CJS is `lib/main.cjs` (rollup), types are `types/index.d.ts` (dts-buddy).
-- `prepack` runs `build:types` then `dist`, so `npm publish` always ships fresh artifacts. Both `lib/main.cjs` and `types/index.d.ts` are tracked in git — regenerate (`npm test` does both) and commit alongside source changes that affect the public API.
+- `type: module` in `package.json`; the package ships `src/index.js` as ES module only (package `main`, `module`, `browser` and `exports` all resolve to it), types are `types/index.d.ts` (dts-buddy).
+- `exports` uses the `default` condition, not `import`, so a CommonJS host can still `require('moddle-context-serializer')` — Node loads the ES module natively (unflagged since 22.12). bpmn-engine and bpmn-elements are packaged the same way. `test/exports-test.js` pins down that `require` and `import` return the same module.
+- `prepack` runs `toc` then `build:types`, so `npm publish` always ships fresh types. `types/index.d.ts` is tracked in git — regenerate (`npm test` does) and commit alongside source changes that affect the public API.
 - Tests import from `'moddle-context-serializer'` (Node package self-reference via `package.json` `exports` field), not `'../src/index.js'`. This means tests exercise the same module-resolution path consumers use.
 
 ## Dependency notes
@@ -69,6 +71,8 @@ This project is TDD and coverage is a USP. Write a failing test first, then impl
 - Default → named export: `import BpmnModdle from 'bpmn-moddle'` (v9) → `import { BpmnModdle } from 'bpmn-moddle'` (v10). Test helpers already use the v10 form.
 - `exports` map drops the CJS path (file still ships, just not surfaced via Node resolution). ESM-only.
 - Engines: Node ≥ 18 → ≥ 20.12.
+
+The dev dep is `^10.3.1`. 10.1 → 10.3 added generated element types under `bpmn-moddle/types` and made parsing and serializing deeply nested documents scale; the parse result is unchanged. Types here still come from `@types/bpmn-moddle`.
 
 The `BPMNModel` runtime shape (`{ rootElement, elementsById, references, warnings }`) is unchanged across v6/v7/v9/v10 — that's why `peerDependencies: "bpmn-moddle": ">=6"` holds and `test/backwardCompatibility-test.js` passes against all four. The `Mapper.map()` `rootElement ?? rootHandler.element` fallback is only relevant for v6's callback-context API.
 

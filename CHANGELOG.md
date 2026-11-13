@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## v7.0.0 - 2026-11-13
+
+- **breaking:** drop support for node 20, node 22 is the lowest supported version and declared as package `engines`
+- **breaking:** remove the bundled CommonJS build: the `lib` folder is no longer published, and package `main`, `browser`, and `exports` resolve to the ES module source in `src`. A CommonJS host can still `require('moddle-context-serializer')`, node loads the ES module natively (unflagged since node 22.12)
+- bump dev `bpmn-moddle` to v10.3.1; peer dep stays `>=6`
+
 ## v6.0.2 - 2026-08-11
 
 - typecheck tests through `test/tsconfig.json` and declare test globals in `test/global.d.ts`, mirroring the bpmn-elements layout; `tsconfig.check.json` is gone and `npm run lint` now runs typecheck
