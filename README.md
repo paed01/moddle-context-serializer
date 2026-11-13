@@ -2,7 +2,7 @@
 
 Make bpmn-moddle context serializable and mapped to behaviour functions
 
-[![build](https://github.com/paed01/moddle-context-serializer/actions/workflows/build.yaml/badge.svg)](https://github.com/paed01/moddle-context-serializer/actions/workflows/build.yaml)[![coverage](https://coveralls.io/repos/github/paed01/moddle-context-serializer/badge.svg?branch=master)](https://coveralls.io/github/paed01/moddle-context-serializer?branch=master)
+[![build](https://github.com/paed01/moddle-context-serializer/actions/workflows/build.yaml/badge.svg)](https://github.com/paed01/moddle-context-serializer/actions/workflows/build.yaml)[![coverage](https://coveralls.io/repos/github/paed01/moddle-context-serializer/badge.svg?branch=main)](https://coveralls.io/github/paed01/moddle-context-serializer?branch=main)
 
 [`bpmn-moddle`](https://www.npmjs.com/package/bpmn-moddle) parses a BPMN 2.0 source into a graph of moddle objects that refer to each other. That graph can not be stored as JSON and is awkward for a runtime to query. This package maps it into a plain context that:
 
